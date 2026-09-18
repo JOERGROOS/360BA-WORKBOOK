@@ -84,11 +84,17 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start }:
         if (e.key >= '1' && e.key <= '9') { skalaWaehlen(Number(e.key)); return; }
         if (e.key === '0') { skalaWaehlen(10); return; }
       }
-      if ((typ === 'skala' || typ === 'tabelle') && e.key === 'Enter') { e.preventDefault(); weiter(); }
+      // Hat ein Skala-Knopf den Fokus, soll Enter ihn normal aktivieren (Klick übernimmt das automatische Weiter) statt Weiter zu erzwingen.
+      if (e.target instanceof HTMLButtonElement) return;
+      if ((typ === 'skala' || typ === 'tabelle') && e.key === 'Enter') {
+        if (speichertGerade) return;
+        e.preventDefault();
+        weiter();
+      }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [eintrag, zeigeEinleitung, skalaWaehlen, weiter]);
+  }, [eintrag, zeigeEinleitung, skalaWaehlen, weiter, speichertGerade]);
 
   function zurueck() {
     setFehler('');
