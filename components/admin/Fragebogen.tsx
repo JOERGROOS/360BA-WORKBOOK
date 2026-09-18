@@ -8,24 +8,42 @@ type Ziel = { art: 'kapitel'; id: string | null } | { art: 'frage'; id: string |
 
 const FRAGE_TYP_LABEL: Record<FrageTyp, string> = { text: 'Freitext', skala: 'Skala 1–10', tabelle: 'Tabelle' };
 
+export class AufrufFehler extends Error {
+  status: number;
+  constructor(message: string, status: number) { super(message); this.status = status; }
+}
+
 export async function aufruf(url: string, methode: string, body?: unknown) {
   const r = await fetch(url, { method: methode, headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
-  if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error ?? 'Das hat nicht geklappt.'); }
+  if (!r.ok) { const d = await r.json().catch(() => ({})); throw new AufrufFehler(d.error ?? 'Das hat nicht geklappt.', r.status); }
   return r.json();
+}
+
+export function fehlertext(e: unknown): string {
+  if (e instanceof AufrufFehler && e.status === 401) return 'Sitzung abgelaufen – bitte neu anmelden.';
+  return e instanceof Error ? e.message : 'Das hat nicht geklappt.';
 }
 
 export function Fragebogen({ kapitel, fragen, neuLaden }: { kapitel: Kapitel[]; fragen: Frage[]; neuLaden: () => Promise<void> }) {
   const [ziel, setZiel] = useState<Ziel | null>(null);
+  const [fehler, setFehler] = useState('');
   const aktiveFragen = fragen.filter((f) => f.aktiv).length;
   const kapitelSortiert = kapitel.slice().sort((a, b) => a.position - b.position);
 
-  async function frageVerschieben(id: string, richtung: 'hoch' | 'runter') { await aufruf(`/api/admin/fragen/${id}`, 'PUT', { richtung }); await neuLaden(); }
-  async function frageUmschalten(f: Frage) { await aufruf(`/api/admin/fragen/${f.id}`, 'PUT', { aktiv: !f.aktiv }); await neuLaden(); }
+  async function frageVerschieben(id: string, richtung: 'hoch' | 'runter') {
+    try { await aufruf(`/api/admin/fragen/${id}`, 'PUT', { richtung }); setFehler(''); await neuLaden(); }
+    catch (e) { setFehler(fehlertext(e)); }
+  }
+  async function frageUmschalten(f: Frage) {
+    try { await aufruf(`/api/admin/fragen/${f.id}`, 'PUT', { aktiv: !f.aktiv }); setFehler(''); await neuLaden(); }
+    catch (e) { setFehler(fehlertext(e)); }
+  }
 
   return (
     <div className={`grid ${ziel ? 'grid-cols-[1fr_420px]' : 'grid-cols-1'}`}>
       <main className="p-8 max-w-[900px]">
         <div className="eyebrow">Admin · Fragebogen</div>
+        {fehler && <p className="text-[#ff7a52] mt-3 text-sm">{fehler}</p>}
         <div className="grid grid-cols-2 gap-3.5 mt-5 max-w-md">
           <div className="card !p-4">
             <div className="text-[12px] tracking-[.12em] uppercase text-muted">Fragen aktiv</div>

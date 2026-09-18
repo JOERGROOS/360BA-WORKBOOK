@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { Kapitel, KapitelTyp } from '@/lib/db';
-import { aufruf } from './Fragebogen';
+import { aufruf, fehlertext } from './Fragebogen';
 
 const TYP_LABEL: Record<KapitelTyp, string> = { fakten: 'Fakten', faktor: 'Erfolgsfaktor' };
 
@@ -21,13 +21,13 @@ export function KapitelFormular({ kapitel, hatFragen, schliessen, neuLaden }: {
       if (kapitel) await aufruf(`/api/admin/kapitel/${kapitel.id}`, 'PUT', f);
       else await aufruf('/api/admin/kapitel', 'POST', f);
       await neuLaden(); schliessen();
-    } catch (e) { setFehler(e instanceof Error ? e.message : 'Das hat nicht geklappt.'); } finally { setLaeuft(false); }
+    } catch (e) { setFehler(fehlertext(e)); } finally { setLaeuft(false); }
   }
   async function loeschen() {
     if (!kapitel || !confirm('Kapitel wirklich löschen?')) return;
     setLaeuft(true); setFehler('');
     try { await aufruf(`/api/admin/kapitel/${kapitel.id}`, 'DELETE'); await neuLaden(); schliessen(); }
-    catch (e) { setFehler(e instanceof Error ? e.message : 'Das hat nicht geklappt.'); } finally { setLaeuft(false); }
+    catch (e) { setFehler(fehlertext(e)); } finally { setLaeuft(false); }
   }
 
   return (
@@ -44,12 +44,16 @@ export function KapitelFormular({ kapitel, hatFragen, schliessen, neuLaden }: {
           ))}
         </div>
       </div>
-      <div className="mb-4.5 flex items-center justify-between">
-        <label className="mb-0">Aktiv</label>
-        <button onClick={() => setF({ ...f, aktiv: !f.aktiv })} className={`w-[38px] h-[22px] rounded-full relative ${f.aktiv ? 'bg-o' : 'bg-line'}`}>
-          <span className={`absolute top-[3px] w-4 h-4 rounded-full bg-white ${f.aktiv ? 'right-[3px]' : 'left-[3px]'}`} />
-        </button>
-      </div>
+      {kapitel ? (
+        <div className="mb-4.5 flex items-center justify-between">
+          <label className="mb-0">Aktiv</label>
+          <button onClick={() => setF({ ...f, aktiv: !f.aktiv })} className={`w-[38px] h-[22px] rounded-full relative ${f.aktiv ? 'bg-o' : 'bg-line'}`}>
+            <span className={`absolute top-[3px] w-4 h-4 rounded-full bg-white ${f.aktiv ? 'right-[3px]' : 'left-[3px]'}`} />
+          </button>
+        </div>
+      ) : (
+        <p className="fine mb-4.5">Neue Kapitel starten aktiv und erscheinen sofort im Interview, sobald sie Fragen enthalten.</p>
+      )}
       {fehler && <p className="text-[#ff7a52] mb-3 text-sm">{fehler}</p>}
       <div className="flex items-center gap-3 mt-7">
         <button className="btn" disabled={laeuft || !f.titel.trim()} onClick={speichern}>Speichern</button>

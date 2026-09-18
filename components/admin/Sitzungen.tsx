@@ -10,6 +10,12 @@ function antwortAnzeigen(a: unknown): string {
   return String(a);
 }
 
+async function fehlerAus(r: Response, standard: string): Promise<string> {
+  if (r.status === 401) return 'Sitzung abgelaufen – bitte neu anmelden.';
+  const d = await r.json().catch(() => ({}));
+  return d.error ?? standard;
+}
+
 export function Sitzungen() {
   const [liste, setListe] = useState<SitzungListe[] | null>(null);
   const [offen, setOffen] = useState<string | null>(null);
@@ -35,30 +41,31 @@ export function Sitzungen() {
   async function pdfOeffnen(id: string) {
     setLaeuft(id); setFehler('');
     const r = await fetch(`/api/admin/sitzungen/${id}/pdf`);
-    const d = await r.json();
     setLaeuft(null);
-    if (!r.ok) { setFehler(d.error ?? 'PDF noch nicht vorhanden.'); return; }
+    if (!r.ok) { setFehler(await fehlerAus(r, 'PDF noch nicht vorhanden.')); return; }
+    const d = await r.json();
     window.open(d.url, '_blank');
   }
   async function pdfNeu(id: string) {
     setLaeuft(id); setFehler('');
     const r = await fetch(`/api/admin/sitzungen/${id}/pdf`, { method: 'POST' });
-    const d = await r.json();
     setLaeuft(null);
-    if (!r.ok) { setFehler(d.error ?? 'Das hat nicht geklappt.'); return; }
+    if (!r.ok) { setFehler(await fehlerAus(r, 'Das hat nicht geklappt.')); return; }
+    const d = await r.json();
     window.open(d.url, '_blank');
   }
   async function linkErneut(id: string) {
     setLaeuft(id); setFehler('');
     const r = await fetch(`/api/admin/sitzungen/${id}/link`, { method: 'POST' });
     setLaeuft(null);
-    if (!r.ok) { const d = await r.json().catch(() => ({})); setFehler(d.error ?? 'Das hat nicht geklappt.'); }
+    if (!r.ok) setFehler(await fehlerAus(r, 'Das hat nicht geklappt.'));
   }
   async function loeschen(id: string) {
     if (!confirm('Sitzung inklusive PDF wirklich löschen?')) return;
-    setLaeuft(id);
-    await fetch(`/api/admin/sitzungen/${id}`, { method: 'DELETE' });
+    setLaeuft(id); setFehler('');
+    const r = await fetch(`/api/admin/sitzungen/${id}`, { method: 'DELETE' });
     setLaeuft(null);
+    if (!r.ok) { setFehler(await fehlerAus(r, 'Das hat nicht geklappt.')); return; }
     await laden();
   }
 

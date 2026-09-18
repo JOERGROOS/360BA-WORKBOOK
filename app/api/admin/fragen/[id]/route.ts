@@ -28,7 +28,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const upd: Record<string, unknown> = { updated_at: new Date().toISOString() };
   for (const k of erlaubt) if (k in b) upd[k] = b[k];
   if (upd.typ && !FRAGE_TYPEN.includes(upd.typ as string)) return NextResponse.json({ error: 'Typ' }, { status: 400 });
-  if (upd.typ === 'tabelle' && !tabelleGueltig(upd.optionen)) return NextResponse.json({ error: 'Zeilen und Spalten dürfen nicht leer sein' }, { status: 400 });
+  if ('typ' in upd || 'optionen' in upd) {
+    const { data: bestehende } = await db.from('wb_questions').select('typ,optionen').eq('id', id).single();
+    if (!bestehende) return NextResponse.json({ error: 'Frage nicht gefunden' }, { status: 404 });
+    const effektiv = (upd.typ as string | undefined) ?? bestehende.typ;
+    if (effektiv === 'tabelle' && !tabelleGueltig(upd.optionen ?? bestehende.optionen)) {
+      return NextResponse.json({ error: 'Zeilen und Spalten dürfen nicht leer sein' }, { status: 400 });
+    }
+  }
   const { error } = await db.from('wb_questions').update(upd).eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

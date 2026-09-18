@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { Frage, FrageTyp } from '@/lib/db';
-import { aufruf } from './Fragebogen';
+import { aufruf, fehlertext } from './Fragebogen';
 
 const TYP_LABEL: Record<FrageTyp, string> = { text: 'Freitext', skala: 'Skala 1–10', tabelle: 'Tabelle' };
 
@@ -25,13 +25,13 @@ export function FrageFormular({ frage, chapterId, schliessen, neuLaden }: {
       if (frage) await aufruf(`/api/admin/fragen/${frage.id}`, 'PUT', { text: f.text, hinweis: f.hinweis, typ: f.typ, optionen, aktiv: f.aktiv });
       else await aufruf('/api/admin/fragen', 'POST', { chapter_id: chapterId, text: f.text, hinweis: f.hinweis, typ: f.typ, optionen });
       await neuLaden(); schliessen();
-    } catch (e) { setFehler(e instanceof Error ? e.message : 'Das hat nicht geklappt.'); } finally { setLaeuft(false); }
+    } catch (e) { setFehler(fehlertext(e)); } finally { setLaeuft(false); }
   }
   async function loeschen() {
     if (!frage || !confirm('Frage wirklich löschen?')) return;
     setLaeuft(true); setFehler('');
     try { await aufruf(`/api/admin/fragen/${frage.id}`, 'DELETE'); await neuLaden(); schliessen(); }
-    catch (e) { setFehler(e instanceof Error ? e.message : 'Das hat nicht geklappt.'); } finally { setLaeuft(false); }
+    catch (e) { setFehler(fehlertext(e)); } finally { setLaeuft(false); }
   }
 
   return (
