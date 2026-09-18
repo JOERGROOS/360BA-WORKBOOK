@@ -114,7 +114,7 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
               <div key={kapitel.id} className="border-b border-line py-4">
                 <div className="flex justify-between items-start gap-4 flex-wrap">
                   <div className="text-[15px]">Faktor · {kapitel.titel}</div>
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex items-center gap-4 flex-wrap">
                     <span className="fine">{aussagen.length} Aussagen · {fw?.summe ?? 0} von {fw?.maximum ?? 0} Punkten</span>
                     <button type="button" className="underline text-o text-[13px]" onClick={() => setOffen((o) => ({ ...o, [kapitel.id]: !o[kapitel.id] }))}>{offen[kapitel.id] ? 'einklappen' : 'Details'}</button>
                     <a className="underline text-o text-[13px]" href={`/w/${token}?frage=${i}`}>bearbeiten</a>
@@ -139,7 +139,7 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
                 ) : frage.typ === 'skala' ? (
                   <p className="text-[14px] text-[#C9CFD3] flex-1">{(() => { const w = antworten[frage.id]; return typeof w === 'number' ? w : <span className="text-muted">– keine Antwort –</span>; })()}</p>
                 ) : frage.optionen ? (
-                  <div className="flex-1"><MiniTabelle optionen={frage.optionen} wert={(antworten[frage.id] as TabellenWert) ?? {}} /></div>
+                  <div className="flex-1 min-w-0 overflow-x-auto"><MiniTabelle optionen={frage.optionen} wert={(antworten[frage.id] as TabellenWert) ?? {}} /></div>
                 ) : null}
                 <a className="underline text-o text-[13px] shrink-0" href={`/w/${token}?frage=${i}`}>bearbeiten</a>
               </div>
