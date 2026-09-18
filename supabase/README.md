@@ -1,0 +1,30 @@
+# Supabase
+
+Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabellen und den `workbooks`-Bucket anfassen).
+
+## Migration einspielen
+
+Wie bei JOERG AI über die Management-API, kein CLI-Login nötig:
+
+```bash
+curl -s -X POST "https://api.supabase.com/v1/projects/zzmomqmegzjibnqrmzyo/database/query" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
+  --data "$(python3 -c 'import json,sys;print(json.dumps({"query":open("supabase/migrations/001_workbook.sql").read()}))')"
+```
+
+`SUPABASE_ACCESS_TOKEN` steht in `~/.config/360ba-workbook/.env.local`. Erwartete Antwort: `[]` ohne Fehler.
+
+Schlägt allein das `insert into storage.buckets` fehl (Rechte-Problem über den SQL-Endpunkt), Bucket stattdessen per Node anlegen:
+
+```js
+db.storage.createBucket('workbooks', { public: false })
+```
+
+## Seed
+
+```bash
+node --env-file=.env.local scripts/seed.mjs
+node scripts/check-seed.mjs
+```
+
+`seed.mjs` ist wiederholbar — legt nur an, was laut Titel/Fragetext noch fehlt.
