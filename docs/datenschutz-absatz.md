@@ -21,11 +21,15 @@ mit Serverstandort Frankfurt am Main.
 Aufnahme zur Umwandlung in Text an OpenAI (USA) übertragen. Die Aufnahme
 selbst speichern wir nicht, und sie wird von OpenAI nicht zum Training von
 KI-Modellen verwendet. Gespeichert wird ausschließlich der daraus erzeugte
-Text.
+Text. Die Übermittlung in die USA ist über EU-Standardvertragsklauseln
+gemäß Art. 46 Abs. 2 lit. c DSGVO abgesichert.
 
 **Sprachliche Glättung.** Den aus einer Sprachaufnahme entstandenen Text
-glätten wir mithilfe von Anthropic, damit er sich flüssig liest. Auch hierbei
-wird nur der Text verarbeitet, keine Audiodaten.
+glätten wir mithilfe von Anthropic, einem Unternehmen mit Sitz in den USA,
+damit er sich flüssig liest. Auch hierbei wird nur der Text verarbeitet,
+keine Audiodaten, und die Daten werden nicht zum Training von KI-Modellen
+verwendet. Auch diese Übermittlung in die USA ist über
+EU-Standardvertragsklauseln gemäß Art. 46 Abs. 2 lit. c DSGVO abgesichert.
 
 **E-Mail-Versand.** Den Link zu Ihrem Workbook sowie Ihr fertiges Workbook als
 PDF versenden wir über den Dienstleister Resend.

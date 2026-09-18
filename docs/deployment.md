@@ -23,7 +23,11 @@ dich einfach durch.
 2. Das gerade angelegte Repo `360BA-WORKBOOK` auswählen und „Import" klicken.
 3. Bei „Framework Preset" steht automatisch **Next.js** — nichts ändern.
 4. Die Region (Frankfurt) muss nicht in der Vercel-Oberfläche eingestellt
-   werden: Die Datei `vercel.json` im Repo legt das schon fest.
+   werden: Die Datei `vercel.json` im Repo legt das schon fest. Das wirkt
+   aber nur auf einem bezahlten Vercel-Plan (Pro) — im kostenlosen
+   Hobby-Plan laufen die Funktionen trotzdem in der US-Standardregion. Bitte
+   prüfen, welcher Plan im JOERG-AI-Konto aktiv ist (dasselbe Konto zu
+   nutzen ist in Ordnung).
 5. Noch nicht auf „Deploy" klicken — zuerst die Umgebungsvariablen eintragen
    (nächster Schritt).
 

@@ -34,6 +34,10 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 3 · Supabase
    `node scripts/check-mail-html.mjs` · `node scripts/check-pdf.mjs` (braucht
    laufenden Dev-Server, schreibt `docs/beispiel/beispiel.pdf`).
 
+## Spec & Plan
+Spec: `docs/specs/2026-09-18-online-workbook-design.md` · Plan:
+`docs/plans/2026-09-18-online-workbook.md` · Mockup: `docs/mockup/index.html`.
+
 ## Datenbank
 Supabase-Projekt `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur
 `wb_*`-Tabellen und den Bucket `workbooks` anfassen). Migration einspielen
