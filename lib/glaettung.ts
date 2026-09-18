@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 
+// Ziffern-Satz unten: "exakt übernehmen" allein ließ Haiku Zahlwörter wie "zwölf" stehen, statt sie in Schriftform ("12") zu bringen.
 export const GLAETTUNG_ANWEISUNG = `Du bekommst die Rohabschrift einer gesprochenen Antwort eines Handwerksunternehmers auf eine Frage in einem Workbook.
 Bring den Text in verständliches Schriftdeutsch, so wie der Sprecher es selbst aufschreiben würde.
 Regeln:

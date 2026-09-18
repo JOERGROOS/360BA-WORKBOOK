@@ -5,7 +5,7 @@ import type { Snapshot, Antworten, Antwort, TabellenWert } from '@/lib/db';
 import { flach, fortschritt } from '@/lib/punkte';
 import { Fortschritt } from './Fortschritt';
 import { FrageText } from './FrageText';
-import { Mikro } from './Mikro';
+import { Mikro, type MikroStatus } from './Mikro';
 import { FrageSkala } from './FrageSkala';
 import { FrageTabelle } from './FrageTabelle';
 
@@ -23,6 +23,7 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start }:
   const [fehler, setFehler] = useState('');
   const [speichertGerade, setSpeichertGerade] = useState(false);
   const [linkHinweis, setLinkHinweis] = useState('');
+  const [mikroStatus, setMikroStatus] = useState<MikroStatus>({ z: 'bereit', sek: 0, fehler: '' });
   const zeitgeberRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const eintrag = alle[pos];
@@ -128,6 +129,16 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start }:
     setAntworten((a) => ({ ...a, [frage.id]: v }));
   }
 
+  function mikroStatusZeile(s: MikroStatus) {
+    if (s.z === 'nimmt-auf') {
+      const mm = `${Math.floor(s.sek / 60)}:${String(s.sek % 60).padStart(2, '0')}`;
+      return <span><span className="inline-block w-2 h-2 rounded-full bg-[#ff5a4a] mr-2 animate-pulse" />Aufnahme läuft · {mm} · Stopp mit Klick oder Leertaste. Danach wandeln wir deine Antwort in Text um und glätten sie – du kannst sie noch anpassen.</span>;
+    }
+    if (s.z === 'wandelt-um') return <span>Wandle deine Antwort in Text um …</span>;
+    if (s.z === 'fehler') return <span className="text-[#ff7a52]">{s.fehler}</span>;
+    return null;
+  }
+
   return (
     <main>
       <div className="flex items-center justify-between px-12 py-6 gap-4 flex-wrap">
@@ -159,12 +170,15 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start }:
           {frage.hinweis && <p className="text-[15px] text-[#C9CFD3] font-light mb-7 leading-relaxed">{frage.hinweis}</p>}
 
           {frage.typ === 'text' && (
-            <FrageText
-              wert={(antworten[frage.id] as string) ?? ''}
-              onChange={setzeWert}
-              onWeiter={() => weiter()}
-              mikro={<Mikro token={token} onText={(t) => setAntworten((a) => { const alt = (a[frage.id] as string) ?? ''; return { ...a, [frage.id]: alt ? alt.trimEnd() + '\n\n' + t : t }; })} />}
-            />
+            <>
+              <FrageText
+                wert={(antworten[frage.id] as string) ?? ''}
+                onChange={setzeWert}
+                onWeiter={() => weiter()}
+                mikro={<Mikro token={token} onText={(t) => setAntworten((a) => { const alt = (a[frage.id] as string) ?? ''; return { ...a, [frage.id]: alt ? alt.trimEnd() + '\n\n' + t : t }; })} onStatus={setMikroStatus} />}
+              />
+              <div className="mt-3.5 text-sm text-[#C9CFD3] min-h-[22px]">{mikroStatusZeile(mikroStatus)}</div>
+            </>
           )}
           {frage.typ === 'skala' && (
             <FrageSkala wert={antworten[frage.id] as number | undefined} onChange={skalaWaehlen} />
