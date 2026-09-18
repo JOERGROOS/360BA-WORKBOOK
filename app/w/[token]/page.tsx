@@ -14,6 +14,6 @@ export default async function InterviewSeite({ params, searchParams }: { params:
     );
   }
   if (s.status === 'abgeschlossen') redirect(`/w/${token}/fertig`);
-  const start = Number(frage) || s.aktuelle_frage;
+  const start = frage !== undefined && Number.isInteger(Number(frage)) && Number(frage) >= 0 ? Number(frage) : s.aktuelle_frage;
   return <Interview token={token} snapshot={s.fragen_snapshot} antworten={s.antworten} start={start} vorname={s.vorname} zurueckZumErgebnis={frage !== undefined} />;
 }

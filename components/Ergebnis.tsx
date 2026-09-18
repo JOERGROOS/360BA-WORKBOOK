@@ -69,17 +69,19 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
   }
 
   const angezeigt = new Set<string>();
+  const titelTeile = texte.ergebnis_titel.split('Erfolgsrad');
+  const titel = titelTeile.length === 2 ? <>{titelTeile[0]}<span className="text-o">Erfolgsrad</span>{titelTeile[1]}</> : texte.ergebnis_titel;
 
   return (
     <main className="max-w-[1040px] mx-auto px-8 pb-24">
       <div className="flex items-center py-6"><img src="/logo-full-white.svg" alt="JOERG ROOS" className="h-6" /></div>
       <div className="eyebrow mt-6">Geschafft, {vorname}</div>
-      <h1 className="font-semibold text-[40px] leading-[1.15] my-4">So sieht dein <span className="text-o">Erfolgsrad</span> heute aus.</h1>
+      <h1 className="font-semibold text-[40px] leading-[1.15] my-4">{titel}</h1>
       <p className="text-[17px] leading-relaxed text-[#C9CFD3] font-light max-w-[640px]">{texte.ergebnis_text}</p>
 
       {fehlend.length > 0 && (
         <div className="card mt-8" style={{ borderColor: '#ED7A02' }}>
-          <p>Dir fehlen noch {fehlend.length} Aussage{fehlend.length === 1 ? '' : 'n'} — <a className="underline text-o" href={`/w/${token}?frage=${alle.indexOf(fehlend[0])}`}>zur ersten offenen</a></p>
+          <p>Dir fehlen noch {fehlend.length} Skala-Antwort{fehlend.length === 1 ? '' : 'en'} — <a className="underline text-o" href={`/w/${token}?frage=${alle.indexOf(fehlend[0])}`}>zur ersten offenen</a></p>
         </div>
       )}
 
@@ -157,7 +159,7 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
             placeholder="Tippen oder einsprechen …"
           />
           <div className="absolute right-3.5 bottom-3.5">
-            <Mikro token={token} onText={(t) => setAha((a) => { const neu = a ? a.trimEnd() + '\n\n' + t : t; void speichereAha(neu); return neu; })} onStatus={setMikroStatus} />
+            <Mikro token={token} onText={(t) => { const neu = aha ? aha.trimEnd() + '\n\n' + t : t; setAha(neu); void speichereAha(neu); }} onStatus={setMikroStatus} />
           </div>
         </div>
         <div className="mt-3.5 text-sm text-[#C9CFD3] min-h-[22px]">{mikroStatusZeile(mikroStatus)}</div>
