@@ -61,7 +61,8 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
     try {
       const res = await fetch(`/api/w/${token}/abschluss`, { method: 'POST' });
       if (!res.ok) throw new Error();
-      router.push(`/w/${token}/fertig`);
+      const { mailFehler } = await res.json();
+      router.push(`/w/${token}/fertig${mailFehler ? '?mail=fehler' : ''}`);
     } catch {
       setFehler('Wir konnten dein Workbook gerade nicht erstellen. Deine Antworten sind sicher. Bitte in einer Minute erneut versuchen.');
       setSpeichertAb(false);

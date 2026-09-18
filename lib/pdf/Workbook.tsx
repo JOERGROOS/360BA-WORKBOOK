@@ -29,7 +29,9 @@ const st = StyleSheet.create({
   absatz: { marginBottom: 8, fontWeight: 300, lineHeight: 0.8 },
   frage: { fontSize: 8.5, letterSpacing: 0.8, color: GRAU, textTransform: 'uppercase', fontWeight: 500, marginTop: 10 },
   antwort: { marginTop: 2, marginBottom: 6, paddingBottom: 6, borderBottomWidth: 0.5, borderBottomColor: LINIE, lineHeight: 0.8 },
-  leer: { color: GRAU, fontStyle: 'italic', lineHeight: 0.8 },
+  // kein fontStyle:'italic' — es liegt keine kursive Montserrat-Datei vor (public/fonts/),
+  // react-pdf bricht sonst beim Rendern mit "Could not resolve font" ab.
+  leer: { color: GRAU, lineHeight: 0.8 },
   zeile: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: LINIE, paddingVertical: 4 },
   zelleText: { flex: 1, lineHeight: 0.8 },
   zelleWert: { width: 40, textAlign: 'right', fontWeight: 600, lineHeight: 0.8 },
