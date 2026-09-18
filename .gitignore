@@ -1,0 +1,8 @@
+node_modules
+.next
+.env.local
+.env*.local
+tsconfig.tsbuildinfo
+docs/beispiel/*.pdf
+.DS_Store
+.superpowers/

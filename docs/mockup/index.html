@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>360° Business-Analyse · Workbook (Mockup)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--o:#ED7A02;--od:#9F3C07;--blue:#0F1B23;--bl:#3D4D5C;--ink:#0A1118;--paper:#EEEEEE;--w:#fff;--surf:#16212A;--line:#2A353D;--r:12px;--muted:#AFB3B5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Montserrat',Arial,sans-serif;background:var(--ink);color:var(--w);-webkit-font-smoothing:antialiased}
+.bg{position:fixed;inset:0;z-index:-1;background:
+ radial-gradient(1200px 700px at 78% -10%, rgba(237,122,2,.28), rgba(159,60,7,.12) 35%, rgba(15,27,35,0) 70%),
+ radial-gradient(900px 600px at 10% 110%, rgba(61,77,92,.35), rgba(10,17,24,0) 60%),
+ linear-gradient(180deg,#0F1B23 0%,#0A1118 100%)}
+.screen{display:none;min-height:100vh}
+.screen.on{display:block}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:26px 48px}
+.topbar img{height:26px}
+.topbar .step{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:820px;margin:0 auto;padding:0 32px 80px}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--o);font-weight:600}
+h1{font-weight:600;font-size:44px;line-height:1.12;margin:14px 0 18px}
+h1 span{color:var(--o)}
+h2{font-weight:600;font-size:30px;line-height:1.25}
+p.lead{font-size:17px;line-height:1.6;color:#C9CFD3;font-weight:300;max-width:620px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:32px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:500}
+input,textarea{width:100%;background:#0F1B23;border:1px solid var(--line);border-radius:var(--r);color:var(--w);font:inherit;font-size:16px;padding:14px 16px;outline:none}
+input:focus,textarea:focus{border-color:var(--o)}
+textarea{min-height:170px;line-height:1.55;resize:vertical}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--o);color:var(--w);border:0;border-radius:var(--r);padding:16px 28px;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+.btn.sec{background:transparent;border:1px solid var(--o);color:var(--w)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.btn.big{padding:20px 36px;font-size:17px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.fine{font-size:13.5px;color:var(--muted);line-height:1.5}
+/* progress */
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:0 48px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--od),var(--o));border-radius:2px}
+.chapters{display:flex;gap:6px;margin:14px 48px 0}
+.chapters b{flex:1;height:6px;border-radius:3px;background:var(--line);position:relative}
+.chapters b.done{background:var(--o)}
+.chapters b.cur{background:linear-gradient(90deg,var(--o) 60%,var(--line) 60%)}
+.chapters b span{position:absolute;top:12px;left:0;font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.qnum{font-size:14px;color:var(--muted);margin-top:56px}
+.q{font-weight:500;font-size:34px;line-height:1.28;margin:14px 0 8px}
+.hint{font-size:15px;color:#C9CFD3;font-weight:300;margin-bottom:28px;line-height:1.5}
+.answer{position:relative}
+.mic{position:absolute;right:14px;bottom:14px;width:52px;height:52px;border-radius:50%;background:var(--o);display:flex;align-items:center;justify-content:center;border:0;cursor:pointer;box-shadow:0 0 0 0 rgba(237,122,2,.5)}
+.mic.rec{animation:pulse 1.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(237,122,2,.55)}100%{box-shadow:0 0 0 18px rgba(237,122,2,0)}}
+.mic svg{width:22px;height:22px;fill:#fff}
+.voice{display:flex;align-items:center;gap:14px;margin-top:14px;font-size:14px;color:#C9CFD3}
+.voice .dot{width:8px;height:8px;border-radius:50%;background:#ff5a4a;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.wave{display:flex;gap:3px;align-items:center;height:22px}
+.wave i{width:3px;background:var(--o);border-radius:2px;display:block}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px}
+.kbd{font-size:12.5px;color:var(--muted)}
+.kbd b{border:1px solid var(--line);border-radius:6px;padding:2px 7px;font-weight:500;color:#C9CFD3}
+/* scale */
+.scale{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;margin-top:18px}
+.scale button{aspect-ratio:1;border-radius:14px;border:1px solid var(--line);background:#0F1B23;color:var(--w);font:inherit;font-size:20px;font-weight:600;cursor:pointer}
+.scale button.sel{background:var(--o);border-color:var(--o)}
+.scale button:hover{border-color:var(--o)}
+.scale-lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:10px}
+.factor{display:inline-flex;align-items:center;gap:10px;background:rgba(237,122,2,.12);border:1px solid rgba(237,122,2,.35);border-radius:999px;padding:6px 14px 6px 6px;font-size:13px;font-weight:500;margin-top:48px}
+.factor b{width:26px;height:26px;border-radius:50%;background:var(--o);display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+/* result */
+.resgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:start;margin-top:32px}
+.scores{display:flex;flex-direction:column;gap:10px}
+.sc{display:grid;grid-template-columns:1fr 60px;gap:12px;align-items:center;padding:12px 16px;background:var(--surf);border:1px solid var(--line);border-radius:14px}
+.sc .bar{height:6px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+.sc .bar i{display:block;height:100%;background:var(--o)}
+.sc small{font-size:13px;color:#C9CFD3}
+.sc .n{font-size:22px;font-weight:600;text-align:right}
+.qa{margin-top:34px}
+.qa .item{padding:18px 0;border-bottom:1px solid var(--line)}
+.qa .item .qq{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500}
+.qa .item .aa{font-size:16px;line-height:1.55;color:#E6E9EB;font-weight:300}
+.qa .item .aa a{color:var(--o);font-size:13px;text-decoration:none;margin-left:8px;font-weight:500}
+.aha{margin-top:40px;border-color:rgba(237,122,2,.5);background:#1F1408}
+/* admin */
+.adm{display:grid;grid-template-columns:250px 1fr 420px;min-height:100vh}
+.side{background:var(--surf);border-right:1px solid var(--line);padding:26px 22px}
+.side img{height:22px;margin-bottom:34px}
+.side .nav-l{display:flex;flex-direction:column;gap:4px}
+.side .nav-l a{color:#C9CFD3;text-decoration:none;font-size:14px;padding:10px 12px;border-radius:10px}
+.side .nav-l a.on{background:rgba(237,122,2,.14);color:var(--w);font-weight:500}
+.side h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:26px 0 10px}
+.main{padding:32px 34px;min-width:0}
+.tbl{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.qrow{display:grid;grid-template-columns:24px 1fr 110px 44px 90px;gap:14px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:14px}
+.qrow .h{color:var(--muted);cursor:grab}
+.qrow .t{font-weight:400}
+.badge{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:#C9CFD3}
+.badge.o{border-color:var(--o);color:var(--o)}
+.tog{width:38px;height:22px;border-radius:11px;background:var(--o);position:relative}
+.tog:after{content:"";position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+.tog.off{background:var(--line)}
+.tog.off:after{right:auto;left:3px}
+.mini{font-size:13px;color:var(--o);text-decoration:none;font-weight:500}
+.chap{display:flex;align-items:center;gap:12px;margin-top:34px}
+.chap h3{font-weight:600;font-size:18px}
+.chap .badge{margin-left:4px}
+.edit{background:#0F1B23;border-left:1px solid var(--line);padding:30px 28px}
+.edit h3{font-size:18px;font-weight:600;margin-bottom:22px}
+.edit .f{margin-bottom:18px}
+.seg{display:flex;gap:6px}
+.seg span{flex:1;text-align:center;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;color:#C9CFD3}
+.seg span.on{border-color:var(--o);color:var(--w);background:rgba(237,122,2,.14)}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.stat .card{padding:18px 20px}
+.stat .k{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-size:34px;font-weight:600;margin-top:6px}
+.stat .v small{font-size:14px;color:var(--muted);font-weight:400}
+.sub{display:grid;grid-template-columns:1fr 1fr 100px 130px 120px;gap:14px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:14px}
+.sub .badge.g{border-color:#4ec986;color:#4ec986}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<!-- ===================== 1 · START / LOGIN ===================== -->
+<section id="start" class="screen">
+  <div class="topbar"><img src="logo.svg" alt="JOERG ROOS"><span class="step">360° Business-Analyse · Workbook</span></div>
+  <div class="wrap" style="padding-top:60px">
+    <div class="eyebrow">Schön, dass du dabei bist</div>
+    <h1>Dein Workbook zur<br><span>360° Business-Analyse</span></h1>
+    <p class="lead">Bevor wir uns einen Tag lang deinem Unternehmen widmen, gehen wir gemeinsam durch das, was dich und deinen Betrieb ausmacht. Ich stelle dir eine Frage nach der anderen. Du antwortest – getippt oder gesprochen. Nimm dir Zeit und sei ehrlich zu dir selbst. Nur so wird der gemeinsame Tag wertvoll.</p>
+    <div class="row" style="margin:22px 0 34px;gap:26px">
+      <span class="fine">⏱ ca. 2–3 Stunden</span>
+      <span class="fine">💾 jederzeit pausieren – wir schicken dir deinen Link</span>
+      <span class="fine">🎙 tippen oder einsprechen</span>
+    </div>
+    <div class="card">
+      <div class="grid2">
+        <div><label>Vorname</label><input value="Kai"></div>
+        <div><label>Nachname</label><input value="Hurtner"></div>
+        <div style="grid-column:1/-1"><label>Firmenname</label><input value="Hurtner Bedachungen GmbH"></div>
+        <div><label>Telefon</label><input value="+49 171 …"></div>
+        <div><label>E-Mail</label><input value="kai@…"></div>
+      </div>
+      <div class="row" style="margin-top:26px">
+        <button class="btn big">Interview starten →</button>
+        <span class="spacer"></span>
+        <span class="fine" style="max-width:280px">Deine Angaben nutzen wir nur für die 360° Business-Analyse. <u>Datenschutz</u></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2 · OFFENE FRAGE ===================== -->
+<section id="frage" class="screen">
+  <div class="topbar"><img src="logo.svg" alt="JOERG ROOS"><span class="step">Frage 14 von 95 · 15 %</span></div>
+  <div class="prog"><i style="width:15%"></i></div>
+  <div class="chapters">
+    <b class="cur"><span>Ein paar Fakten</span></b><b><span>Persönlichkeit</span></b><b><span>Finanzen</span></b><b><span>Ziele &amp; Strategie</span></b><b><span>Leadership &amp; Team</span></b><b><span>Fulfillment</span></b><b><span>Marketing</span></b><b><span>Sales</span></b><b><span>Ergebnis</span></b>
+  </div>
+  <div class="wrap">
+    <div class="qnum">Kapitel 1 · Ein paar Fakten zum Einstieg · Marktlage und Wettbewerb</div>
+    <div class="q">Wer sind deine größten Wettbewerber – und was unterscheidet dich von ihnen?</div>
+    <div class="hint">Denk an die zwei oder drei Betriebe, gegen die du regelmäßig antrittst. Was machst du anders als sie?</div>
+    <div class="answer">
+      <textarea>Im Umkreis sind das vor allem Dachdecker Meier und die Firma Kortmann. Beide sind größer als wir und fahren über den Preis. Wir unterscheiden uns dadurch, dass wir bei Sanierungen immer den Meister vor Ort haben und</textarea>
+      <button class="mic rec" title="Antwort einsprechen"><svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg></button>
+    </div>
+    <div class="voice"><span class="dot"></span> Aufnahme läuft · 0:42
+      <span class="wave"><i style="height:6px"></i><i style="height:14px"></i><i style="height:20px"></i><i style="height:11px"></i><i style="height:17px"></i><i style="height:8px"></i><i style="height:15px"></i><i style="height:5px"></i></span>
+      <span class="fine">Nach dem Stopp wandeln wir deine Antwort in Text um und glätten sie – du kannst sie danach noch anpassen.</span>
+    </div>
+    <div class="nav">
+      <button class="btn ghost">← Zurück</button>
+      <span class="kbd"><b>⏎</b> Weiter &nbsp;·&nbsp; <b>Leertaste</b> Aufnahme</span>
+      <button class="btn">Weiter →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3 · SKALEN-AUSSAGE ===================== -->
+<section id="skala" class="screen">
+  <div class="topbar"><img src="logo.svg" alt="JOERG ROOS"><span class="step">Frage 38 von 95 · 40 %</span></div>
+  <div class="prog"><i style="width:40%"></i></div>
+  <div class="chapters">
+    <b class="done"><span>Ein paar Fakten</span></b><b class="done"><span>Persönlichkeit</span></b><b class="cur"><span>Finanzen</span></b><b><span>Ziele &amp; Strategie</span></b><b><span>Leadership &amp; Team</span></b><b><span>Fulfillment</span></b><b><span>Marketing</span></b><b><span>Sales</span></b><b><span>Ergebnis</span></b>
+  </div>
+  <div class="wrap">
+    <div class="factor"><b>2</b> Erfolgsfaktor · Finanzen &amp; wirtschaftliche Lage · Aussage 5 von 10</div>
+    <div class="q" style="margin-top:22px">Ich plane meine Liquidität mindestens 6 bis 12 Monate im Voraus.</div>
+    <div class="hint">Wie sehr trifft diese Aussage auf dich zu – nicht auf dem Papier, sondern in deinem Alltag?</div>
+    <div class="scale">
+      <button>1</button><button>2</button><button>3</button><button>4</button><button class="sel">5</button><button>6</button><button>7</button><button>8</button><button>9</button><button>10</button>
+    </div>
+    <div class="scale-lbl"><span>1 · trifft überhaupt nicht zu</span><span>10 · trifft voll und ganz zu</span></div>
+    <div class="nav" style="margin-top:44px">
+      <button class="btn ghost">← Zurück</button>
+      <span class="kbd">Tippe eine Zahl <b>1</b>–<b>0</b> · geht automatisch weiter</span>
+      <button class="btn">Weiter →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4 · ERGEBNIS ===================== -->
+<section id="ergebnis" class="screen">
+  <div class="topbar"><img src="logo.svg" alt="JOERG ROOS"><span class="step">Dein Ergebnis</span></div>
+  <div class="prog"><i style="width:98%"></i></div>
+  <div class="wrap" style="max-width:1040px">
+    <div class="eyebrow" style="margin-top:44px">Geschafft, Kai</div>
+    <h2>So sieht dein <span style="color:var(--o)">Erfolgsrad</span> heute aus.</h2>
+    <p class="lead" style="margin-top:12px">Sieben Erfolgsfaktoren, je bis zu 100 Punkte. Ein rundes Rad heißt: breit aufgestellt. Ein kurzer Ausschlag zeigt dir, wo der größte Hebel liegt.</p>
+    <div class="resgrid">
+      <svg viewBox="0 0 520 520" width="100%" id="rad"></svg>
+      <div class="scores">
+        <div class="sc"><div><small>Unternehmerpersönlichkeit</small><div class="bar"><i style="width:72%"></i></div></div><div class="n">72</div></div>
+        <div class="sc"><div><small>Finanzen &amp; wirtschaftliche Lage</small><div class="bar"><i style="width:41%"></i></div></div><div class="n">41</div></div>
+        <div class="sc"><div><small>Ziele &amp; Strategie</small><div class="bar"><i style="width:55%"></i></div></div><div class="n">55</div></div>
+        <div class="sc"><div><small>Leadership &amp; Team</small><div class="bar"><i style="width:63%"></i></div></div><div class="n">63</div></div>
+        <div class="sc"><div><small>Fulfillment &amp; Leistungserbringung</small><div class="bar"><i style="width:78%"></i></div></div><div class="n">78</div></div>
+        <div class="sc"><div><small>Marketing</small><div class="bar"><i style="width:34%"></i></div></div><div class="n">34</div></div>
+        <div class="sc"><div><small>Sales (Vertrieb)</small><div class="bar"><i style="width:49%"></i></div></div><div class="n">49</div></div>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="eyebrow">Deine Antworten im Überblick</div>
+      <div class="item"><div class="qq">Wie heißt dein Unternehmen (inkl. Rechtsform)?</div><div class="aa">Hurtner Bedachungen GmbH <a href="#">bearbeiten</a></div></div>
+      <div class="item"><div class="qq">Was läuft aktuell besonders gut in deinem Unternehmen?</div><div class="aa">Die Auslastung ist hoch, wir haben bis in den Frühling Aufträge. Das Team ist stabil, die Qualität stimmt – wir bekommen viele Empfehlungen. <a href="#">bearbeiten</a></div></div>
+      <div class="item"><div class="qq">Wo siehst du die größten Herausforderungen?</div><div class="aa">Ich habe zu wenig Überblick über die Zahlen. Am Monatsende weiß ich nicht sicher, ob wir Gewinn gemacht haben. Und ich hänge zu viel auf der Baustelle. <a href="#">bearbeiten</a></div></div>
+      <div class="item"><div class="qq">Faktor 2 · Finanzen &amp; wirtschaftliche Lage</div><div class="aa">10 Aussagen · 41 von 100 Punkten <a href="#">Details</a></div></div>
+      <div class="fine" style="margin-top:14px">… alle 95 Antworten stehen vollständig im Workbook.</div>
+    </div>
+
+    <div class="card aha">
+      <div class="eyebrow">Deine Aha-Momente</div>
+      <div class="q" style="font-size:26px;margin-top:10px">Wenn du deine Antworten und dein Erfolgsrad jetzt so vor dir siehst – was fällt dir auf? Was überrascht dich, was bestätigt sich?</div>
+      <div class="answer" style="margin-top:14px">
+        <textarea style="min-height:130px" placeholder="Tippen oder einsprechen …"></textarea>
+        <button class="mic"><svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg></button>
+      </div>
+      <div class="row" style="margin-top:22px">
+        <button class="btn big">Ergebnis speichern &amp; Workbook als PDF erhalten</button>
+        <span class="fine" style="max-width:300px">Du bekommst dein fertiges Workbook per E-Mail. Jörg erhält es zeitgleich zur Vorbereitung eures Tages.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 5 · ADMIN ===================== -->
+<section id="admin" class="screen">
+  <div class="adm">
+    <aside class="side">
+      <img src="logo.svg" alt="">
+      <div class="nav-l">
+        <a class="on" href="#">Fragebogen</a>
+        <a href="#">Ausgefüllte Workbooks <span style="float:right;color:var(--o)">3</span></a>
+        <a href="#">Texte (Einleitung · Über Jörg)</a>
+        <a href="#">Vorschau als Kunde</a>
+      </div>
+      <h4>Kapitel</h4>
+      <div class="nav-l">
+        <a href="#">1 · Ein paar Fakten <span style="float:right;color:var(--muted)">25</span></a>
+        <a class="on" href="#">2 · Unternehmerpersönlichkeit <span style="float:right;color:var(--muted)">10</span></a>
+        <a href="#">3 · Finanzen &amp; Lage <span style="float:right;color:var(--muted)">10</span></a>
+        <a href="#">4 · Ziele &amp; Strategie <span style="float:right;color:var(--muted)">10</span></a>
+        <a href="#">5 · Leadership &amp; Team <span style="float:right;color:var(--muted)">10</span></a>
+        <a href="#">6 · Fulfillment <span style="float:right;color:var(--muted)">10</span></a>
+        <a href="#">7 · Marketing <span style="float:right;color:var(--muted)">10</span></a>
+        <a href="#">8 · Sales <span style="float:right;color:var(--muted)">10</span></a>
+        <a href="#" style="color:var(--o)">+ Neues Kapitel</a>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="eyebrow">Admin · Fragebogen</div>
+      <div class="stat">
+        <div class="card"><div class="k">Fragen aktiv</div><div class="v">95 <small>in 8 Kapiteln</small></div></div>
+        <div class="card"><div class="k">Ausgefüllt</div><div class="v">3 <small>seit 01.10.2026</small></div></div>
+        <div class="card"><div class="k">In Arbeit</div><div class="v">2 <small>zuletzt heute 11:40</small></div></div>
+      </div>
+      <div class="chap"><h3>Kapitel 2 · Erfolgsfaktor Unternehmerpersönlichkeit</h3><span class="badge o">Skala 1–10 · fließt ins Erfolgsrad</span><span class="spacer"></span><a class="mini" href="#">Einleitungstext bearbeiten</a><a class="mini" href="#" style="margin-left:18px">+ Neue Frage</a></div>
+      <div class="tbl">
+        <div class="qrow"><span class="h">⋮⋮</span><span class="t">Ich treffe unternehmerische Entscheidungen zügig und ohne sie unnötig aufzuschieben.</span><span class="badge">Skala 1–10</span><span class="tog"></span><a class="mini" href="#">Bearbeiten</a></div>
+        <div class="qrow" style="border-color:var(--o)"><span class="h">⋮⋮</span><span class="t">Ich unterscheide klar zwischen operativen Aufgaben und meiner Rolle als Unternehmer.</span><span class="badge">Skala 1–10</span><span class="tog"></span><a class="mini" href="#">Bearbeiten</a></div>
+        <div class="qrow"><span class="h">⋮⋮</span><span class="t">Ich handle regelmäßig nach Prioritäten – nicht nach Dringlichkeit.</span><span class="badge">Skala 1–10</span><span class="tog"></span><a class="mini" href="#">Bearbeiten</a></div>
+        <div class="qrow"><span class="h">⋮⋮</span><span class="t">Ich halte bewusst Grenzen ein (Zeit, Energie, Nein sagen).</span><span class="badge">Skala 1–10</span><span class="tog"></span><a class="mini" href="#">Bearbeiten</a></div>
+        <div class="qrow"><span class="h">⋮⋮</span><span class="t">Ich übernehme Verantwortung für Ergebnisse, ohne Schuld auf andere zu schieben.</span><span class="badge">Skala 1–10</span><span class="tog"></span><a class="mini" href="#">Bearbeiten</a></div>
+        <div class="qrow" style="opacity:.55"><span class="h">⋮⋮</span><span class="t">Ich nehme mir wöchentlich eine Stunde ohne Störung zum Nachdenken. <em style="color:var(--muted)">(Entwurf)</em></span><span class="badge">Skala 1–10</span><span class="tog off"></span><a class="mini" href="#">Bearbeiten</a></div>
+      </div>
+      <div class="chap" style="margin-top:44px"><h3>Ausgefüllte Workbooks</h3><span class="spacer"></span><a class="mini" href="#">Alle anzeigen</a></div>
+      <div class="tbl">
+        <div class="sub"><span>Kai Hurtner</span><span style="color:#C9CFD3">Hurtner Bedachungen GmbH</span><span style="color:var(--muted)">17.09.2026</span><span class="badge g">PDF versandt</span><a class="mini" href="#">PDF öffnen</a></div>
+        <div class="sub"><span>Enrico Lammerner</span><span style="color:#C9CFD3">Lammerner Bau</span><span style="color:var(--muted)">heute 11:40</span><span class="badge">In Arbeit · 61 %</span><a class="mini" href="#">Link erneut senden</a></div>
+      </div>
+    </main>
+    <div class="edit">
+      <h3>Frage bearbeiten</h3>
+      <div class="f"><label>Fragetext</label><textarea style="min-height:90px">Ich unterscheide klar zwischen operativen Aufgaben und meiner Rolle als Unternehmer.</textarea></div>
+      <div class="f"><label>Hinweis für den Kunden (optional)</label><input value="Denk an eine typische Woche: Wie viele Stunden bist du Unternehmer, wie viele Fachkraft?"></div>
+      <div class="f"><label>Antwort-Typ</label><div class="seg"><span>Freitext</span><span class="on">Skala 1–10</span><span>Tabelle</span><span>Auswahl</span></div></div>
+      <div class="f"><label>Sichtbar im Interview</label><div class="tog"></div></div>
+      <div class="row" style="margin-top:30px"><button class="btn">Speichern</button><button class="btn ghost">Abbrechen</button><span class="spacer"></span><a class="mini" href="#" style="color:#ff7a52">Löschen</a></div>
+      <p class="fine" style="margin-top:26px">Änderungen gelten für alle neuen Interviews. Laufende Interviews behalten ihren Fragestand.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+// Screen-Umschaltung per #hash
+function show(){const h=(location.hash||'#start').slice(1);document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===h));}
+addEventListener('hashchange',show);show();
+
+// Erfolgsrad · 7 Segmente, 10 Ringe, Werte 0–100
+(function(){
+ const svg=document.getElementById('rad');if(!svg)return;
+ const labels=['Unternehmerpersönlichkeit','Finanzen & Lage','Ziele & Strategie','Leadership & Team','Fulfillment','Marketing','Sales'];
+ const vals=[72,41,55,63,78,34,49];
+ const cx=260,cy=260,R=190,n=7,gap=0.035;
+ const ns='http://www.w3.org/2000/svg';
+ const el=(t,a)=>{const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e;};
+ // Außenring
+ el('circle',{cx,cy,r:R+34,fill:'#16212A',stroke:'#2A353D'});
+ // Ringe
+ for(let i=1;i<=10;i++)el('circle',{cx,cy,r:R*i/10,fill:'none',stroke:'#2A353D','stroke-width':1});
+ const pol=(a,r)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
+ for(let i=0;i<n;i++){
+  const a0=-Math.PI/2+i*2*Math.PI/n+gap,a1=-Math.PI/2+(i+1)*2*Math.PI/n-gap;
+  const r=R*vals[i]/100;
+  const [x0,y0]=pol(a0,r),[x1,y1]=pol(a1,r);
+  el('path',{d:`M${cx},${cy} L${x0},${y0} A${r},${r} 0 0 1 ${x1},${y1} Z`,fill:'#ED7A02',opacity:0.32+0.68*vals[i]/100});
+  // Trennlinien
+  const [lx,ly]=pol(-Math.PI/2+i*2*Math.PI/n,R);
+  el('line',{x1:cx,y1:cy,x2:lx,y2:ly,stroke:'#3D4D5C','stroke-width':1.5});
+  // Label
+  const am=(a0+a1)/2,[tx,ty]=pol(am,R+18);
+  const t=el('text',{x:tx,y:ty,fill:'#EEEEEE','font-size':'12','font-weight':'500','text-anchor':'middle','dominant-baseline':'middle','font-family':'Montserrat, Arial'});
+  t.textContent=labels[i];
+  // Wert
+  const [vx,vy]=pol(am,Math.max(r-22,40));
+  const v=el('text',{x:vx,y:vy,fill:'#fff','font-size':'15','font-weight':'700','text-anchor':'middle','dominant-baseline':'middle','font-family':'Montserrat, Arial'});
+  v.textContent=vals[i];
+ }
+ el('circle',{cx,cy,r:14,fill:'#0F1B23',stroke:'#3D4D5C'});
+})();
+</script>
+</body>
+</html>
