@@ -17,11 +17,17 @@ export async function abschliessen(s: Sitzung, neuErzeugen = false): Promise<{ p
   if (s.pdf_path && s.status === 'abgeschlossen' && !neuErzeugen) return { pfad: s.pdf_path };
   const jetzt = new Date().toISOString();
   if (!neuErzeugen) {
+    // Selbstheilung: eine "abgeschlossen"-Zeile ohne PDF, die seit über zwei Minuten so steht, ist ein
+    // gestrandeter Versuch (Prozess mitten im Rendern/Hochladen beendet, siehe Catch unten). Zurück auf
+    // "ergebnis", damit der Retry unten die Beanspruchung wieder gewinnen kann statt für immer 409 zu liefern.
+    if (s.status === 'abgeschlossen' && !s.pdf_path && Date.now() - new Date(s.updated_at).getTime() > 120_000) {
+      await db.from('wb_sessions').update({ status: 'ergebnis', abgeschlossen_at: null }).eq('id', s.id).eq('status', 'abgeschlossen').is('pdf_path', null);
+    }
     // Schutz gegen doppelten Abschluss (Doppelklick, Retry nach Timeout): den Status atomar beanspruchen,
     // BEVOR die PDF gerendert wird. Nur wer die Zeile wirklich von laufend/ergebnis auf abgeschlossen dreht,
     // rendert und verschickt Mails — der Verlierer bekommt hier nur den (ggf. noch leeren) Stand zurück.
     const { data: beansprucht, error: eBean } = await db.from('wb_sessions')
-      .update({ status: 'abgeschlossen', abgeschlossen_at: s.abgeschlossen_at ?? jetzt, updated_at: jetzt })
+      .update({ status: 'abgeschlossen', abgeschlossen_at: jetzt, updated_at: jetzt })
       .eq('id', s.id).in('status', ['laufend', 'ergebnis']).select('id');
     if (eBean) throw eBean;
     if (!beansprucht || beansprucht.length === 0) {
@@ -29,14 +35,29 @@ export async function abschliessen(s: Sitzung, neuErzeugen = false): Promise<{ p
       return { pfad: neu?.pdf_path ?? '' };
     }
   }
-  const texte = await texteLaden();
-  const pdf = await pdfErzeugen(s, texte);
-  const dateiname = pdfDateiname(s);
-  const pfad = `${s.id}/${dateiname}`;
-  const { error: eUp } = await db.storage.from('workbooks').upload(pfad, pdf, { contentType: 'application/pdf', upsert: true });
-  if (eUp) throw eUp;
-  const { error: eDb } = await db.from('wb_sessions').update({ pdf_path: pfad, status: 'abgeschlossen', abgeschlossen_at: s.abgeschlossen_at ?? jetzt, updated_at: new Date().toISOString() }).eq('id', s.id);
-  if (eDb) throw eDb;
+  let texte: Record<string, string>, pdf: Buffer, dateiname: string, pfad: string;
+  try {
+    // Test-Schalter, NUR außerhalb von Produktion wirksam: WB_TEST_RENDER_FEHLER=1 erzwingt hier einen
+    // Fehler, um die Rücknahme der Beanspruchung unten im Catch reproduzierbar zu prüfen (dev/lokal).
+    if (process.env.NODE_ENV !== 'production' && process.env.WB_TEST_RENDER_FEHLER === '1') {
+      throw new Error('WB_TEST_RENDER_FEHLER: erzwungener Renderfehler für den Abschluss-Test');
+    }
+    texte = await texteLaden();
+    pdf = await pdfErzeugen(s, texte);
+    dateiname = pdfDateiname(s);
+    pfad = `${s.id}/${dateiname}`;
+    const { error: eUp } = await db.storage.from('workbooks').upload(pfad, pdf, { contentType: 'application/pdf', upsert: true });
+    if (eUp) throw eUp;
+    const { error: eDb } = await db.from('wb_sessions').update({ pdf_path: pfad, status: 'abgeschlossen', abgeschlossen_at: jetzt, updated_at: new Date().toISOString() }).eq('id', s.id);
+    if (eDb) throw eDb;
+  } catch (e) {
+    if (!neuErzeugen) {
+      // Beanspruchung zurücknehmen — aber nur, wenn wirklich noch keine PDF liegt, damit ein parallel
+      // erfolgreicher Lauf hierdurch nie überschrieben wird.
+      await db.from('wb_sessions').update({ status: s.status, abgeschlossen_at: null }).eq('id', s.id).eq('status', 'abgeschlossen').is('pdf_path', null);
+    }
+    throw e;
+  }
   if (neuErzeugen) return { pfad };
   const werte = { vorname: s.vorname, nachname: s.nachname, firma: s.firma, email: s.email, telefon: s.telefon, link: linkFuer(s) };
   try {

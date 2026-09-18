@@ -13,7 +13,10 @@ export default async function InterviewSeite({ params, searchParams }: { params:
       </main>
     );
   }
-  if (s.status === 'abgeschlossen') redirect(`/w/${token}/fertig`);
+  // Nur mit fertiger PDF auf die Fertig-Seite — eine gestrandete "abgeschlossen"-Zeile ohne pdf_path
+  // (Prozess mitten im Rendern beendet) landet stattdessen auf dem Ergebnis, wo der Retry-Knopf sitzt.
+  if (s.status === 'abgeschlossen' && s.pdf_path) redirect(`/w/${token}/fertig`);
+  if (s.status === 'abgeschlossen') redirect(`/w/${token}/ergebnis`);
   const start = frage !== undefined && Number.isInteger(Number(frage)) && Number(frage) >= 0 ? Number(frage) : s.aktuelle_frage;
   return <Interview token={token} snapshot={s.fragen_snapshot} antworten={s.antworten} start={start} vorname={s.vorname} zurueckZumErgebnis={frage !== undefined} />;
 }
