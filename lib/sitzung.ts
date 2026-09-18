@@ -46,6 +46,10 @@ export async function antwortSpeichern(token: string, frageId: string, wert: Ant
   const s = await sitzungLaden(token);
   if (!s) throw new Error('Sitzung nicht gefunden');
   if (s.status === 'abgeschlossen') throw new Error('Sitzung ist abgeschlossen');
+  if (frageId === '__aha') {
+    const { error } = await db.from('wb_sessions').update({ aha: String(wert).slice(0, 20000), status: s.status === 'laufend' ? 'ergebnis' : s.status, updated_at: new Date().toISOString() }).eq('id', s.id);
+    if (error) throw error; return;
+  }
   const kennt = s.fragen_snapshot.kapitel.some((k) => k.fragen.some((f) => f.id === frageId));
   if (!kennt) throw new Error('Frage gehört nicht zu dieser Sitzung');
   const antworten = { ...s.antworten, [frageId]: wert };

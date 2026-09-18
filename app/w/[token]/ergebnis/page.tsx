@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation';
 import { sitzungLaden } from '@/lib/sitzung';
-import { Interview } from '@/components/Interview';
+import { texteLaden } from '@/lib/texte';
+import { db } from '@/lib/db';
+import { Ergebnis } from '@/components/Ergebnis';
 
-export default async function InterviewSeite({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ frage?: string }> }) {
+export default async function ErgebnisSeite({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const { frage } = await searchParams;
   const s = await sitzungLaden(token);
   if (!s) {
     return (
@@ -14,6 +15,7 @@ export default async function InterviewSeite({ params, searchParams }: { params:
     );
   }
   if (s.status === 'abgeschlossen') redirect(`/w/${token}/fertig`);
-  const start = Number(frage) || s.aktuelle_frage;
-  return <Interview token={token} snapshot={s.fragen_snapshot} antworten={s.antworten} start={start} vorname={s.vorname} zurueckZumErgebnis={frage !== undefined} />;
+  if (s.status === 'laufend') await db.from('wb_sessions').update({ status: 'ergebnis' }).eq('id', s.id);
+  const texte = await texteLaden();
+  return <Ergebnis token={token} snapshot={s.fragen_snapshot} antworten={s.antworten} aha={s.aha} vorname={s.vorname} texte={texte} />;
 }

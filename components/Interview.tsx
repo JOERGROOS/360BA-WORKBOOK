@@ -14,7 +14,7 @@ function introKey(token: string, kapitelId: string): string {
 }
 
 // vorname wird von Task 6/9 für Personalisierung erwartet, hier noch ungenutzt.
-export function Interview({ token, snapshot, antworten: antwortenStart, start }: { token: string; snapshot: Snapshot; antworten: Antworten; start: number; vorname: string }) {
+export function Interview({ token, snapshot, antworten: antwortenStart, start, zurueckZumErgebnis = false }: { token: string; snapshot: Snapshot; antworten: Antworten; start: number; vorname: string; zurueckZumErgebnis?: boolean }) {
   const router = useRouter();
   const alle = useMemo(() => flach(snapshot), [snapshot]);
   const [pos, setPos] = useState(() => Math.min(Math.max(start, 0), Math.max(alle.length - 1, 0)));
@@ -61,9 +61,9 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start }:
     setSpeichertGerade(false);
     if (!ok) { setFehler('Nicht gespeichert, bitte erneut versuchen'); return; }
     setAntworten((a) => ({ ...a, [frage.id]: wert }));
-    if (pos + 1 >= alle.length) { router.push(`/w/${token}/ergebnis`); return; }
+    if (zurueckZumErgebnis || pos + 1 >= alle.length) { router.push(`/w/${token}/ergebnis`); return; }
     setPos(pos + 1);
-  }, [eintrag, antworten, pos, alle.length, token, router]);
+  }, [eintrag, antworten, pos, alle.length, token, router, zurueckZumErgebnis]);
 
   const skalaWaehlen = useCallback((n: number) => {
     if (!eintrag) return;
