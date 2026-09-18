@@ -2,6 +2,11 @@
 
 Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabellen und den `workbooks`-Bucket anfassen).
 
+## Migrationen
+
+- `001_workbook.sql` — Schema (`wb_*`-Tabellen, Bucket `workbooks`)
+- `002_rls.sql` — Row Level Security auf allen `wb_*`-Tabellen, `anon`/`authenticated` gesperrt
+
 ## Migration einspielen
 
 Wie bei JOERG AI über die Management-API, kein CLI-Login nötig:
@@ -11,6 +16,8 @@ curl -s -X POST "https://api.supabase.com/v1/projects/zzmomqmegzjibnqrmzyo/datab
   -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
   --data "$(python3 -c 'import json,sys;print(json.dumps({"query":open("supabase/migrations/001_workbook.sql").read()}))')"
 ```
+
+(Für `002_rls.sql` denselben Aufruf mit dem anderen Dateinamen wiederholen.)
 
 `SUPABASE_ACCESS_TOKEN` steht in `~/.config/360ba-workbook/.env.local`. Erwartete Antwort: `[]` ohne Fehler.
 

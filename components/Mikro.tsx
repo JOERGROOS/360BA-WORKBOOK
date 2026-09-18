@@ -52,7 +52,7 @@ export function Mikro({ token, onText, onStatus }: { token: string; onText: (t: 
     } catch (e) { setZ('fehler'); setFehler((e as Error).message || 'Aufnahme konnte nicht umgewandelt werden.'); }
   }
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.code === 'Space' && !(e.target instanceof HTMLTextAreaElement) && !(e.target instanceof HTMLInputElement)) { e.preventDefault(); z === 'nimmt-auf' ? stopp() : z === 'bereit' && void start(); } };
+    const h = (e: KeyboardEvent) => { if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); z === 'nimmt-auf' ? stopp() : z === 'bereit' && void start(); } };
     window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h);
   }, [z]);
   return (

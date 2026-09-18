@@ -1,6 +1,9 @@
 import { texteLaden } from '@/lib/texte';
 import { StartFormular } from '@/components/StartFormular';
 
+// Admin-Textänderungen sollen sofort sichtbar sein, nicht erst nach dem nächsten Build-Cache-Ablauf.
+export const dynamic = 'force-dynamic';
+
 export default async function Start() {
   const t = await texteLaden();
   const [vor, nach] = t.start_titel.split('360°');

@@ -12,7 +12,7 @@ export function gleichOhneZeitverrat(a: string, b: string): boolean {
 }
 export function cookieWert(): string { const ablauf = String(Date.now() + DAUER_S * 1000); return `${ablauf}.${sig(ablauf)}`; }
 export function cookieKopf(wert: string, loeschen = false): string {
-  return `${COOKIE}=${loeschen ? '' : wert}; Path=/; HttpOnly; SameSite=Lax; ${process.env.APP_URL?.startsWith('https') ? 'Secure; ' : ''}Max-Age=${loeschen ? 0 : DAUER_S}`;
+  return `${COOKIE}=${loeschen ? '' : wert}; Path=/; HttpOnly; SameSite=Lax; ${process.env.NODE_ENV === 'production' ? 'Secure; ' : ''}Max-Age=${loeschen ? 0 : DAUER_S}`;
 }
 export function adminGeprueft(req: Request): boolean {
   const roh = (req.headers.get('cookie') ?? '').split(';').map((c) => c.trim()).find((c) => c.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1);

@@ -44,7 +44,7 @@ Werte für **Production** eintragen. Die echten Werte liegen auf deinem Mac in
 | `OPENAI_API_KEY` | Schlüssel für die Umwandlung von Sprache in Text | aus `.env.local` |
 | `ANTHROPIC_API_KEY` | Schlüssel für die sprachliche Glättung der Antworten | aus `.env.local` |
 | `RESEND_API_KEY` | Schlüssel für den E-Mail-Versand | im Resend-Dashboard unter „API Keys" — das JOERG-AI-Projekt in Vercel hat denselben Schlüssel bereits hinterlegt, dort kannst du ihn auch abschreiben |
-| `ADMIN_PASSWORD` | Passwort für deinen Admin-Bereich `/admin` | aus `.env.local` |
+| `ADMIN_PASSWORD` | Passwort für deinen Admin-Bereich `/admin` — **mindestens 24 zufällige Zeichen aus einem Passwort-Generator**, kein selbst ausgedachtes Wort | aus `.env.local` |
 | `APP_URL` | Die öffentliche Adresse des Workbooks | fest eintragen: `https://workbook.joerg-roos.com` |
 
 Danach auf „Deploy" klicken. Der erste Durchlauf dauert ein bis zwei Minuten.
@@ -79,4 +79,7 @@ nötig.
 
 Die Datenbank-Migration ist bereits eingespielt, und der Speicherbereich
 („Bucket") `workbooks` für die PDFs existiert schon. Auch hier ist kein
-weiterer Schritt nötig.
+weiterer Schritt nötig. Row Level Security ist auf allen `wb_*`-Tabellen aktiv
+(Migration `002_rls.sql`) — nur der Server mit dem Service-Role-Key kommt
+noch an die Daten, ein Browser-Zugriff mit dem öffentlichen Anon-Key läuft
+ins Leere.
