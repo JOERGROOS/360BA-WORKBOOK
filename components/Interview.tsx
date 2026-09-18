@@ -5,6 +5,7 @@ import type { Snapshot, Antworten, Antwort, TabellenWert } from '@/lib/db';
 import { flach, fortschritt } from '@/lib/punkte';
 import { Fortschritt } from './Fortschritt';
 import { FrageText } from './FrageText';
+import { Mikro } from './Mikro';
 import { FrageSkala } from './FrageSkala';
 import { FrageTabelle } from './FrageTabelle';
 
@@ -158,7 +159,12 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start }:
           {frage.hinweis && <p className="text-[15px] text-[#C9CFD3] font-light mb-7 leading-relaxed">{frage.hinweis}</p>}
 
           {frage.typ === 'text' && (
-            <FrageText wert={(antworten[frage.id] as string) ?? ''} onChange={setzeWert} onWeiter={() => weiter()} />
+            <FrageText
+              wert={(antworten[frage.id] as string) ?? ''}
+              onChange={setzeWert}
+              onWeiter={() => weiter()}
+              mikro={<Mikro token={token} onText={(t) => setAntworten((a) => { const alt = (a[frage.id] as string) ?? ''; return { ...a, [frage.id]: alt ? alt.trimEnd() + '\n\n' + t : t }; })} />}
+            />
           )}
           {frage.typ === 'skala' && (
             <FrageSkala wert={antworten[frage.id] as number | undefined} onChange={skalaWaehlen} />
