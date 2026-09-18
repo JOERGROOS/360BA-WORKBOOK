@@ -6,11 +6,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!adminGeprueft(req)) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
   const { id } = await params; const b = await req.json();
   if (b.richtung) {
-    const { data: alle } = await db.from('wb_chapters').select('id,position').order('position');
-    const i = alle!.findIndex((k) => k.id === id); const j = b.richtung === 'hoch' ? i - 1 : i + 1;
-    if (i < 0 || j < 0 || j >= alle!.length) return NextResponse.json({ ok: true });
-    await db.from('wb_chapters').update({ position: alle![j].position }).eq('id', id);
-    await db.from('wb_chapters').update({ position: alle![i].position }).eq('id', alle![j].id);
+    const { data: alle, error: eAlle } = await db.from('wb_chapters').select('id,position').order('position');
+    if (eAlle || !alle) return NextResponse.json({ error: eAlle?.message ?? 'Kapitel konnten nicht geladen werden' }, { status: 500 });
+    const i = alle.findIndex((k) => k.id === id); const j = b.richtung === 'hoch' ? i - 1 : i + 1;
+    if (i < 0 || j < 0 || j >= alle.length) return NextResponse.json({ ok: true });
+    await db.from('wb_chapters').update({ position: alle[j].position }).eq('id', id);
+    await db.from('wb_chapters').update({ position: alle[i].position }).eq('id', alle[j].id);
     return NextResponse.json({ ok: true });
   }
   const erlaubt = ['titel', 'untertitel', 'einleitung', 'typ', 'aktiv'] as const;

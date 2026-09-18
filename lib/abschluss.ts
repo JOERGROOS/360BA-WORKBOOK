@@ -15,13 +15,27 @@ export async function signierteAdresse(pfad: string): Promise<string> {
 // nur der Mailversand schlägt fehl. Das darf den Abschluss nicht rückgängig machen.
 export async function abschliessen(s: Sitzung, neuErzeugen = false): Promise<{ pfad: string; mailFehler?: boolean }> {
   if (s.pdf_path && s.status === 'abgeschlossen' && !neuErzeugen) return { pfad: s.pdf_path };
+  const jetzt = new Date().toISOString();
+  if (!neuErzeugen) {
+    // Schutz gegen doppelten Abschluss (Doppelklick, Retry nach Timeout): den Status atomar beanspruchen,
+    // BEVOR die PDF gerendert wird. Nur wer die Zeile wirklich von laufend/ergebnis auf abgeschlossen dreht,
+    // rendert und verschickt Mails — der Verlierer bekommt hier nur den (ggf. noch leeren) Stand zurück.
+    const { data: beansprucht, error: eBean } = await db.from('wb_sessions')
+      .update({ status: 'abgeschlossen', abgeschlossen_at: s.abgeschlossen_at ?? jetzt, updated_at: jetzt })
+      .eq('id', s.id).in('status', ['laufend', 'ergebnis']).select('id');
+    if (eBean) throw eBean;
+    if (!beansprucht || beansprucht.length === 0) {
+      const { data: neu } = await db.from('wb_sessions').select('pdf_path').eq('id', s.id).maybeSingle();
+      return { pfad: neu?.pdf_path ?? '' };
+    }
+  }
   const texte = await texteLaden();
   const pdf = await pdfErzeugen(s, texte);
   const dateiname = pdfDateiname(s);
   const pfad = `${s.id}/${dateiname}`;
   const { error: eUp } = await db.storage.from('workbooks').upload(pfad, pdf, { contentType: 'application/pdf', upsert: true });
   if (eUp) throw eUp;
-  const { error: eDb } = await db.from('wb_sessions').update({ pdf_path: pfad, status: 'abgeschlossen', abgeschlossen_at: s.abgeschlossen_at ?? new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', s.id);
+  const { error: eDb } = await db.from('wb_sessions').update({ pdf_path: pfad, status: 'abgeschlossen', abgeschlossen_at: s.abgeschlossen_at ?? jetzt, updated_at: new Date().toISOString() }).eq('id', s.id);
   if (eDb) throw eDb;
   if (neuErzeugen) return { pfad };
   const werte = { vorname: s.vorname, nachname: s.nachname, firma: s.firma, email: s.email, telefon: s.telefon, link: linkFuer(s) };

@@ -12,7 +12,9 @@ export async function POST(_: Request, { params }: { params: Promise<{ token: st
   const offen = punkteJeFaktor(s.fragen_snapshot, s.antworten).some((p) => s.fragen_snapshot.kapitel.find((k) => k.id === p.kapitelId)!.fragen.some((f) => f.typ === 'skala' && typeof s.antworten[f.id] !== 'number'));
   if (offen) return NextResponse.json({ error: 'Es fehlen noch Aussagen.' }, { status: 400 });
   try {
-    const { mailFehler } = await abschliessen(s);
+    const { pfad, mailFehler } = await abschliessen(s);
+    // Verlierer eines gleichzeitigen Abschlusses: PDF liegt noch nicht (anderer Aufruf rendert gerade).
+    if (!pfad) return NextResponse.json({ error: 'Wird gerade erstellt – bitte in einer Minute erneut' }, { status: 409 });
     return NextResponse.json({ ok: true, mailFehler: !!mailFehler });
   } catch (e) {
     console.error('[abschluss]', e);

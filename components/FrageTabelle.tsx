@@ -22,7 +22,7 @@ export function FrageTabelle({ optionen, wert, onChange }: { optionen: TabellenO
               <td className="text-[15px] pr-4 whitespace-nowrap">{z}</td>
               {optionen.spalten.map((s) => (
                 <td key={s} className="px-1">
-                  <input inputMode="numeric" value={wert[z]?.[s] ?? ''} onChange={(e) => setZelle(z, s, e.target.value)} />
+                  <input inputMode="numeric" aria-label={`${z} ${s}`} value={wert[z]?.[s] ?? ''} onChange={(e) => setZelle(z, s, e.target.value)} />
                 </td>
               ))}
             </tr>

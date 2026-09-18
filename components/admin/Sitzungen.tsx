@@ -19,7 +19,7 @@ async function fehlerAus(r: Response, standard: string): Promise<string> {
 export function Sitzungen() {
   const [liste, setListe] = useState<SitzungListe[] | null>(null);
   const [offen, setOffen] = useState<string | null>(null);
-  const [details, setDetails] = useState<Record<string, Sitzung>>({});
+  const [details, setDetails] = useState<Record<string, Omit<Sitzung, 'token'>>>({});
   const [laeuft, setLaeuft] = useState<string | null>(null);
   const [fehler, setFehler] = useState('');
 
@@ -34,7 +34,7 @@ export function Sitzungen() {
     setOffen(id);
     if (!details[id]) {
       const r = await fetch(`/api/admin/sitzungen/${id}`);
-      if (r.ok) { const voll: Sitzung = await r.json(); setDetails((d) => ({ ...d, [id]: voll })); }
+      if (r.ok) { const voll: Omit<Sitzung, 'token'> = await r.json(); setDetails((d) => ({ ...d, [id]: voll })); }
     }
   }
 

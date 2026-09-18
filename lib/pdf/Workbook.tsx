@@ -107,7 +107,7 @@ export function Workbook({ s, texte }: { s: Sitzung; texte: Record<string, strin
   const t = (k: string) => (texte[k] ?? '').replace(/\{vorname\}/g, s.vorname);
   const kapitel = s.fragen_snapshot.kapitel;
   const punkte = punkteJeFaktor(s.fragen_snapshot, s.antworten);
-  const datum = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+  const datum = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' });
   return (
     <Document title={`360° Business-Analyse · Workbook · ${s.vorname} ${s.nachname}`} author="Jörg Roos" language="de">
       <Page size="A4" style={[st.seite, st.deck]}>

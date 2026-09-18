@@ -17,11 +17,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (b.richtung) {
     const { data: frage } = await db.from('wb_questions').select('chapter_id').eq('id', id).single();
     if (!frage) return NextResponse.json({ error: 'Frage nicht gefunden' }, { status: 404 });
-    const { data: alle } = await db.from('wb_questions').select('id,position').eq('chapter_id', frage.chapter_id).order('position');
-    const i = alle!.findIndex((f) => f.id === id); const j = b.richtung === 'hoch' ? i - 1 : i + 1;
-    if (i < 0 || j < 0 || j >= alle!.length) return NextResponse.json({ ok: true });
-    await db.from('wb_questions').update({ position: alle![j].position }).eq('id', id);
-    await db.from('wb_questions').update({ position: alle![i].position }).eq('id', alle![j].id);
+    const { data: alle, error: eAlle } = await db.from('wb_questions').select('id,position').eq('chapter_id', frage.chapter_id).order('position');
+    if (eAlle || !alle) return NextResponse.json({ error: eAlle?.message ?? 'Fragen konnten nicht geladen werden' }, { status: 500 });
+    const i = alle.findIndex((f) => f.id === id); const j = b.richtung === 'hoch' ? i - 1 : i + 1;
+    if (i < 0 || j < 0 || j >= alle.length) return NextResponse.json({ ok: true });
+    await db.from('wb_questions').update({ position: alle[j].position }).eq('id', id);
+    await db.from('wb_questions').update({ position: alle[i].position }).eq('id', alle[j].id);
     return NextResponse.json({ ok: true });
   }
   const erlaubt = ['text', 'hinweis', 'typ', 'optionen', 'aktiv'] as const;

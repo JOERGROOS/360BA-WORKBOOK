@@ -38,9 +38,11 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
   const [speichertAb, setSpeichertAb] = useState(false);
   const [fehler, setFehler] = useState('');
 
-  async function speichereAha(wert: string) {
-    try { await fetch(`/api/w/${token}/antwort`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ frageId: '__aha', wert, position: alle.length }) }); }
-    catch { /* Aha-Text bleibt lokal, nächster Speicherversuch übernimmt ihn */ }
+  async function speichereAha(wert: string): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/w/${token}/antwort`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ frageId: '__aha', wert, position: alle.length }) });
+      return res.ok;
+    } catch { return false; /* Aha-Text bleibt lokal, nächster Speicherversuch übernimmt ihn */ }
   }
 
   function mikroStatusZeile(s: MikroStatus) {
@@ -57,7 +59,11 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
     if (fehlend.length > 0 || speichertAb) return;
     if (!confirm('Wollen wir dein Ergebnis so festhalten? Danach sind die Antworten nicht mehr änderbar.')) return;
     setFehler(''); setSpeichertAb(true);
-    await speichereAha(aha);
+    if (!(await speichereAha(aha))) {
+      setFehler('Wir konnten dein Workbook gerade nicht erstellen. Deine Antworten sind sicher. Bitte in einer Minute erneut versuchen.');
+      setSpeichertAb(false);
+      return;
+    }
     try {
       const res = await fetch(`/api/w/${token}/abschluss`, { method: 'POST' });
       if (!res.ok) throw new Error();
