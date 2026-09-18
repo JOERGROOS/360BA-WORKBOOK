@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "seed": "node scripts/seed.mjs",
-    "check": "node scripts/check-seed.mjs && node scripts/check-punkte.mjs && node scripts/check-geometrie.mjs"
+    "check": "node scripts/check-seed.mjs && node scripts/check-punkte.mjs && node scripts/check-geometrie.mjs && node scripts/check-admin-auth.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.126.0",

@@ -3,6 +3,7 @@ const { glaette } = await import('../lib/glaettung.ts');
 const faelle = [
   { roh: 'ähm also wir haben so ungefähr äh zwölf Leute und der Umsatz war letztes Jahr so bei eins Komma vier Millionen also 1,4 Millionen ja', muss: ['12', '1,4'] },
   { roh: 'unser größter Wettbewerber ist die Firma Kortmann aus Haltern die sind größer und ähm fahren halt über den Preis', muss: ['Kortmann', 'Haltern'] },
+  { roh: 'unsere Firma Baumann GmbH hat also letztes Jahr äh ungefähr zwei Komma sechs Millionen Euro Umsatz gemacht', muss: ['Baumann', '2,6'] },
 ];
 for (const f of faelle) {
   const t = await glaette(f.roh);

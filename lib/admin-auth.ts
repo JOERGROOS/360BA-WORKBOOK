@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { bremse, aufruferIp } from './bremse';
+import { bremse, aufruferIp } from './bremse.ts';
 
 const COOKIE = 'wb_admin';
 const DAUER_S = 12 * 3600;

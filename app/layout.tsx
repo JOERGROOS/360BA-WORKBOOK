@@ -3,7 +3,7 @@ export const metadata = { title: '360° Business-Analyse · Workbook', descripti
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de">
-      <head><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" /></head>
+      <head />
       <body><div className="bg" />{children}</body>
     </html>
   );

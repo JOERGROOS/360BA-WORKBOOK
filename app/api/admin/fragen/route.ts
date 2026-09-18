@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { adminGeprueft } from '@/lib/admin-auth';
-
-const FRAGE_TYPEN = ['text', 'skala', 'tabelle'];
-
-function tabelleGueltig(o: unknown): boolean {
-  const zeilen = (o as { zeilen?: unknown })?.zeilen;
-  const spalten = (o as { spalten?: unknown })?.spalten;
-  const liste = (l: unknown) => Array.isArray(l) && l.length > 0 && l.every((v) => typeof v === 'string' && v.trim());
-  return liste(zeilen) && liste(spalten);
-}
+import { FRAGE_TYPEN, tabelleGueltig } from '@/lib/frage-validierung';
 
 // Neue Fragen starten als Entwurf (inaktiv) — sie erscheinen erst nach bewusstem Aktivieren im Interview.
 export async function POST(req: Request) {

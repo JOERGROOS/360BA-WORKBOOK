@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { adminGeprueft } from '@/lib/admin-auth';
-
-const FRAGE_TYPEN = ['text', 'skala', 'tabelle'];
-
-function tabelleGueltig(o: unknown): boolean {
-  const zeilen = (o as { zeilen?: unknown })?.zeilen;
-  const spalten = (o as { spalten?: unknown })?.spalten;
-  const liste = (l: unknown) => Array.isArray(l) && l.length > 0 && l.every((v) => typeof v === 'string' && v.trim());
-  return liste(zeilen) && liste(spalten);
-}
+import { FRAGE_TYPEN, tabelleGueltig } from '@/lib/frage-validierung';
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!adminGeprueft(req)) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
