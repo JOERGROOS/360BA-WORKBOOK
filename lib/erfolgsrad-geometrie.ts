@@ -15,7 +15,8 @@ export function radGeometrie(werte: RadWert[], groesse = 520): RadGeometrie {
     const wert = Math.max(0, Math.min(100, Math.round(w.punkte)));
     const r = (R * wert) / 100;
     const [x0, y0] = pol(a0, r), [x1, y1] = pol(a1, r);
-    const pfad = wert > 0 ? `M${runde(cx)},${runde(cy)} L${runde(x0)},${runde(y0)} A${runde(r)},${runde(r)} 0 0 1 ${runde(x1)},${runde(y1)} Z` : '';
+    const gross = a1 - a0 > Math.PI ? 1 : 0;
+    const pfad = wert > 0 ? `M${runde(cx)},${runde(cy)} L${runde(x0)},${runde(y0)} A${runde(r)},${runde(r)} 0 ${gross} 1 ${runde(x1)},${runde(y1)} Z` : '';
     const [wertX, wertY] = pol(am, Math.max(r - groesse * 0.045, groesse * 0.08));
     const [labelX, labelY] = pol(am, R + groesse * 0.035);
     const [trennX, trennY] = pol(-Math.PI / 2 + (i * 2 * Math.PI) / n, R);
