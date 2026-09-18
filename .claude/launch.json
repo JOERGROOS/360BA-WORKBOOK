@@ -1,0 +1,2 @@
+{ "version": "0.0.1", "configurations": [
+  { "name": "workbook-lokal", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev", "--prefix", "/Users/joergroos/dev/360ba-workbook"], "port": 3000 } ] }

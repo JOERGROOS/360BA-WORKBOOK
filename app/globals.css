@@ -1,0 +1,16 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+:root{--o:#ED7A02;--od:#9F3C07;--blue:#0F1B23;--ink:#0A1118;--paper:#EEEEEE;--surf:#16212A;--line:#2A353D;--muted:#AFB3B5}
+body{background:var(--ink);color:#fff;font-family:'Montserrat',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.bg{position:fixed;inset:0;z-index:-1;background:
+ radial-gradient(1200px 700px at 78% -10%,rgba(237,122,2,.28),rgba(159,60,7,.12) 35%,rgba(15,27,35,0) 70%),
+ radial-gradient(900px 600px at 10% 110%,rgba(61,77,92,.35),rgba(10,17,24,0) 60%),
+ linear-gradient(180deg,#0F1B23 0%,#0A1118 100%)}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:32px}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--o);color:#fff;border:0;border-radius:12px;padding:16px 28px;font-weight:600;font-size:16px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--o);font-weight:600}
+label{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:500}
+input,textarea,select{width:100%;background:#0F1B23;border:1px solid var(--line);border-radius:12px;color:#fff;font:inherit;font-size:16px;padding:14px 16px;outline:none}
+input:focus,textarea:focus{border-color:var(--o)}
+.fine{font-size:13.5px;color:var(--muted);line-height:1.5}
