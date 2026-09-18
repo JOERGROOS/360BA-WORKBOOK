@@ -53,8 +53,10 @@ export async function abschliessen(s: Sitzung, neuErzeugen = false): Promise<{ p
   } catch (e) {
     if (!neuErzeugen) {
       // Beanspruchung zurücknehmen — aber nur, wenn wirklich noch keine PDF liegt, damit ein parallel
-      // erfolgreicher Lauf hierdurch nie überschrieben wird.
-      await db.from('wb_sessions').update({ status: s.status, abgeschlossen_at: null }).eq('id', s.id).eq('status', 'abgeschlossen').is('pdf_path', null);
+      // erfolgreicher Lauf hierdurch nie überschrieben wird. Fest auf "ergebnis" statt s.status: nach der
+      // Selbstheilung oben (oder einem zweiten Fehlschlag auf einer schon gestrandeten Zeile) ist s.status
+      // veraltet ("abgeschlossen"), das würde die Zeile sonst wieder festnageln.
+      await db.from('wb_sessions').update({ status: 'ergebnis', abgeschlossen_at: null }).eq('id', s.id).eq('status', 'abgeschlossen').is('pdf_path', null);
     }
     throw e;
   }
