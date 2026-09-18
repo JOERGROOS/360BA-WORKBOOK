@@ -1,0 +1,781 @@
+{
+  "id": "7e0784d1-d6d0-47e3-80d6-508edb4eaeda",
+  "token": "muster",
+  "vorname": "Kai",
+  "nachname": "Muster",
+  "firma": "Muster Bedachungen GmbH",
+  "telefon": "02364 555 123",
+  "email": "kai.muster@muster-bedachungen.de",
+  "status": "ergebnis",
+  "test": true,
+  "fragen_snapshot": {
+    "kapitel": [
+      {
+        "id": "35d80c88-21d5-4272-9441-fb53fb24cb53",
+        "typ": "fakten",
+        "titel": "Ein paar Fakten zum Einstieg",
+        "fragen": [
+          {
+            "id": "b26b5d39-b539-4155-ad09-e7f3ef624331",
+            "typ": "text",
+            "text": "Wie heißt du?",
+            "hinweis": ""
+          },
+          {
+            "id": "0866907e-c6aa-432e-ade2-2e79ce689d82",
+            "typ": "text",
+            "text": "Wo wohnst du?",
+            "hinweis": ""
+          },
+          {
+            "id": "4d7a9046-6f29-4136-8598-9167f99eccc2",
+            "typ": "text",
+            "text": "Wann wurdest du geboren?",
+            "hinweis": "Dein Geburtsdatum."
+          },
+          {
+            "id": "21b69722-3941-46ef-92be-1ccc090d6831",
+            "typ": "text",
+            "text": "Was sind deine Hobbys? Wie verbringst du gerne deine Freizeit?",
+            "hinweis": ""
+          },
+          {
+            "id": "bff8f3a2-9f66-4fc9-808a-5795ae26a113",
+            "typ": "text",
+            "text": "Welche Ausbildung bringst du mit?",
+            "hinweis": "Höchster Schulabschluss und sonstige Abschlüsse."
+          },
+          {
+            "id": "265c6130-f8c3-447d-b887-f33f36e9b8c2",
+            "typ": "text",
+            "text": "Wie heißt dein Unternehmen?",
+            "hinweis": "Bitte mit Rechtsform."
+          },
+          {
+            "id": "5401ddda-8d8d-4dfe-bf1a-57f503fc6e90",
+            "typ": "text",
+            "text": "In welcher Branche bist du tätig?",
+            "hinweis": ""
+          },
+          {
+            "id": "36397d0b-eda8-435f-9917-c69d866d05b8",
+            "typ": "text",
+            "text": "Wie lange führst du dein Unternehmen schon? Wann wurde es gegründet?",
+            "hinweis": ""
+          },
+          {
+            "id": "01491179-be6a-4850-9e9a-6330509250c7",
+            "typ": "tabelle",
+            "text": "Wie viele Mitarbeiter beschäftigt dein Unternehmen insgesamt?",
+            "hinweis": "Kopfzahlen je Stichtag.",
+            "optionen": {
+              "zeilen": [
+                "Vollzeit",
+                "Teilzeit",
+                "Minijob",
+                "Azubi"
+              ],
+              "spalten": [
+                "Dezember 2024",
+                "Dezember 2025",
+                "Aktuell"
+              ]
+            }
+          },
+          {
+            "id": "183baa56-2c05-4007-afce-196a4110b6d8",
+            "typ": "text",
+            "text": "Welche Produkte oder Dienstleistungen bietest du an?",
+            "hinweis": "Dein Geschäftsmodell in eigenen Worten."
+          },
+          {
+            "id": "f9e359a4-5730-4d37-89de-fc2ab0b19eb3",
+            "typ": "text",
+            "text": "Wer sind deine typischen Kunden?",
+            "hinweis": "Deine Zielgruppe: Privat, Gewerbe, öffentliche Hand? Welche Größe, welche Region?"
+          },
+          {
+            "id": "025e8e5d-03c4-4ad4-9bf9-51fa45d6a26f",
+            "typ": "text",
+            "text": "Welche Vertriebskanäle nutzt du?",
+            "hinweis": ""
+          },
+          {
+            "id": "2b168798-2c84-4652-8eee-31c5640d92fb",
+            "typ": "text",
+            "text": "Wie schätzt du die aktuelle Marktlage ein?",
+            "hinweis": "Zum Beispiel: steigende Nachfrage, starker Preisdruck, neue Marktteilnehmer."
+          },
+          {
+            "id": "f6d54033-2659-49d3-a617-48880e902523",
+            "typ": "text",
+            "text": "Wer sind deine größten Wettbewerber – und was unterscheidet dich von ihnen?",
+            "hinweis": ""
+          },
+          {
+            "id": "6ce6c23c-d85a-41b7-b7f8-235e57b0b1e3",
+            "typ": "text",
+            "text": "Gibt es Trends oder Veränderungen in deinem Markt, die für dich relevant sind?",
+            "hinweis": ""
+          },
+          {
+            "id": "d7d9256d-0a5a-4387-8645-e22825d91356",
+            "typ": "text",
+            "text": "Hast du Kredite abgeschlossen?",
+            "hinweis": "Wenn ja, bitte jeden Kredit einzeln: Kreditgeber, Betrag, Zinssatz, Laufzeit, Ende der Laufzeit."
+          },
+          {
+            "id": "5b2cc0cc-e9cd-4622-8047-3c60c4b63b9e",
+            "typ": "text",
+            "text": "Welche finanziellen Ziele möchtest du mit deinem Unternehmen in den nächsten 9 bis 12 Monaten unbedingt erreichen?",
+            "hinweis": ""
+          },
+          {
+            "id": "fd018657-a8af-4315-8509-7049302c4b8c",
+            "typ": "text",
+            "text": "Was hast du bereits selbst unternommen, um diese finanziellen Ziele zu erreichen?",
+            "hinweis": ""
+          },
+          {
+            "id": "33f73adb-f080-43a5-a41b-0dd4418f9e90",
+            "typ": "text",
+            "text": "Mit welchem Steuerberater arbeitest du zusammen?",
+            "hinweis": ""
+          },
+          {
+            "id": "d0435d89-5a8a-4c65-9d78-7ec3a31c0e3f",
+            "typ": "skala",
+            "text": "Auf einer Skala von 1 bis 10: Wie zufrieden bist du mit deinem Steuerberater?",
+            "hinweis": ""
+          },
+          {
+            "id": "49c73ea3-c116-4354-8743-9837dbc10dad",
+            "typ": "text",
+            "text": "Planst du konkret, deinen Steuerberater zu wechseln?",
+            "hinweis": "Wenn ja: Weißt du schon, wohin?"
+          },
+          {
+            "id": "72fb7a7e-ba01-4f03-9693-29c425806b1a",
+            "typ": "text",
+            "text": "Was läuft aktuell besonders gut in deinem Unternehmen?",
+            "hinweis": ""
+          },
+          {
+            "id": "78cc7ca2-93b3-45bb-8881-8086ae1750fd",
+            "typ": "text",
+            "text": "Wo siehst du die größten Herausforderungen?",
+            "hinweis": "Gerne auch neben deinen Finanzen."
+          }
+        ],
+        "einleitung": "Bevor wir in die Tiefe gehen, verschaffen wir uns einen Überblick: Wer bist du, was macht dein Unternehmen, wo steht es heute? Antworte so, wie du es einem guten Sparringspartner erzählen würdest – klar und ohne Schönfärberei.",
+        "untertitel": "Kapitel 1"
+      },
+      {
+        "id": "ebb795ca-18fb-4cad-9e2a-eaeb13e560a1",
+        "typ": "faktor",
+        "titel": "Unternehmerpersönlichkeit",
+        "fragen": [
+          {
+            "id": "8fca50cb-744d-432e-9e64-c1fdf5efe6dc",
+            "typ": "skala",
+            "text": "Ich treffe unternehmerische Entscheidungen zügig und ohne sie unnötig aufzuschieben.",
+            "hinweis": ""
+          },
+          {
+            "id": "ea0f9992-eaf6-4b33-8112-1b5ae5b5c5db",
+            "typ": "skala",
+            "text": "Ich unterscheide klar zwischen operativen Aufgaben und meiner Rolle als Unternehmer.",
+            "hinweis": ""
+          },
+          {
+            "id": "335163d3-b560-4ede-95d7-122f156ca133",
+            "typ": "skala",
+            "text": "Ich handle regelmäßig nach Prioritäten – nicht nach Dringlichkeit.",
+            "hinweis": ""
+          },
+          {
+            "id": "7aa06f19-1a96-4f29-9e5e-8faa684dd1e8",
+            "typ": "skala",
+            "text": "Ich halte bewusst Grenzen ein (Zeit, Energie, Nein sagen).",
+            "hinweis": ""
+          },
+          {
+            "id": "8173bc65-cd42-4d20-827c-db182f1fd43c",
+            "typ": "skala",
+            "text": "Ich übernehme Verantwortung für Ergebnisse, ohne Schuld auf andere zu schieben.",
+            "hinweis": ""
+          },
+          {
+            "id": "28970003-2c93-4643-8dae-648a168c763f",
+            "typ": "skala",
+            "text": "Ich reflektiere regelmäßig meine Entscheidungen und leite konkrete Veränderungen daraus ab.",
+            "hinweis": ""
+          },
+          {
+            "id": "1380aa4f-5f93-4004-9483-e8c43864df7b",
+            "typ": "skala",
+            "text": "Ich gehe offen mit Unsicherheit um und entscheide trotzdem.",
+            "hinweis": ""
+          },
+          {
+            "id": "1b8478b5-be93-4cc9-862f-632b4152cd73",
+            "typ": "skala",
+            "text": "Meine Energie und Leistungsfähigkeit sind über Wochen stabil.",
+            "hinweis": ""
+          },
+          {
+            "id": "617d2f90-5f72-4828-a376-5b493803cb17",
+            "typ": "skala",
+            "text": "Ich habe klare persönliche Standards, nach denen ich mein Unternehmen führe.",
+            "hinweis": ""
+          },
+          {
+            "id": "b4ffa12f-399b-4316-b30a-1b86cb3932ee",
+            "typ": "skala",
+            "text": "Wenn ich vier Wochen zurückblicke, habe ich mindestens eine Entscheidung getroffen, die spürbar Wirkung gezeigt hat.",
+            "hinweis": ""
+          }
+        ],
+        "einleitung": "Du als Unternehmerpersönlichkeit bist der wichtigste Erfolgsfaktor. Du prägst durch Entscheidungen, Prioritäten und Selbstführung dein Unternehmen stärker als Strategien oder Systeme. Entscheidend ist der klare Umgang mit Verantwortung, Druck und Unsicherheit sowie die Fähigkeit, zwischen operativer Arbeit und deiner Rolle als Unternehmer zu unterscheiden, damit Klarheit entsteht und dein Unternehmen nicht im Tagesgeschäft stecken bleibt.",
+        "untertitel": "Erfolgsfaktor 1 von 7"
+      },
+      {
+        "id": "ba781643-5132-431f-86fc-8e8feff388ba",
+        "typ": "faktor",
+        "titel": "Finanzen & wirtschaftliche Lage",
+        "fragen": [
+          {
+            "id": "0274a384-afe7-4a68-bb7f-2b90cb322ae3",
+            "typ": "skala",
+            "text": "Ich habe jederzeit einen klaren Überblick über Liquidität und Kontostand.",
+            "hinweis": ""
+          },
+          {
+            "id": "c9b77ef9-9506-4dd1-9c82-43ec5521d7b3",
+            "typ": "skala",
+            "text": "Ich kenne die wichtigsten Kennzahlen meines Unternehmens (z. B. Marge, Gewinn, verpflichtende Kosten).",
+            "hinweis": ""
+          },
+          {
+            "id": "9a32be81-079c-4be7-b58c-0ba198a2da72",
+            "typ": "skala",
+            "text": "Ich weiß, welche Leistungen oder Aufträge wirklich Geld verdienen.",
+            "hinweis": ""
+          },
+          {
+            "id": "bc7a9f23-ce76-492a-9380-e6415adc58eb",
+            "typ": "skala",
+            "text": "Ich treffe Investitionsentscheidungen auf Basis von Zahlen, nicht aus dem Bauch heraus.",
+            "hinweis": ""
+          },
+          {
+            "id": "018ebae3-d81c-4a26-a7d2-86a13a10b8e9",
+            "typ": "skala",
+            "text": "Ich plane Liquidität mindestens 6 bis 12 Monate im Voraus.",
+            "hinweis": ""
+          },
+          {
+            "id": "224b2608-1f3b-423c-8c07-5e00da076629",
+            "typ": "skala",
+            "text": "Meine Preisgestaltung deckt Kosten, Risiko und Unternehmerlohn zuverlässig ab.",
+            "hinweis": ""
+          },
+          {
+            "id": "a29d9ba1-c288-4e91-9f87-46486790822e",
+            "typ": "skala",
+            "text": "Ich erkenne finanzielle Engpässe frühzeitig.",
+            "hinweis": ""
+          },
+          {
+            "id": "b2263437-3bc1-4c6f-8a7a-704c33b838b7",
+            "typ": "skala",
+            "text": "Ich habe Rücklagen für schlechte Monate oder unerwartete Ereignisse.",
+            "hinweis": ""
+          },
+          {
+            "id": "9f5e2a6e-ad0c-42ab-bc49-a2ea604e4f86",
+            "typ": "skala",
+            "text": "Aus meinen Zahlen leite ich regelmäßig konkrete Maßnahmen ab (z. B. Preise, Kosten, Kapazität).",
+            "hinweis": ""
+          },
+          {
+            "id": "83f03a78-b7a8-4cee-963f-e3e3588ebc84",
+            "typ": "skala",
+            "text": "Ich nutze meine Finanzdaten aktiv für strategische Entscheidungen.",
+            "hinweis": ""
+          }
+        ],
+        "einleitung": "Solide, transparente Finanzen zeigen deine wahre Unternehmensgesundheit und schaffen Sicherheit sowie Handlungsspielraum für fundierte Entscheidungen.",
+        "untertitel": "Erfolgsfaktor 2 von 7"
+      },
+      {
+        "id": "06ba17c9-0607-4fc0-96c6-4f41b5c4993d",
+        "typ": "faktor",
+        "titel": "Ziele & Strategie",
+        "fragen": [
+          {
+            "id": "592bbd13-0fdb-49c2-8219-4b1a4c90474a",
+            "typ": "skala",
+            "text": "Ich habe ein klares Zukunftsbild für mein Unternehmen.",
+            "hinweis": ""
+          },
+          {
+            "id": "8148819c-7d1a-4bbe-a8fe-828d887cb70e",
+            "typ": "skala",
+            "text": "Meine kurz-, mittel- und langfristigen Ziele sind schriftlich definiert.",
+            "hinweis": ""
+          },
+          {
+            "id": "a9d13562-d207-4403-bed6-45aaf038c975",
+            "typ": "skala",
+            "text": "Ich weiß, wofür mein Unternehmen steht – und wofür nicht.",
+            "hinweis": ""
+          },
+          {
+            "id": "3a80d720-a5a6-4f84-8749-9e5e3e79bf95",
+            "typ": "skala",
+            "text": "Meine Strategie ist verständlich und nicht zu komplex.",
+            "hinweis": ""
+          },
+          {
+            "id": "72cff9d8-5bde-4a5e-90c8-e3e83ade93e1",
+            "typ": "skala",
+            "text": "Ich überprüfe meine Ziele regelmäßig und passe sie bei Bedarf an.",
+            "hinweis": ""
+          },
+          {
+            "id": "169c0b12-b4bd-4f73-b9de-d67768a67c9f",
+            "typ": "skala",
+            "text": "Meine Strategie zahlt auf Stabilität und nicht nur auf Wachstum ein.",
+            "hinweis": ""
+          },
+          {
+            "id": "4d1896a2-6d72-413a-9a8e-b25925df487a",
+            "typ": "skala",
+            "text": "Ich kenne die größten Engpässe, die das Erreichen meiner Ziele aktuell bremsen.",
+            "hinweis": ""
+          },
+          {
+            "id": "22fd1053-dd45-4ca8-bc5c-c4210b63de1d",
+            "typ": "skala",
+            "text": "Mein Geschäftsmodell ist auch in schwierigeren Zeiten tragfähig.",
+            "hinweis": ""
+          },
+          {
+            "id": "481fe08a-daa6-4ab6-8f7e-c7f3bd8eccbe",
+            "typ": "skala",
+            "text": "Meine strategischen Ziele haben konkrete Auswirkungen auf Entscheidungen im Tagesgeschäft.",
+            "hinweis": ""
+          },
+          {
+            "id": "fc554bfc-41f5-4f0d-a8af-0db00206fbeb",
+            "typ": "skala",
+            "text": "Ich treffe Entscheidungen im Einklang mit meiner langfristigen Strategie.",
+            "hinweis": ""
+          }
+        ],
+        "einleitung": "Ziele und Strategie geben deinem Unternehmen Orientierung und Klarheit. Entscheidend sind ein verständliches Zukunftsbild, realistische und priorisierte Ziele sowie deren Verbindung zum Tagesgeschäft. Eine klare Strategie hilft dir, Fokus zu halten, Nein zu sagen und Entscheidungen konsequent an der langfristigen Entwicklung auszurichten.",
+        "untertitel": "Erfolgsfaktor 3 von 7"
+      },
+      {
+        "id": "358d513d-ff3c-4902-a635-3c9e641d8e55",
+        "typ": "faktor",
+        "titel": "Leadership & Team",
+        "fragen": [
+          {
+            "id": "ff47c32e-e38c-4d6c-aec8-72ab6355b9b4",
+            "typ": "skala",
+            "text": "Rollen und Verantwortlichkeiten im Team sind klar definiert.",
+            "hinweis": ""
+          },
+          {
+            "id": "e82874e9-cfcb-4221-9d3d-60266e43202f",
+            "typ": "skala",
+            "text": "Ich führe mein Team über Ziele und Ergebnisse, nicht über Kontrolle.",
+            "hinweis": ""
+          },
+          {
+            "id": "fe9ac510-e231-4175-acd8-3a38434665d0",
+            "typ": "skala",
+            "text": "Entscheidungen werden dort getroffen, wo die Verantwortung liegt.",
+            "hinweis": ""
+          },
+          {
+            "id": "ee57e65c-a49e-471f-a79a-e1f17cd41e25",
+            "typ": "skala",
+            "text": "Ich entwickle Mitarbeiter aktiv weiter.",
+            "hinweis": ""
+          },
+          {
+            "id": "37fd14ad-a2fc-42bf-8b0d-c66fd0798632",
+            "typ": "skala",
+            "text": "Mein Team weiß, was von ihm erwartet wird.",
+            "hinweis": ""
+          },
+          {
+            "id": "c78fe60b-cd2d-49d5-96c0-7f4348ad8913",
+            "typ": "skala",
+            "text": "Ich führe regelmäßig klare Feedbackgespräche.",
+            "hinweis": ""
+          },
+          {
+            "id": "ffb51e64-c3e4-4cb6-b08f-1f7ee8267503",
+            "typ": "skala",
+            "text": "Ich halte Führung auch dann aufrecht, wenn es unangenehm wird.",
+            "hinweis": ""
+          },
+          {
+            "id": "6c697acb-4d22-4421-8d5a-926ceac4b905",
+            "typ": "skala",
+            "text": "Das Team entlastet mich spürbar im Alltag.",
+            "hinweis": ""
+          },
+          {
+            "id": "eb052c5a-5f00-4151-adc2-7e7b5a60dcdb",
+            "typ": "skala",
+            "text": "Leistungsschwache Mitarbeiter werden klar angesprochen und entwickelt oder getrennt.",
+            "hinweis": ""
+          },
+          {
+            "id": "7ce4cfec-65b4-4e07-8303-c09b51523b5e",
+            "typ": "skala",
+            "text": "Führung schafft bei mir mehr Klarheit als Reibung.",
+            "hinweis": ""
+          }
+        ],
+        "einleitung": "Dein Team bestimmt, ob dein Unternehmen unabhängig von dir funktioniert. Klare Rollen, Verantwortlichkeiten und gelebte Führung sind entscheidend. Führung bedeutet Orientierung und Ergebnisverantwortung statt Kontrolle und sorgt für deine Entlastung, höhere Leistungsfähigkeit und Stabilität im Betrieb.",
+        "untertitel": "Erfolgsfaktor 4 von 7"
+      },
+      {
+        "id": "ef9d9cee-f628-4379-82fa-4d01cc3e2e8b",
+        "typ": "faktor",
+        "titel": "Fulfillment & Leistungserbringung",
+        "fragen": [
+          {
+            "id": "c9669fbd-98be-4131-8a7c-6ec9d1f96c6c",
+            "typ": "skala",
+            "text": "Unsere Leistungen werden zuverlässig und in gleichbleibender Qualität erbracht.",
+            "hinweis": ""
+          },
+          {
+            "id": "c1da0741-b504-4891-b060-2df84531d4ca",
+            "typ": "skala",
+            "text": "Prozesse zur Leistungserbringung sind klar definiert.",
+            "hinweis": ""
+          },
+          {
+            "id": "c2a59954-a165-4f5b-9deb-8a4bbd1e7881",
+            "typ": "skala",
+            "text": "Kunden wissen genau, was sie erwarten können.",
+            "hinweis": ""
+          },
+          {
+            "id": "e6a878c8-46b3-49b6-b323-c8439065ae25",
+            "typ": "skala",
+            "text": "Fehler oder Probleme werden systematisch ausgewertet.",
+            "hinweis": ""
+          },
+          {
+            "id": "5d472f79-29e2-4cba-8450-0fcf8d64a3f0",
+            "typ": "skala",
+            "text": "Die Abwicklung hängt nicht an einzelnen Personen.",
+            "hinweis": ""
+          },
+          {
+            "id": "1c73a812-5492-4c80-8622-ee4d05478525",
+            "typ": "skala",
+            "text": "Termine, Qualität und Zusagen werden eingehalten.",
+            "hinweis": ""
+          },
+          {
+            "id": "b4dc820b-fffc-42e9-8f25-d35321350ad8",
+            "typ": "skala",
+            "text": "Die Leistungserbringung ist wirtschaftlich organisiert.",
+            "hinweis": ""
+          },
+          {
+            "id": "e4b7b474-7b8a-4572-8e02-685d3b56c4a7",
+            "typ": "skala",
+            "text": "Kundenfeedback fließt in Verbesserungen ein.",
+            "hinweis": ""
+          },
+          {
+            "id": "8fb43381-9273-4575-bf88-f8a396a7a317",
+            "typ": "skala",
+            "text": "Unsere Abläufe sind auch bei höherer Auslastung stabil.",
+            "hinweis": ""
+          },
+          {
+            "id": "66a43d0c-03f0-471d-9ccd-9692e07f7bec",
+            "typ": "skala",
+            "text": "Nach Abschluss von Aufträgen prüfen wir regelmäßig, ob sie wirtschaftlich wie geplant waren.",
+            "hinweis": ""
+          }
+        ],
+        "einleitung": "Fulfillment beschreibt die zuverlässige und wirtschaftliche Umsetzung von Leistungen im Tagesgeschäft. Entscheidend sind funktionierende, personenunabhängige Abläufe, gleichbleibende Qualität und ausreichende Rentabilität, damit Wachstum kontrollierbar bleibt und nicht zu Chaos führt.",
+        "untertitel": "Erfolgsfaktor 5 von 7"
+      },
+      {
+        "id": "d0c8d135-4207-4dfb-a164-1238e12b6c06",
+        "typ": "faktor",
+        "titel": "Marketing",
+        "fragen": [
+          {
+            "id": "7d043352-dfe8-4760-9e50-4f057a2fb6f9",
+            "typ": "skala",
+            "text": "Unsere Zielkunden sind klar definiert.",
+            "hinweis": ""
+          },
+          {
+            "id": "2742e3de-9e5a-4815-a69f-4a57b0d873d1",
+            "typ": "skala",
+            "text": "Unsere Botschaft ist verständlich und relevant für unsere Zielkunden.",
+            "hinweis": ""
+          },
+          {
+            "id": "c9ebda86-ef75-4445-ad49-3a57bc54841c",
+            "typ": "skala",
+            "text": "Wir sind für unsere Zielgruppe sichtbar.",
+            "hinweis": ""
+          },
+          {
+            "id": "aa3ac327-1d69-4295-93b8-a56e10c8dd5f",
+            "typ": "skala",
+            "text": "Marketing erfolgt regelmäßig und nicht zufällig.",
+            "hinweis": ""
+          },
+          {
+            "id": "2612d431-7126-4083-a5bc-5660aa891756",
+            "typ": "skala",
+            "text": "Unsere Inhalte bauen Vertrauen auf.",
+            "hinweis": ""
+          },
+          {
+            "id": "68cfd5cf-1f19-44f4-9b1c-57f8eff399b4",
+            "typ": "skala",
+            "text": "Wir wissen, welche Marketingmaßnahmen funktionieren.",
+            "hinweis": ""
+          },
+          {
+            "id": "a2f17ba9-3444-4af2-9dfb-d5a70bd16d57",
+            "typ": "skala",
+            "text": "Marketing erzeugt Anfragen und Interesse.",
+            "hinweis": ""
+          },
+          {
+            "id": "68a47677-46d8-41c7-8ce2-3abea8ac32c2",
+            "typ": "skala",
+            "text": "Unser Marketing passt zu unserer Positionierung.",
+            "hinweis": ""
+          },
+          {
+            "id": "0f9a2475-b30b-4eb1-82a1-b3f6beb01d0f",
+            "typ": "skala",
+            "text": "Wir kennen die Kosten und den Nutzen unserer wichtigsten Marketingmaßnahmen.",
+            "hinweis": ""
+          },
+          {
+            "id": "45a74dba-ee42-4d50-8800-1da0ee709e73",
+            "typ": "skala",
+            "text": "Marketing ist planbar und kein Glücksspiel.",
+            "hinweis": ""
+          }
+        ],
+        "einleitung": "Marketing stellt sicher, dass dein Unternehmen von den richtigen Kunden wahrgenommen wird und kontinuierlich Anfragen erhält. Entscheidend sind eine klar definierte Zielgruppe, eine verständliche Botschaft und planbare Sichtbarkeit, um Vertrauen aufzubauen und einen stabilen Auftragszufluss zu sichern.",
+        "untertitel": "Erfolgsfaktor 6 von 7"
+      },
+      {
+        "id": "ec74be40-7161-4a44-9355-1a1648001f07",
+        "typ": "faktor",
+        "titel": "Sales (Vertrieb)",
+        "fragen": [
+          {
+            "id": "b4c83d74-15c8-447c-9979-6cbdfa85e140",
+            "typ": "skala",
+            "text": "Es gibt einen klaren Prozess vom Erstkontakt bis zum Abschluss.",
+            "hinweis": ""
+          },
+          {
+            "id": "f0a31d75-3d59-4600-96be-0d8362fb7e96",
+            "typ": "skala",
+            "text": "Ich weiß, wie Abschlüsse zustande kommen.",
+            "hinweis": ""
+          },
+          {
+            "id": "e70230be-4377-468b-ba46-e8a6597bc2d6",
+            "typ": "skala",
+            "text": "Preise werden selbstbewusst vertreten.",
+            "hinweis": ""
+          },
+          {
+            "id": "eef1c9fd-d9b4-47da-8dcd-d361222c3895",
+            "typ": "skala",
+            "text": "Nachfassprozesse sind strukturiert.",
+            "hinweis": ""
+          },
+          {
+            "id": "8620ff78-e3b8-446d-9246-ea8037bc3982",
+            "typ": "skala",
+            "text": "Abschlüsse sind nicht zufallsabhängig.",
+            "hinweis": ""
+          },
+          {
+            "id": "1abdf5dc-a10b-4f34-a54f-ed7c70d57723",
+            "typ": "skala",
+            "text": "Ich kenne meine Abschlussquote.",
+            "hinweis": ""
+          },
+          {
+            "id": "bf8aeb09-2b5e-4da7-aa03-37749b371e94",
+            "typ": "skala",
+            "text": "Verkaufsentscheidungen basieren auf klaren Kriterien.",
+            "hinweis": ""
+          },
+          {
+            "id": "687bba2a-83a3-4874-a0a5-aa41776f8428",
+            "typ": "skala",
+            "text": "Vertrieb kostet mich weniger Energie als früher.",
+            "hinweis": ""
+          },
+          {
+            "id": "eb53f207-fa38-4e86-bb7d-7612b96fe7e6",
+            "typ": "skala",
+            "text": "Umsatz ist kalkulierbar.",
+            "hinweis": ""
+          },
+          {
+            "id": "9377412f-3f87-47c0-a427-bbf026212b02",
+            "typ": "skala",
+            "text": "Wir sagen bewusst Nein zu Aufträgen, die wirtschaftlich oder strategisch nicht passen.",
+            "hinweis": ""
+          }
+        ],
+        "einleitung": "Sales sorgt dafür, dass aus Anfragen rentable Aufträge entstehen. Ein klar strukturierter und konsequenter Vertriebsprozess ermöglicht planbare Abschlüsse, sichere Preisvertretung und kalkulierbare Umsätze und schützt dein Unternehmen vor unrentablen Aufträgen.",
+        "untertitel": "Erfolgsfaktor 7 von 7"
+      }
+    ],
+    "erstellt": "2026-09-18T13:50:45.840Z"
+  },
+  "antworten": {
+    "01491179-be6a-4850-9e9a-6330509250c7": {
+      "Azubi": {
+        "Aktuell": "2",
+        "Dezember 2024": "1",
+        "Dezember 2025": "2"
+      },
+      "Minijob": {
+        "Aktuell": "1",
+        "Dezember 2024": "0",
+        "Dezember 2025": "1"
+      },
+      "Teilzeit": {
+        "Aktuell": "2",
+        "Dezember 2024": "1",
+        "Dezember 2025": "1"
+      },
+      "Vollzeit": {
+        "Aktuell": "8",
+        "Dezember 2024": "6",
+        "Dezember 2025": "7"
+      }
+    },
+    "018ebae3-d81c-4a26-a7d2-86a13a10b8e9": 9,
+    "025e8e5d-03c4-4ad4-9bf9-51fa45d6a26f": "Empfehlungen von Bestandskunden, Google-Anzeigen und die eigene Website. Eine feste Vertriebsstruktur gibt es nicht.",
+    "0274a384-afe7-4a68-bb7f-2b90cb322ae3": 7,
+    "0866907e-c6aa-432e-ade2-2e79ce689d82": "Ich wohne in Recklinghausen, das Unternehmen sitzt im Nachbarort.",
+    "0f9a2475-b30b-4eb1-82a1-b3f6beb01d0f": 4,
+    "1380aa4f-5f93-4004-9483-e8c43864df7b": 8,
+    "169c0b12-b4bd-4f73-b9de-d67768a67c9f": 7,
+    "183baa56-2c05-4007-afce-196a4110b6d8": "Dachsanierung, Neueindeckung, Dachfenster und kleinere Reparaturen. Seit zwei Jahren auch Photovoltaik-Montage auf dem eigenen Dach.",
+    "1abdf5dc-a10b-4f34-a54f-ed7c70d57723": 5,
+    "1b8478b5-be93-4cc9-862f-632b4152cd73": 7,
+    "1c73a812-5492-4c80-8622-ee4d05478525": 9,
+    "21b69722-3941-46ef-92be-1ccc090d6831": "Ich fahre gerne Motorrad und bin zwei Mal die Woche im Fußballverein aktiv. Am Wochenende ist die Familie dran.",
+    "224b2608-1f3b-423c-8c07-5e00da076629": 6,
+    "22fd1053-dd45-4ca8-bc5c-c4210b63de1d": 6,
+    "2612d431-7126-4083-a5bc-5660aa891756": 3,
+    "265c6130-f8c3-447d-b887-f33f36e9b8c2": "Muster Bedachungen GmbH.",
+    "2742e3de-9e5a-4815-a69f-4a57b0d873d1": 3,
+    "28970003-2c93-4643-8dae-648a168c763f": 6,
+    "2b168798-2c84-4652-8eee-31c5640d92fb": "Solide, aber die Preise für Material schwanken stark und drücken auf die Marge.",
+    "335163d3-b560-4ede-95d7-122f156ca133": 8,
+    "33f73adb-f080-43a5-a41b-0dd4418f9e90": "Kanzlei Wester & Partner in Recklinghausen, seit der Betriebsübernahme.",
+    "36397d0b-eda8-435f-9917-c69d866d05b8": "Ich habe den Betrieb 2012 von meinem Vater übernommen, gegründet wurde er 1988.",
+    "37fd14ad-a2fc-42bf-8b0d-c66fd0798632": 7,
+    "3a80d720-a5a6-4f84-8749-9e5e3e79bf95": 8,
+    "45a74dba-ee42-4d50-8800-1da0ee709e73": 4,
+    "481fe08a-daa6-4ab6-8f7e-c7f3bd8eccbe": 7,
+    "49c73ea3-c116-4354-8743-9837dbc10dad": "Nein, aber ich wünsche mir mehr als nur die Jahresabschluss-Zahlen.",
+    "4d1896a2-6d72-413a-9a8e-b25925df487a": 5,
+    "4d7a9046-6f29-4136-8598-9167f99eccc2": "14.03.1984.",
+    "5401ddda-8d8d-4dfe-bf1a-57f503fc6e90": "Dach- und Fassadenbau, Schwerpunkt Steildach und Dachsanierung.",
+    "592bbd13-0fdb-49c2-8219-4b1a4c90474a": 6,
+    "5b2cc0cc-e9cd-4622-8047-3c60c4b63b9e": "Ich will die Marge um fünf Punkte anheben und endlich eine Liquiditätsreserve für drei Monate aufbauen.",
+    "5d472f79-29e2-4cba-8450-0fcf8d64a3f0": 8,
+    "617d2f90-5f72-4828-a376-5b493803cb17": 6,
+    "66a43d0c-03f0-471d-9ccd-9692e07f7bec": 9,
+    "687bba2a-83a3-4874-a0a5-aa41776f8428": 4,
+    "68a47677-46d8-41c7-8ce2-3abea8ac32c2": 3,
+    "68cfd5cf-1f19-44f4-9b1c-57f8eff399b4": 4,
+    "6c697acb-4d22-4421-8d5a-926ceac4b905": 7,
+    "6ce6c23c-d85a-41b7-b7f8-235e57b0b1e3": "Photovoltaik auf dem Dach wird immer öfter mitbeauftragt, das verändert die Kalkulation.",
+    "72cff9d8-5bde-4a5e-90c8-e3e83ade93e1": 6,
+    "72fb7a7e-ba01-4f03-9693-29c425806b1a": "Die Auftragsbücher sind für die nächsten vier Monate voll, die Mannschaft ist eingespielt.",
+    "78cc7ca2-93b3-45bb-8881-8086ae1750fd": "Ich habe keinen klaren Blick auf die Zahlen zwischen den Jahresabschlüssen und weiß oft erst spät, wie ein Monat wirklich lief.",
+    "7aa06f19-1a96-4f29-9e5e-8faa684dd1e8": 5,
+    "7ce4cfec-65b4-4e07-8303-c09b51523b5e": 8,
+    "7d043352-dfe8-4760-9e50-4f057a2fb6f9": 4,
+    "8148819c-7d1a-4bbe-a8fe-828d887cb70e": 7,
+    "8173bc65-cd42-4d20-827c-db182f1fd43c": 7,
+    "83f03a78-b7a8-4cee-963f-e3e3588ebc84": 7,
+    "8620ff78-e3b8-446d-9246-ea8037bc3982": 4,
+    "8fb43381-9273-4575-bf88-f8a396a7a317": 7,
+    "8fca50cb-744d-432e-9e64-c1fdf5efe6dc": 7,
+    "9377412f-3f87-47c0-a427-bbf026212b02": 5,
+    "9a32be81-079c-4be7-b58c-0ba198a2da72": 8,
+    "9f5e2a6e-ad0c-42ab-bc49-a2ea604e4f86": 5,
+    "a29d9ba1-c288-4e91-9f87-46486790822e": 3,
+    "a2f17ba9-3444-4af2-9dfb-d5a70bd16d57": 5,
+    "a9d13562-d207-4403-bed6-45aaf038c975": 5,
+    "aa3ac327-1d69-4295-93b8-a56e10c8dd5f": 4,
+    "b2263437-3bc1-4c6f-8a7a-704c33b838b7": 8,
+    "b26b5d39-b539-4155-ad09-e7f3ef624331": "Kai Muster.",
+    "b4c83d74-15c8-447c-9979-6cbdfa85e140": 5,
+    "b4dc820b-fffc-42e9-8f25-d35321350ad8": 8,
+    "b4ffa12f-399b-4316-b30a-1b86cb3932ee": 7,
+    "bc7a9f23-ce76-492a-9380-e6415adc58eb": 4,
+    "bf8aeb09-2b5e-4da7-aa03-37749b371e94": 6,
+    "bff8f3a2-9f66-4fc9-808a-5795ae26a113": "Dachdeckermeister, dazu einen Betriebswirt-Lehrgang bei der Handwerkskammer.",
+    "c1da0741-b504-4891-b060-2df84531d4ca": 8,
+    "c2a59954-a165-4f5b-9deb-8a4bbd1e7881": 9,
+    "c78fe60b-cd2d-49d5-96c0-7f4348ad8913": 8,
+    "c9669fbd-98be-4131-8a7c-6ec9d1f96c6c": 9,
+    "c9b77ef9-9506-4dd1-9c82-43ec5521d7b3": 5,
+    "c9ebda86-ef75-4445-ad49-3a57bc54841c": 5,
+    "d0435d89-5a8a-4c65-9d78-7ec3a31c0e3f": 6,
+    "d7d9256d-0a5a-4387-8645-e22825d91356": "Ja, einen Investitionskredit für den neuen Firmenwagen und das Baugerüst-Material.",
+    "e4b7b474-7b8a-4572-8e02-685d3b56c4a7": 9,
+    "e6a878c8-46b3-49b6-b323-c8439065ae25": 7,
+    "e70230be-4377-468b-ba46-e8a6597bc2d6": 6,
+    "e82874e9-cfcb-4221-9d3d-60266e43202f": 7,
+    "ea0f9992-eaf6-4b33-8112-1b5ae5b5c5db": 6,
+    "eb052c5a-5f00-4151-adc2-7e7b5a60dcdb": 8,
+    "eb53f207-fa38-4e86-bb7d-7612b96fe7e6": 5,
+    "ee57e65c-a49e-471f-a79a-e1f17cd41e25": 8,
+    "eef1c9fd-d9b4-47da-8dcd-d361222c3895": 5,
+    "f0a31d75-3d59-4600-96be-0d8362fb7e96": 4,
+    "f6d54033-2659-49d3-a617-48880e902523": "Zwei größere Dachdeckerbetriebe in der Region. Wir sind persönlicher und schneller vor Ort, aber preislich manchmal im Nachteil.",
+    "f9e359a4-5730-4d37-89de-fc2ab0b19eb3": "Private Hausbesitzer im Umkreis von 30 Kilometern, dazu ein paar Wohnungsgesellschaften als Stammkunden.",
+    "fc554bfc-41f5-4f0d-a8af-0db00206fbeb": 6,
+    "fd018657-a8af-4315-8509-7049302c4b8c": "Ich habe die Preise einmal angepasst und schaue monatlich in die Buchhaltung, mehr aber noch nicht.",
+    "fe9ac510-e231-4175-acd8-3a38434665d0": 9,
+    "ff47c32e-e38c-4d6c-aec8-72ab6355b9b4": 8,
+    "ffb51e64-c3e4-4cb6-b08f-1f7ee8267503": 9
+  },
+  "aha": "Der Aha-Moment war, dass meine Mitarbeiterkosten schneller gewachsen sind als mein Umsatz – das habe ich vorher nie so klar gesehen, weil ich nur auf den Kontostand geschaut habe.",
+  "aktuelle_frage": 93,
+  "pdf_path": null,
+  "created_at": "2026-09-18T13:50:45.944094+00:00",
+  "updated_at": "2026-09-18T13:50:59.425+00:00",
+  "abgeschlossen_at": null
+}
