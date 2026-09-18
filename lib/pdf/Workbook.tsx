@@ -11,7 +11,13 @@ const st = StyleSheet.create({
   // ponytail: kein lineHeight hier auf Seitenebene — das bringt react-pdf/Yoga 4.9 bei der
   // fixed-Fußzeile (unten, position:'bottom') aus dem Takt, sie wird dann gar nicht mehr
   // gerendert, egal was die Fußzeile selbst für Styles trägt (empirisch isoliert). lineHeight
-  // deshalb gezielt an den Fließtext-Stilen (absatz, antwort) statt global auf der Seite.
+  // deshalb gezielt an den Fließtext-Stilen (absatz, antwort, …) statt global auf der Seite.
+  //
+  // Zweiter react-pdf-4.9-Eigenheit (per baseline-Messung mit read_pdf_layout isoliert):
+  // ein hier gesetzter lineHeight-Wert wird beim Rendern mit fix 12/7 (≈1,714) multipliziert,
+  // unabhängig von Schriftart — lineHeight:1.35 im Code ergibt also ~2,31 auf der Seite (deutlich
+  // zu weiter Durchschuss). Faustregel: Stil-Wert = gewünschte sichtbare Zeilenhöhe × 7/12.
+  // 0.8 hier → sichtbar ≈ 1,37 (Zielkorridor 1,35–1,4).
   seite: { fontFamily: 'Montserrat', fontSize: 10.5, color: BLAU, paddingTop: 64, paddingBottom: 60, paddingHorizontal: 56 },
   kopf: { position: 'absolute', top: 24, left: 56, right: 56, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   logo: { width: 110, height: 110 / 7.87 }, // Proportion 7,87 : 1 — nie unabhängig setzen
@@ -20,20 +26,20 @@ const st = StyleSheet.create({
   eyebrow: { fontSize: 8.5, letterSpacing: 1.6, color: O, fontWeight: 600, textTransform: 'uppercase', marginBottom: 6 },
   h1: { fontSize: 22, fontWeight: 600, marginBottom: 14, lineHeight: 1.2 },
   h2: { fontSize: 13, fontWeight: 600, marginTop: 14, marginBottom: 4 },
-  absatz: { marginBottom: 8, fontWeight: 300, lineHeight: 1.5 },
+  absatz: { marginBottom: 8, fontWeight: 300, lineHeight: 0.8 },
   frage: { fontSize: 8.5, letterSpacing: 0.8, color: GRAU, textTransform: 'uppercase', fontWeight: 500, marginTop: 10 },
-  antwort: { marginTop: 2, marginBottom: 6, paddingBottom: 6, borderBottomWidth: 0.5, borderBottomColor: LINIE, lineHeight: 1.5 },
-  leer: { color: GRAU, fontStyle: 'italic' },
+  antwort: { marginTop: 2, marginBottom: 6, paddingBottom: 6, borderBottomWidth: 0.5, borderBottomColor: LINIE, lineHeight: 0.8 },
+  leer: { color: GRAU, fontStyle: 'italic', lineHeight: 0.8 },
   zeile: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: LINIE, paddingVertical: 4 },
-  zelleText: { flex: 1 },
-  zelleWert: { width: 40, textAlign: 'right', fontWeight: 600 },
+  zelleText: { flex: 1, lineHeight: 0.8 },
+  zelleWert: { width: 40, textAlign: 'right', fontWeight: 600, lineHeight: 0.8 },
   summe: { flexDirection: 'row', backgroundColor: '#FDEBD9', paddingVertical: 6, paddingHorizontal: 6, marginTop: 4, fontWeight: 600 },
   deck: { backgroundColor: BLAU, color: '#FFFFFF', padding: 56, justifyContent: 'space-between' },
 });
 
 function Rahmen({ children, kopf }: { children: React.ReactNode; kopf: string }) {
   return (
-    <Page size="A4" style={st.seite} wrap>
+    <Page size="A4" style={st.seite}>
       <View style={st.kopf} fixed>
         <Image src={pub('logo-full.png')} style={st.logo} />
         <Text style={st.kopfText}>{kopf}</Text>
@@ -67,8 +73,11 @@ function Absaetze({ text }: { text: string }) {
 }
 
 function Antwort({ frage, wert }: { frage: SnapshotFrage; wert: unknown }) {
-  if (frage.typ === 'tabelle' && frage.optionen) {
-    const t = (wert ?? {}) as TabellenWert;
+  if (frage.typ === 'tabelle') {
+    if (!frage.optionen || typeof wert !== 'object' || wert === null) {
+      return <Text style={[st.antwort, st.leer]}>– keine Antwort –</Text>;
+    }
+    const t = wert as TabellenWert;
     return (
       <View style={st.antwort}>
         <View style={st.zeile}>
@@ -114,7 +123,7 @@ export function Workbook({ s, texte }: { s: Sitzung; texte: Record<string, strin
       </Page>
 
       <Rahmen kopf="Willkommen">
-        <Text style={st.eyebrow}>Schön, dass du dabei bist</Text>
+        <Text style={st.eyebrow}>{t('willkommen_titel')}</Text>
         <Text style={st.h1}>Hallo {s.vorname}</Text>
         <Absaetze text={t('willkommen_text')} />
       </Rahmen>
@@ -193,11 +202,11 @@ export function Workbook({ s, texte }: { s: Sitzung; texte: Record<string, strin
         <Text style={st.eyebrow}>Ergebnis</Text>
         <Text style={st.h1}>{t('ergebnis_titel')}</Text>
         <Text style={st.absatz}>{t('ergebnis_text')}</Text>
-        <View style={{ alignItems: 'center', marginVertical: 8 }}>
-          <ErfolgsradPdf werte={punkte} groesse={400} />
+        <View style={{ alignItems: 'center', marginVertical: 4 }}>
+          <ErfolgsradPdf werte={punkte} groesse={340} />
         </View>
         {punkte.map((p) => (
-          <View key={p.kapitelId} style={st.zeile}>
+          <View key={p.kapitelId} style={[st.zeile, { paddingVertical: 3 }]}>
             <Text style={st.zelleText}>{p.titel}</Text>
             <View style={{ width: 160, height: 5, backgroundColor: '#EEEEEE', marginHorizontal: 10, marginTop: 5 }}>
               <View style={{ width: `${p.punkte}%`, height: 5, backgroundColor: O }} />
@@ -205,7 +214,7 @@ export function Workbook({ s, texte }: { s: Sitzung; texte: Record<string, strin
             <Text style={st.zelleWert}>{p.punkte}</Text>
           </View>
         ))}
-        <Text style={[st.absatz, { marginTop: 12 }]}>{t('ergebnis_fazit')}</Text>
+        <Text style={[st.absatz, { marginTop: 10 }]}>{t('ergebnis_fazit')}</Text>
       </Rahmen>
 
       <Rahmen kopf="Aha-Momente">

@@ -22,7 +22,7 @@ export function schriftenRegistrieren() {
 
 export function pdfDateiname(s: Sitzung): string {
   const name = s.nachname.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'Kunde';
-  return `360BA-Workbook-${name}-${new Date().toISOString().slice(0, 10)}.pdf`;
+  return `360BA-Workbook-${name}-${new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })}.pdf`;
 }
 
 export async function pdfErzeugen(s: Sitzung, texte: Record<string, string>): Promise<Buffer> {
