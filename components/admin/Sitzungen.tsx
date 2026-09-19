@@ -151,7 +151,11 @@ export function Sitzungen() {
                     <div className="flex flex-col gap-2">
                       {dateien[s.id].map((d, i) => (
                         <div key={i} className="flex justify-between items-center gap-3 text-[14px]">
-                          <a className="underline text-o truncate" href={d.url} target="_blank" rel="noreferrer">{d.dateiname}</a>
+                          {d.url ? (
+                            <a className="underline text-o truncate" href={d.url} target="_blank" rel="noreferrer">{d.dateiname}</a>
+                          ) : (
+                            <span className="truncate text-muted" title={d.hinweis}>{d.dateiname} — {d.hinweis ?? 'Adresse nicht verfügbar'}</span>
+                          )}
                           <span className={`text-[11px] uppercase tracking-[.08em] px-2.5 py-1 rounded-full border shrink-0 ${d.abgeholt_at ? 'border-[#4ec986] text-[#4ec986]' : 'border-muted text-muted'}`}>{d.abgeholt_at ? 'abgeholt ✓' : 'wartet'}</span>
                         </div>
                       ))}

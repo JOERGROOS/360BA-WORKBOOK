@@ -23,6 +23,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const { error: eStorage } = await db.storage.from('workbooks').remove(dateien.map((d) => `${id}/${d.name}`));
     if (eStorage) { console.error('[admin sitzungen] Ordner löschen', eStorage); return NextResponse.json({ error: 'PDF konnte nicht gelöscht werden' }, { status: 500 }); }
   }
+  // Finanzdaten-Bucket ebenfalls aufräumen — sonst bleiben hochgeladene Dateien als verwaiste
+  // Objekte liegen, obwohl die wb_dateien-Zeilen per ON DELETE CASCADE mit der Sitzung verschwinden.
+  const { data: finanzdaten, error: eListeFin } = await db.storage.from('finanzdaten').list(id);
+  if (eListeFin) { console.error('[admin sitzungen] Finanzdaten-Ordner listen', eListeFin); return NextResponse.json({ error: 'Finanzdaten konnten nicht gelöscht werden' }, { status: 500 }); }
+  if (finanzdaten && finanzdaten.length > 0) {
+    const { error: eStorageFin } = await db.storage.from('finanzdaten').remove(finanzdaten.map((d) => `${id}/${d.name}`));
+    if (eStorageFin) { console.error('[admin sitzungen] Finanzdaten-Ordner löschen', eStorageFin); return NextResponse.json({ error: 'Finanzdaten konnten nicht gelöscht werden' }, { status: 500 }); }
+  }
   const { error } = await db.from('wb_sessions').delete().eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

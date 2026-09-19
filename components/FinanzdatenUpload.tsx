@@ -52,7 +52,7 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
 
     const registriert = await fetch(`/api/w/${token}/dateien`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pfad: adr.pfad, dateiname: datei.name, bytes: datei.size, content_type: datei.type }),
+      body: JSON.stringify({ pfad: adr.pfad, dateiname: datei.name }),
     });
     if (!registriert.ok) { setzeEintrag({ status: 'fehler', fehler: 'Konnte nicht gemeldet werden' }); return; }
     setzeEintrag({ status: 'fertig', fortschritt: 100 });

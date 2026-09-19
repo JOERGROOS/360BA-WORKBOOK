@@ -34,19 +34,31 @@ Finanzdaten-Upload läuft direkt vom Browser in den privaten Bucket
 `finanzdaten` (Vercel-Funktionen haben eine 4,5-MB-Grenze für den
 Funktionskörper selbst, deshalb signierte Adressen statt Server-Upload):
 `POST /api/w/[token]/dateien/upload-url` liefert eine signierte Adresse
-(`lib/dateien.ts` → `uploadAdresse`, prüft Typ/Größe vorher), der Browser lädt
-per `XMLHttpRequest PUT` auf diese Adresse hoch (getestet — PUT funktioniert,
-kein POST/FormData nötig), danach meldet `POST /api/w/[token]/dateien` die
-Datei an (`dateiRegistrieren`, prüft Existenz im Speicher + Grenze 30 Dateien
-je Sitzung), `POST /api/w/[token]/dateien/melden` schickt eine interne Mail
-(`lib/mail.ts` → `finanzdatenMailSenden`). Upload ist in JEDEM Sitzungsstatus
+(`lib/dateien.ts` → `uploadAdresse`, prüft Typ/Größe vorher UND die
+30-Dateien-Grenze über `wb_dateien` UND den echten Speicher-Bestand — sonst
+könnte jemand beliebig viele Adressen anfordern, ohne je zu registrieren),
+der Browser lädt per `XMLHttpRequest PUT` auf diese Adresse hoch (getestet —
+PUT funktioniert, kein POST/FormData nötig), danach meldet
+`POST /api/w/[token]/dateien` die Datei an (`dateiRegistrieren` — Größe und
+Content-Type kommen aus `storage.list`, NICHT vom Client; fehlt das Objekt im
+Speicher, gibt es 404), `POST /api/w/[token]/dateien/melden` schickt eine
+interne Mail (`lib/mail.ts` → `finanzdatenMailSenden`). Ein Objekt im Speicher
+ohne `wb_dateien`-Zeile (Browser zwischen PUT und Registrieren geschlossen)
+trägt eine interne Nachtrag-Funktion vor jeder Leseliste automatisch nach
+(`verwaisteObjekteRegistrieren`, mit den echten Werten aus dem Speicher).
+Validierungsfehler laufen über die Klasse `EingabeFehler` (trägt ihren
+HTTP-Status selbst, Default 400) — Routen prüfen `instanceof EingabeFehler`
+und geben sonst 500 mit `console.error`. Upload ist in JEDEM Sitzungsstatus
 erlaubt, auch `eingeladen` und `abgeschlossen`. Erlaubte Typen, Größen- und
 Mengengrenze: `lib/dateinamen.ts` (`ERLAUBT`, `MAX_BYTES`, `MAX_DATEIEN`) —
 bewusst abhängigkeitsfrei, damit ein Abholprogramm auf Jörgs Mac (Task 3) sie
 mit einfachem `node` importieren kann, ohne Next.js oder Supabase im Gepäck.
 Geprüft mit `scripts/check-dateinamen.mjs`. Admin sieht die Dateien je
 Sitzung in `components/admin/Sitzungen.tsx` („Dateien (n)", ausklappbar,
-Download-Link + Abhol-Status `abgeholt_at`).
+Download-Link + Abhol-Status `abgeholt_at`; scheitert die Download-Adresse
+für eine einzelne Datei, zeigt die Zeile einen Hinweis statt die ganze Liste
+zu blockieren). Session-Löschen (`app/api/admin/sitzungen/[id]/route.ts`)
+räumt beide Buckets auf, `workbooks` UND `finanzdaten`.
 
 Der Kunde öffnet seinen Link, bestätigt/korrigiert seine Daten auf der
 Einladungsseite (`components/EinladungStart.tsx`) und startet damit erst das
@@ -112,12 +124,6 @@ einspielen und Seed-Ablauf: `supabase/README.md`.
   In-Memory-Map. Vercel-Funktionen starten kalt und teilen sie nicht —
   reicht als Missbrauchsbremse für ein Vorbereitungs-Tool, ist aber kein
   verlässliches globales Limit. Bei Bedarf auf Upstash Redis umstellen.
-- **Admin-Löschen räumt den `finanzdaten`-Bucket nicht auf:** Die
-  „Zurückziehen"-Route (`app/api/admin/sitzungen/[id]/route.ts`) entfernt beim
-  Löschen einer Sitzung nur den PDF-Ordner im Bucket `workbooks`. Die
-  `wb_dateien`-Zeilen verschwinden zwar per `ON DELETE CASCADE`, die
-  hochgeladenen Dateien selbst bleiben aber als verwaiste Objekte im Bucket
-  `finanzdaten` liegen. Folge-Aufgabe ist als Vorschlag hinterlegt.
 - **Positionen per Pfeil:** Der „← Zurück"-Pfeil im Interview ändert die
   Position nur lokal im Browser. Der Server-Stand `aktuelle_frage` wird nur
   beim „Weiter" gespeichert. Schließt jemand nach dem Zurückblättern den Tab
