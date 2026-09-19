@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, dbFehler } from '@/lib/db';
 import { adminGeprueft } from '@/lib/admin-auth';
 import { FRAGE_TYPEN, tabelleGueltig } from '@/lib/frage-validierung';
 
@@ -16,6 +16,6 @@ export async function POST(req: Request) {
   const { data, error } = await db.from('wb_questions')
     .insert({ chapter_id: b.chapter_id, text, hinweis: String(b.hinweis ?? ''), typ: b.typ, optionen: b.optionen ?? {}, position, aktiv: false })
     .select('*').single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbFehler('fragen', error, 'Frage konnte nicht angelegt werden.');
   return NextResponse.json(data);
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import type { Kapitel, Frage, FrageTyp } from '@/lib/db';
+import { AufrufFehler, fehlertext } from '@/lib/fehlertext';
 import { KapitelFormular } from './KapitelFormular';
 import { FrageFormular } from './FrageFormular';
 
@@ -8,20 +9,12 @@ type Ziel = { art: 'kapitel'; id: string | null } | { art: 'frage'; id: string |
 
 const FRAGE_TYP_LABEL: Record<FrageTyp, string> = { text: 'Freitext', skala: 'Skala 1–10', tabelle: 'Tabelle' };
 
-export class AufrufFehler extends Error {
-  status: number;
-  constructor(message: string, status: number) { super(message); this.status = status; }
-}
+export { AufrufFehler, fehlertext };
 
 export async function aufruf(url: string, methode: string, body?: unknown) {
   const r = await fetch(url, { method: methode, headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
   if (!r.ok) { const d = await r.json().catch(() => ({})); throw new AufrufFehler(d.error ?? 'Das hat nicht geklappt.', r.status); }
   return r.json();
-}
-
-export function fehlertext(e: unknown): string {
-  if (e instanceof AufrufFehler && e.status === 401) return 'Sitzung abgelaufen – bitte neu anmelden.';
-  return e instanceof Error ? e.message : 'Das hat nicht geklappt.';
 }
 
 export function Fragebogen({ kapitel, fragen, neuLaden }: { kapitel: Kapitel[]; fragen: Frage[]; neuLaden: () => Promise<void> }) {

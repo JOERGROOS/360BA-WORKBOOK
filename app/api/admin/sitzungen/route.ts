@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, dbFehler } from '@/lib/db';
 import { adminGeprueft } from '@/lib/admin-auth';
 import { einladungAnlegen, linkFuer } from '@/lib/sitzung';
 import { fortschritt } from '@/lib/punkte';
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const { data, error } = await db.from('wb_sessions')
     .select('id,token,vorname,nachname,firma,email,status,test,created_at,abgeschlossen_at,fragen_snapshot,antworten')
     .order('created_at', { ascending: false });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbFehler('sitzungen', error, 'Sitzungen konnten nicht geladen werden.');
   const aus = (data ?? []).map((s) => {
     const { fragen_snapshot, antworten, token, ...rest } = s as { fragen_snapshot: Snapshot; antworten: Antworten; token: string } & Record<string, unknown>;
     return { ...rest, prozent: fortschritt(fragen_snapshot, antworten).prozent, link: linkFuer({ token }) };

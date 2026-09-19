@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, dbFehler } from '@/lib/db';
 import { adminGeprueft } from '@/lib/admin-auth';
 
 export async function GET(req: Request) {
   if (!adminGeprueft(req)) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
   const { data: kapitel, error: e1 } = await db.from('wb_chapters').select('*').order('position');
-  if (e1) return NextResponse.json({ error: e1.message }, { status: 500 });
+  if (e1) return dbFehler('kapitel', e1, 'Kapitel konnten nicht geladen werden.');
   const { data: fragen, error: e2 } = await db.from('wb_questions').select('*').order('position');
-  if (e2) return NextResponse.json({ error: e2.message }, { status: 500 });
+  if (e2) return dbFehler('kapitel', e2, 'Fragen konnten nicht geladen werden.');
   return NextResponse.json({ kapitel, fragen });
 }
 
@@ -22,6 +22,6 @@ export async function POST(req: Request) {
   const { data, error } = await db.from('wb_chapters')
     .insert({ titel, untertitel: String(b.untertitel ?? ''), einleitung: String(b.einleitung ?? ''), typ: b.typ, position })
     .select('*').single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbFehler('kapitel', error, 'Kapitel konnte nicht angelegt werden.');
   return NextResponse.json(data);
 }

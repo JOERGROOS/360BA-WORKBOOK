@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 
 export type FrageTyp = 'text' | 'skala' | 'tabelle';
 export type KapitelTyp = 'fakten' | 'faktor';
@@ -31,5 +32,20 @@ function pflicht(name: string): string {
   return v;
 }
 
+const supabaseUrl = pflicht('SUPABASE_URL');
+// Start-Prüfung: eine falsch gesetzte SUPABASE_URL (z. B. leer/falsche Domain) liefert sonst
+// stumme HTML-Fehlerseiten statt Daten zurück — das fällt erst im Vercel-Funktionslog auf, wenn
+// hier direkt geworfen wird, nicht erst beim ersten DB-Zugriff mitten in einer Route.
+if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(supabaseUrl)) {
+  throw new Error(`Umgebungsvariable SUPABASE_URL ungültig (erwartet https://<projekt>.supabase.co)`);
+}
+
 // Nur serverseitig verwenden. Der Service-Role-Key darf nie in den Browser.
-export const db = createClient(pflicht('SUPABASE_URL'), pflicht('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
+export const db = createClient(supabaseUrl, pflicht('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
+
+// Gemeinsames Muster für alle Admin-Routen: DB-Fehler nie roh an den Client (kann z. B. eine ganze
+// HTML-Fehlerseite sein), stattdessen kurze deutsche Meldung + voller Fehler ins Server-Log.
+export function dbFehler(bereich: string, error: { message: string }, meldung: string) {
+  console.error(`[admin ${bereich}]`, error);
+  return NextResponse.json({ error: meldung }, { status: 500 });
+}
