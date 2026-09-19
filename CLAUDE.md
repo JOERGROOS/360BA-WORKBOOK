@@ -1,6 +1,6 @@
 # 360BA Online-Workbook
 
-Stand: 19.09.2026 — Einladungslink (Task 1) fertig.
+Stand: 19.09.2026 — Einladungslink + Admin-Übersicht mit Statistik (Task 1) fertig.
 
 ## Was ist das
 Interaktives Online-Workbook zur 360° Business-Analyse für Jörg Roos' Kunden
@@ -32,13 +32,25 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 3 · Supabase
 ## Ordner & Routen
 - `app/page.tsx` neutrale Zugangs-Seite (kein Formular) · `app/w/[token]/`
   Einladungsbestätigung, Interview, Ergebnis, Fertig-Seite · `app/admin/`
-  Login, Fragebogen, Texte, Sitzungen (inkl. „Neue Einladung").
+  Login, **Übersicht (Startansicht)**, Fragebogen, Texte, Sitzungen (inkl.
+  „Neue Einladung").
 - `app/api/w/[token]/start` Interview starten · `app/api/w/[token]/{antwort,
   abschluss,pdf,link}` Kunden-API · `app/api/admin/*` Admin-API (Cookie-Auth,
-  `POST sitzungen` legt Einladung an) ·
-  `app/api/transkribieren` Sprache→Text.
-- `lib/` Fachlogik (sitzung, punkte, pdf, glaettung, mail-html, bremse) ·
-  `data/` Seed-JSON · `supabase/migrations/` Schema.
+  `POST sitzungen` legt Einladung an, `GET statistik` Nutzungs-Statistik) ·
+  `app/api/transkribieren` Sprache→Text (zählt `diktate` bei Erfolg hoch).
+- `lib/` Fachlogik (sitzung, punkte, statistik, pdf, glaettung, mail-html,
+  bremse) · `data/` Seed-JSON · `supabase/migrations/` Schema.
+
+## Admin-Übersicht
+
+Startansicht des Admin-Bereichs (`components/admin/Uebersicht.tsx`). Zeigt
+oben „Neue Einladung" (öffnet das gemeinsame `EinladungFormular` inline, auch
+von `Sitzungen.tsx` genutzt) und darunter Kennzahl-Karten sowie das
+Erfolgsrad mit den Faktor-Mitteln über alle abgeschlossenen Workbooks.
+Rechenlogik in `lib/statistik.ts` (`berechneStatistik`, reine Funktion,
+geprüft mit `scripts/check-statistik.mjs`) — Test-Sitzungen fließen nie ein.
+Dauer wird aus `wb_sessions.gestartet_at` → `abgeschlossen_at` berechnet,
+Sprachanteil aus dem Zähler `wb_sessions.diktate`.
 
 ## So arbeitet man
 1. `./scripts/sync-lokal.sh` — gleicht nach `~/dev/360ba-workbook/` ab (npm
@@ -47,8 +59,9 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 3 · Supabase
 2. In der Arbeitskopie: `npm run dev` (Dev-Server) bzw. `npx next build`.
 3. Test-Sitzung: `/admin` öffnen, „Vorschau als Kunde" — legt eine echte
    Sitzung mit Jörgs eigenen Daten an, zum kompletten Durchklicken.
-4. Prüfskripte: `npm run check` (check-seed, check-punkte, check-geometrie)
-   · `node scripts/check-glaettung.mjs` (braucht ANTHROPIC_API_KEY) ·
+4. Prüfskripte: `npm run check` (check-seed, check-punkte, check-geometrie,
+   check-admin-auth, check-statistik) · `node scripts/check-glaettung.mjs`
+   (braucht ANTHROPIC_API_KEY) ·
    `node scripts/check-mail-html.mjs` · `node scripts/check-pdf.mjs` (braucht
    laufenden Dev-Server, schreibt `docs/beispiel/beispiel.pdf`).
 

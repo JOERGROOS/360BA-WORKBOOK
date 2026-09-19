@@ -21,7 +21,8 @@ export type Sitzung = {
   id: string; token: string; vorname: string; nachname: string; firma: string; telefon: string; email: string;
   status: 'eingeladen' | 'laufend' | 'ergebnis' | 'abgeschlossen'; test: boolean;
   fragen_snapshot: Snapshot; antworten: Antworten; aha: string; aktuelle_frage: number;
-  pdf_path: string | null; created_at: string; updated_at: string; abgeschlossen_at: string | null;
+  pdf_path: string | null; created_at: string; updated_at: string; gestartet_at: string | null; abgeschlossen_at: string | null;
+  diktate: number;
 };
 
 function pflicht(name: string): string {

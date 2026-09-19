@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
 import { sitzungLaden } from '@/lib/sitzung';
 import { transkribiere } from '@/lib/stt';
 import { glaette } from '@/lib/glaettung';
@@ -23,6 +24,10 @@ export async function POST(req: Request) {
     const text = await glaette(roh);
     const leer = roh.trim() === '';
     console.info('[transkribieren] ergebnis', { rohZeichen: roh.length, geglaettetZeichen: text.length, ms: Date.now() - t0, leer });
+    if (!leer) {
+      const { error } = await db.from('wb_sessions').update({ diktate: s.diktate + 1 }).eq('id', s.id);
+      if (error) console.error('[transkribieren] diktate-zaehler', error);
+    }
     if (leer) return NextResponse.json({ text: '', hinweis: 'leer' });
     return NextResponse.json({ text });
   } catch (e) {

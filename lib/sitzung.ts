@@ -60,7 +60,7 @@ export async function sitzungStarten(token: string, k: Kontakt): Promise<Sitzung
   if (s.status !== 'eingeladen') throw new Error('Sitzung ist bereits gestartet');
   const snapshot = await snapshotZiehen();
   if (!snapshot.kapitel.length) throw new Error('Kein aktiver Fragebogen');
-  const { data, error } = await db.from('wb_sessions').update({ ...k, status: 'laufend', aktuelle_frage: 0, fragen_snapshot: snapshot, updated_at: new Date().toISOString() }).eq('id', s.id).eq('status', 'eingeladen').select('*').maybeSingle();
+  const { data, error } = await db.from('wb_sessions').update({ ...k, status: 'laufend', aktuelle_frage: 0, fragen_snapshot: snapshot, gestartet_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', s.id).eq('status', 'eingeladen').select('*').maybeSingle();
   if (error) throw error;
   if (!data) throw new Error('Sitzung ist bereits gestartet');
   return data as Sitzung;

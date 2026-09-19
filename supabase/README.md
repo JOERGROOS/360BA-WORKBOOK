@@ -7,6 +7,7 @@ Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabe
 - `001_workbook.sql` — Schema (`wb_*`-Tabellen, Bucket `workbooks`)
 - `002_rls.sql` — Row Level Security auf allen `wb_*`-Tabellen, `anon`/`authenticated` gesperrt
 - `003_einladung.sql` — Status `eingeladen` in `wb_sessions.status` erlaubt
+- `004_statistik.sql` — `wb_sessions.gestartet_at` (Start des Interviews) und `wb_sessions.diktate` (Zähler erfolgreicher Spracheingaben) für die Admin-Übersicht
 
 ## Migration einspielen
 

@@ -4,15 +4,16 @@ import type { Kapitel, Frage } from '@/lib/db';
 import { Fragebogen } from '@/components/admin/Fragebogen';
 import { Texte } from '@/components/admin/Texte';
 import { Sitzungen } from '@/components/admin/Sitzungen';
+import { Uebersicht } from '@/components/admin/Uebersicht';
 
-type Bereich = 'fragebogen' | 'workbooks' | 'texte';
+type Bereich = 'uebersicht' | 'fragebogen' | 'workbooks' | 'texte';
 
 export default function AdminSeite() {
   const [angemeldet, setAngemeldet] = useState<boolean | null>(null);
   const [passwort, setPasswort] = useState('');
   const [fehler, setFehler] = useState('');
   const [laeuft, setLaeuft] = useState(false);
-  const [bereich, setBereich] = useState<Bereich>('fragebogen');
+  const [bereich, setBereich] = useState<Bereich>('uebersicht');
   const [kapitel, setKapitel] = useState<Kapitel[]>([]);
   const [fragen, setFragen] = useState<Frage[]>([]);
 
@@ -63,8 +64,9 @@ export default function AdminSeite() {
   }
 
   const BEREICHE: { key: Bereich; label: string }[] = [
-    { key: 'fragebogen', label: 'Fragebogen' },
+    { key: 'uebersicht', label: 'Übersicht' },
     { key: 'workbooks', label: 'Ausgefüllte Workbooks' },
+    { key: 'fragebogen', label: 'Fragebogen' },
     { key: 'texte', label: 'Texte (Einleitung · Über Jörg)' },
   ];
 
@@ -95,6 +97,7 @@ export default function AdminSeite() {
         <button onClick={abmelden} className="text-left text-sm px-3 py-2.5 mt-8 text-muted">Abmelden</button>
       </aside>
       <div>
+        {bereich === 'uebersicht' && <Uebersicht />}
         {bereich === 'fragebogen' && <Fragebogen kapitel={kapitel} fragen={fragen} neuLaden={kapitelLaden} />}
         {bereich === 'workbooks' && <Sitzungen />}
         {bereich === 'texte' && <Texte />}
