@@ -84,7 +84,7 @@ und Seed-Ablauf: `supabase/README.md`.
   aus dem JOERG-AI-Vercel-Projekt abschreiben).
 - GitHub-Repo `JOERGROOS/360BA-WORKBOOK` anlegen und pushen.
 - Vercel-Projekt anlegen, Umgebungsvariablen eintragen, deployen.
-- Domain `workbook.joerg-roos.com` einrichten (CNAME beim DNS-Anbieter).
+- Domain `360ba.joerg-roos.com` einrichten (CNAME beim DNS-Anbieter).
 - Datenschutz-Absatz (`docs/datenschutz-absatz.md`) auf
   joerg-roos.com/datenschutz übernehmen oder anpassen.
 

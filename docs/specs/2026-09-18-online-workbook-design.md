@@ -127,7 +127,7 @@ wb_sessions   id uuid, token text unique (32 Byte zufällig, base64url), vorname
 - Abhängigkeiten über Next hinaus: `@supabase/supabase-js`, `resend`, `openai` (nur Transkription), `@anthropic-ai/sdk`, `@react-pdf/renderer`. Nichts weiter. Kein Drag-and-drop, kein Formular-Framework, keine UI-Bibliothek.
 - Ordner: `app/` (Seiten und Routen), `lib/` (`db.ts`, `punkte.ts`, `erfolgsrad.tsx`, `pdf/`, `mail.ts`, `stt.ts`, `glaettung.ts`, `admin-auth.ts`), `data/fragen-seed.json`, `supabase/migrations/001_workbook.sql`, `scripts/` (Seed und Prüfskripte), `public/` (Logo, Schriften), `docs/`.
 - Code liegt in `04-360BA-Workbook/` auf dem Synology-Laufwerk (Repo `JOERGROOS/360BA-WORKBOOK`). Bauen und Dev-Server laufen wie bei JOERG AI in einer lokalen Kopie außerhalb des Laufwerks (`~/dev/360ba-workbook`, per `rsync` angeglichen), weil Turbopack auf dem Laufwerk abbricht. Eintrag in `.claude/launch.json` des Projekts.
-- Vercel: eigenes Projekt, Region `fra1`, verbunden mit dem GitHub-Repo, Domain `workbook.joerg-roos.com` (Vorschlag).
+- Vercel: eigenes Projekt, Region `fra1`, verbunden mit dem GitHub-Repo, Domain `360ba.joerg-roos.com` (Vorschlag).
 - Umgebungsvariablen: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (bestehendes Projekt), `OPENAI_API_KEY` (neu), `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `ADMIN_PASSWORD` (eigenes, nicht das von JOERG AI), `APP_URL`. Lokal in `~/.config/360ba-workbook/.env.local`, per Symlink eingebunden, außerhalb des Syncs.
 
 ## 12. Datenschutz
@@ -167,7 +167,7 @@ Kleine Prüfskripte ohne Testrahmen, wie bei JOERG AI:
 
 1. OpenAI-Konto anlegen (oder vorhandenes nutzen), API-Schlüssel mit kleinem Guthaben (20 € reichen für Monate).
 2. GitHub-Repo `JOERGROOS/360BA-WORKBOOK` anlegen (leer, privat) — oder mir sagen, dass ich es über deine bestehende Git-Anmeldung anlegen soll.
-3. Vercel-Projekt aus dem Repo anlegen, Region Frankfurt, Umgebungsvariablen eintragen (Liste kommt fertig von mir), Domain `workbook.joerg-roos.com` per DNS-Eintrag.
+3. Vercel-Projekt aus dem Repo anlegen, Region Frankfurt, Umgebungsvariablen eintragen (Liste kommt fertig von mir), Domain `360ba.joerg-roos.com` per DNS-Eintrag.
 4. Datenschutzerklärung um den Absatz zur Sprachumwandlung ergänzen (Textvorschlag kommt von mir).
 
 ## 17. Aufwand

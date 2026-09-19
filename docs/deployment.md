@@ -45,14 +45,14 @@ Werte für **Production** eintragen. Die echten Werte liegen auf deinem Mac in
 | `ANTHROPIC_API_KEY` | Schlüssel für die sprachliche Glättung der Antworten | aus `.env.local` |
 | `RESEND_API_KEY` | Schlüssel für den E-Mail-Versand | im Resend-Dashboard unter „API Keys" — das JOERG-AI-Projekt in Vercel hat denselben Schlüssel bereits hinterlegt, dort kannst du ihn auch abschreiben |
 | `ADMIN_PASSWORD` | Passwort für deinen Admin-Bereich `/admin` — **mindestens 24 zufällige Zeichen aus einem Passwort-Generator**, kein selbst ausgedachtes Wort | aus `.env.local` |
-| `APP_URL` | Die öffentliche Adresse des Workbooks | fest eintragen: `https://workbook.joerg-roos.com` |
+| `APP_URL` | Die öffentliche Adresse des Workbooks | fest eintragen: `https://360ba.joerg-roos.com` |
 
 Danach auf „Deploy" klicken. Der erste Durchlauf dauert ein bis zwei Minuten.
 
 ## 4. Domain einrichten
 
 1. Im Vercel-Projekt unter „Settings" → „Domains" die Adresse
-   `workbook.joerg-roos.com` eintragen und bestätigen.
+   `360ba.joerg-roos.com` eintragen und bestätigen.
 2. Vercel zeigt dir daraufhin einen CNAME-Eintrag an. Bei deinem
    DNS-Anbieter (dort, wo `joerg-roos.com` verwaltet wird) einen neuen
    CNAME-Eintrag anlegen: Name `workbook`, Ziel `cname.vercel-dns.com`.
@@ -69,7 +69,7 @@ Zahlungseingang** für die 360° Business-Analyse.
 
 ## 6. Nach dem ersten Deploy testen
 
-1. `https://workbook.joerg-roos.com/admin` öffnen und mit deinem
+1. `https://360ba.joerg-roos.com/admin` öffnen und mit deinem
    Admin-Passwort anmelden.
 2. Eine Test-Sitzung anlegen („Vorschau als Kunde").
 3. Das Workbook einmal komplett durchklicken, bis zum Abschluss.

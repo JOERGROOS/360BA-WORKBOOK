@@ -1583,8 +1583,8 @@ Dev-Server, Browser auf 390 px Breite: Start-Formular einspaltig, Skala zwei Rei
    { "framework": "nextjs", "regions": ["fra1"] }
    ```
    (Datei ins Repo.)
-3. Umgebungsvariablen in Vercel (Production): die sieben aus `.env.example`, `APP_URL=https://workbook.joerg-roos.com`.
-4. Domain `workbook.joerg-roos.com` in Vercel hinzufügen, CNAME beim DNS-Anbieter auf `cname.vercel-dns.com`.
+3. Umgebungsvariablen in Vercel (Production): die sieben aus `.env.example`, `APP_URL=https://360ba.joerg-roos.com`.
+4. Domain `360ba.joerg-roos.com` in Vercel hinzufügen, CNAME beim DNS-Anbieter auf `cname.vercel-dns.com`.
 5. Nach dem ersten Deploy: `/admin` öffnen, Test-Sitzung, kompletter Durchlauf, PDF prüfen, beide Mails prüfen.
 6. Resend: Absender `noreply@joerg-roos.com` ist verifiziert (JOERG AI). Nichts zu tun.
 7. Supabase: Migration ist eingespielt (Task 2); Bucket `workbooks` existiert.
