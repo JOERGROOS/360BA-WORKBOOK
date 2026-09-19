@@ -9,11 +9,13 @@ Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabe
 - `003_einladung.sql` — Status `eingeladen` in `wb_sessions.status` erlaubt
 - `004_statistik.sql` — `wb_sessions.gestartet_at` (Start des Interviews) und `wb_sessions.diktate` (Zähler erfolgreicher Spracheingaben) für die Admin-Übersicht
 - `005_finanzdaten.sql` — Tabelle `wb_dateien` (Metadaten je hochgeladener Datei) und der private Bucket `finanzdaten` (Finanzdaten-Upload der Kunden, 50 MB je Datei, nur die neun erlaubten Dateitypen aus `lib/dateinamen.ts`)
+- `006_abholer.sql` — `wb_dateien.lokaler_name`: bindet jede Zeile fest an den vom Abholer tatsächlich vergebenen lokalen Dateinamen (siehe unten)
 
-Hinweis: `wb_dateien.abgeholt_at` wird nicht von der App gesetzt, sondern vom
-Abholprogramm auf Jörgs Mac (`scripts/finanzdaten-abholen.mjs`, siehe
-`docs/abholer.md`) — es lädt jede Datei mit `abgeholt_at is null` herunter und
-setzt das Feld danach.
+Hinweis: `wb_dateien.abgeholt_at` und `wb_dateien.lokaler_name` werden nicht von der App
+gesetzt, sondern vom Abholprogramm auf Jörgs Mac (`scripts/finanzdaten-abholen.mjs`, siehe
+`docs/abholer.md`) — es lädt jede Datei mit `abgeholt_at is null` herunter, bindet die Zeile
+dabei fest an ihren lokalen Dateinamen (`lokaler_name`, wichtig bei zwei Uploads mit
+gleichem Namen und gleicher Größe) und setzt `abgeholt_at` danach.
 
 ## Migration einspielen
 

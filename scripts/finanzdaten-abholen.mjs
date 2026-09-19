@@ -52,7 +52,7 @@ const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_R
 
 const { data: zeilen, error } = await db
   .from('wb_dateien')
-  .select('id,dateiname,pfad,bytes,session_id,wb_sessions(firma)')
+  .select('id,dateiname,pfad,bytes,session_id,lokaler_name,wb_sessions(firma)')
   .is('abgeholt_at', null);
 
 if (error) {
@@ -66,20 +66,32 @@ for (const zeile of zeilen ?? []) {
     const ordner = path.join(ZIEL_BASIS, ordnerName(zeile.wb_sessions?.firma ?? '', zeile.session_id));
     fs.mkdirSync(ordner, { recursive: true });
 
-    // Gleicher Name, gleiche Größe → die Datei liegt schon da (z. B. vorheriger Durchlauf
-    // ist nach dem Schreiben, aber vor dem Markieren abgebrochen) — nicht neu laden, nur
-    // markieren. Nur bei abweichender Größe entsteht eine `-2`-Datei.
-    const erwarteterPfad = path.join(ordner, dateiname);
-    if (fs.existsSync(erwarteterPfad) && fs.statSync(erwarteterPfad).size === zeile.bytes) {
-      const { error: eUpdate } = await db.from('wb_dateien').update({ abgeholt_at: new Date().toISOString() }).eq('id', zeile.id);
-      if (eUpdate) throw eUpdate;
-      log(`bereits vorhanden, markiert ${erwarteterPfad}`);
-      continue;
+    let zielPfad;
+    if (zeile.lokaler_name) {
+      // Diese Zeile hat schon einmal einen lokalen Namen bekommen (ggf. mit `-2`-Suffix
+      // bei Namenskonflikt) — IMMER an genau diesen Namen gebunden. Nie erneut über
+      // `freierPfad` einen Namen suchen, sonst verwechseln sich zwei Zeilen mit gleichem
+      // Namen UND gleicher Größe (der eigentliche Fehler, den `lokaler_name` behebt).
+      zielPfad = path.join(ordner, zeile.lokaler_name);
+      if (fs.existsSync(zielPfad) && fs.statSync(zielPfad).size === zeile.bytes) {
+        const { error: eUpdate } = await db.from('wb_dateien').update({ abgeholt_at: new Date().toISOString() }).eq('id', zeile.id);
+        if (eUpdate) throw eUpdate;
+        log(`bereits vorhanden, markiert ${zielPfad}`);
+        continue;
+      }
+      // Fehlt die Datei oder weicht die Größe ab → (erneut) genau an diesen Namen
+      // schreiben, unten überschreibt der Download-Zweig sie über `.teil` + rename.
+    } else {
+      // Erster Durchlauf für diese Zeile: freien Namen im Ordner vergeben und SOFORT auf
+      // der Zeile festschreiben — noch VOR dem Download. Erst danach ist die Zeile
+      // unverwechselbar an "ihre" Datei gebunden, auch wenn der Lauf gleich danach abbricht.
+      zielPfad = freierPfad(ordner, dateiname);
+      const { error: eName } = await db.from('wb_dateien').update({ lokaler_name: path.basename(zielPfad) }).eq('id', zeile.id);
+      if (eName) throw eName;
     }
 
     const { data: blob, error: eDownload } = await db.storage.from('finanzdaten').download(zeile.pfad);
     if (eDownload) throw eDownload;
-    const zielPfad = freierPfad(ordner, dateiname);
     const teilPfad = `${zielPfad}.teil`;
     fs.writeFileSync(teilPfad, Buffer.from(await blob.arrayBuffer()));
     fs.renameSync(teilPfad, zielPfad);
