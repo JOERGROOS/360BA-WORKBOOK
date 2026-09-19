@@ -110,6 +110,21 @@ export async function dateienFuer(sitzungId: string): Promise<DateiEintrag[]> {
 // Für den Admin-Bereich: dieselbe Liste, zusätzlich Speicherpfad, Abhol-Status und eine
 // eine Stunde gültige Download-Adresse je Datei. Scheitert die Adresse für EINE Datei
 // (z. B. kurzer Supabase-Ausfall), fällt nur diese eine Zeile aus — nicht die ganze Liste.
+// Für den ZIP-Download (Admin): Dateiname + Speicherpfad je Datei, für den echten Inhalt siehe
+// `dateiHerunterladen`. Registriert verwaiste Objekte vorher, wie die anderen Lesefunktionen.
+export async function dateienFuerZip(sitzungId: string): Promise<{ dateiname: string; pfad: string }[]> {
+  await verwaisteObjekteRegistrieren(sitzungId);
+  const { data, error } = await db.from('wb_dateien').select('dateiname,pfad').eq('session_id', sitzungId).order('created_at');
+  if (error) throw error;
+  return (data ?? []) as { dateiname: string; pfad: string }[];
+}
+
+export async function dateiHerunterladen(pfad: string): Promise<Uint8Array> {
+  const { data, error } = await db.storage.from(BUCKET).download(pfad);
+  if (error || !data) throw error ?? new Error('Datei fehlt im Speicher');
+  return new Uint8Array(await data.arrayBuffer());
+}
+
 export async function dateienFuerAdmin(sitzungId: string): Promise<DateiEintragAdmin[]> {
   await verwaisteObjekteRegistrieren(sitzungId);
   const { data, error } = await db.from('wb_dateien').select('dateiname,bytes,created_at,pfad,abgeholt_at').eq('session_id', sitzungId).order('created_at');

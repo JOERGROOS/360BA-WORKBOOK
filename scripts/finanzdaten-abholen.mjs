@@ -1,7 +1,9 @@
 // Abholprogramm: lädt neue Finanzdaten-Uploads der Kunden aus dem privaten Supabase-Speicher
-// auf Jörgs Mac herunter und markiert sie als abgeholt. Läuft alle 10 Minuten per launchd
-// (siehe scripts/abholer-installieren.sh) — manuell mit:
-//   node --env-file=$HOME/.config/360ba-workbook/.env.local scripts/finanzdaten-abholen.mjs
+// auf Jörgs Mac herunter und markiert sie als abgeholt. Zwei launchd-Jobs (siehe
+// scripts/abholer-installieren.sh): Vollmodus täglich 08:00/14:00 (alle unabgeholten Dateien),
+// `--nur-angefordert` alle 5 Minuten (nur Sitzungen, für die der Admin "Auf meinen Mac
+// abholen" geklickt hat) — manuell mit:
+//   node --env-file=$HOME/.config/360ba-workbook/.env.local scripts/finanzdaten-abholen.mjs [--nur-angefordert]
 import { createClient } from '@supabase/supabase-js';
 import { ordnerName, dateinameSicher } from '../lib/dateinamen.ts';
 import fs from 'node:fs';
@@ -40,6 +42,28 @@ if (fehlendeEnv.length > 0) {
   process.exit(1);
 }
 
+const nurAngefordert = process.argv.includes('--nur-angefordert');
+const modus = nurAngefordert ? 'angefordert' : 'voll';
+
+const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+
+// Schneller Ausstieg für den 5-Minuten-Job: genau EINE Abfrage, ob überhaupt eine Sitzung
+// "Auf meinen Mac abholen" angefordert hat. Im Normalfall (nichts angefordert) endet der
+// Lauf hier — ohne die teureren Abfragen unten (beanspruchte Namen, Dateien) zu stellen.
+let angeforderteSessionIds = null;
+if (nurAngefordert) {
+  const { data: sessions, error: eSessions } = await db.from('wb_sessions').select('id').not('abholen_angefordert', 'is', null);
+  if (eSessions) {
+    log(`FEHLER angeforderte Sitzungen konnten nicht geladen werden: ${eSessions.message}`);
+    process.exit(1);
+  }
+  angeforderteSessionIds = (sessions ?? []).map((s) => s.id);
+  if (angeforderteSessionIds.length === 0) {
+    log(`Modus: ${modus} · 0 Dateien`);
+    process.exit(0);
+  }
+}
+
 // Reste aus abgebrochenen Durchläufen (Mac ist mitten im Schreiben ausgegangen) räumen,
 // bevor neu abgeholt wird — nur die `.teil`-Endung, sonst nichts im Zielordner.
 for (const datei of fs.existsSync(ZIEL_BASIS) ? fs.readdirSync(ZIEL_BASIS, { recursive: true }) : []) {
@@ -53,8 +77,6 @@ for (const datei of fs.existsSync(ZIEL_BASIS) ? fs.readdirSync(ZIEL_BASIS, { rec
   }
 }
 
-const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
-
 // Alle schon vergebenen lokalen Namen laden — auch von Zeilen, die noch nicht abgeholt
 // sind (Download kann noch laufen oder zuletzt fehlgeschlagen sein). Ohne diese Liste
 // könnte eine zweite Zeile im selben Lauf denselben Namen ziehen, weil die erste Zeile
@@ -66,15 +88,19 @@ if (eVergeben) {
 }
 const beanspruchteNamen = new Set((vergebeneNamen ?? []).map((z) => z.lokaler_name));
 
-const { data: zeilen, error } = await db
+let zeilenAbfrage = db
   .from('wb_dateien')
   .select('id,dateiname,pfad,bytes,session_id,lokaler_name,wb_sessions(firma)')
   .is('abgeholt_at', null);
+if (angeforderteSessionIds) zeilenAbfrage = zeilenAbfrage.in('session_id', angeforderteSessionIds);
+const { data: zeilen, error } = await zeilenAbfrage;
 
 if (error) {
   log(`FEHLER Liste konnte nicht geladen werden: ${error.message}`);
   process.exit(1);
 }
+
+log(`Modus: ${modus} · ${(zeilen ?? []).length} Dateien`);
 
 for (const zeile of zeilen ?? []) {
   const dateiname = dateinameSicher(zeile.dateiname);
@@ -124,4 +150,13 @@ for (const zeile of zeilen ?? []) {
   } catch (e) {
     log(`FEHLER ${dateiname}: ${e.message ?? e}`);
   }
+}
+
+// Signal für "Auf meinen Mac abholen" löschen. Im angeforderten Modus für JEDE angefragte
+// Sitzung (auch wenn sie schon nichts Unabgeholtes mehr hatte — sonst bliebe das Signal
+// stehen); im Vollmodus für die Sitzungen, deren Dateien gerade bearbeitet wurden.
+const zuLoeschen = angeforderteSessionIds ?? [...new Set((zeilen ?? []).map((z) => z.session_id))];
+if (zuLoeschen.length > 0) {
+  const { error: eSignal } = await db.from('wb_sessions').update({ abholen_angefordert: null }).in('id', zuLoeschen);
+  if (eSignal) log(`FEHLER Signal konnte nicht gelöscht werden: ${eSignal.message}`);
 }

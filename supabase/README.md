@@ -10,6 +10,7 @@ Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabe
 - `004_statistik.sql` — `wb_sessions.gestartet_at` (Start des Interviews) und `wb_sessions.diktate` (Zähler erfolgreicher Spracheingaben) für die Admin-Übersicht
 - `005_finanzdaten.sql` — Tabelle `wb_dateien` (Metadaten je hochgeladener Datei) und der private Bucket `finanzdaten` (Finanzdaten-Upload der Kunden, 50 MB je Datei, nur die neun erlaubten Dateitypen aus `lib/dateinamen.ts`)
 - `006_abholer.sql` — `wb_dateien.lokaler_name`: bindet jede Zeile fest an den vom Abholer tatsächlich vergebenen lokalen Dateinamen (siehe unten)
+- `007_abholen_signal.sql` — `wb_sessions.abholen_angefordert`: Signal für den Knopf „Auf meinen Mac abholen" je Sitzung (siehe `docs/abholer.md`)
 
 Hinweis: `wb_dateien.abgeholt_at` und `wb_dateien.lokaler_name` werden nicht von der App
 gesetzt, sondern vom Abholprogramm auf Jörgs Mac (`scripts/finanzdaten-abholen.mjs`, siehe

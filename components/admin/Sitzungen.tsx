@@ -4,7 +4,17 @@ import type { Sitzung } from '@/lib/db';
 import type { DateiEintragAdmin } from '@/lib/dateien';
 import { EinladungFormular } from './EinladungFormular';
 
-type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at'> & { prozent: number; link: string };
+type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at' | 'abholen_angefordert'> & { prozent: number; link: string };
+
+function uhrzeit(iso: string): string {
+  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+function abgeholtText(iso: string): string {
+  return new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(',', '');
+}
+function alleAbgeholt(liste: DateiEintragAdmin[]): boolean {
+  return liste.every((d) => d.abgeholt_at);
+}
 
 function antwortAnzeigen(a: unknown): string {
   if (a === undefined || a === null || a === '') return '—';
@@ -83,6 +93,15 @@ export function Sitzungen() {
     await laden();
   }
 
+  async function abholen(id: string) {
+    setLaeuft(id); setFehler('');
+    const r = await fetch(`/api/admin/sitzungen/${id}/abholen`, { method: 'POST' });
+    setLaeuft(null);
+    if (!r.ok) { setFehler(await fehlerAus(r, 'Das hat nicht geklappt.')); return; }
+    const d: { angefordert: string } = await r.json();
+    setListe((l) => l && l.map((s) => (s.id === id ? { ...s, abholen_angefordert: d.angefordert } : s)));
+  }
+
   async function linkKopieren(s: SitzungListe) {
     await navigator.clipboard.writeText(s.link);
     setKopiert(s.id); setTimeout(() => setKopiert(null), 2000);
@@ -118,6 +137,16 @@ export function Sitzungen() {
                 <span className="flex gap-3 justify-end flex-wrap text-[13px]">
                   <button className="text-o font-medium" onClick={() => ausklappen(s.id)}>Antworten</button>
                   <button className="text-o font-medium" onClick={() => setDateienOffen((o) => (o === s.id ? null : s.id))}>Dateien ({dateien[s.id]?.length ?? 0})</button>
+                  {(dateien[s.id]?.length ?? 0) > 0 && (
+                    <a className="text-o font-medium" href={`/api/admin/sitzungen/${s.id}/dateien/zip`} download>Alle herunterladen (ZIP)</a>
+                  )}
+                  {(dateien[s.id]?.length ?? 0) > 0 && (
+                    alleAbgeholt(dateien[s.id]) ? null : s.abholen_angefordert ? (
+                      <span className="text-muted">angefordert · {uhrzeit(s.abholen_angefordert)}</span>
+                    ) : (
+                      <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => abholen(s.id)}>Auf meinen Mac abholen</button>
+                    )
+                  )}
                   {s.status !== 'abgeschlossen' && <button className="text-o font-medium" onClick={() => linkKopieren(s)}>{kopiert === s.id ? 'Kopiert ✓' : 'Link kopieren'}</button>}
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => pdfOeffnen(s.id)}>PDF öffnen</button>
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => pdfNeu(s.id)}>PDF neu erzeugen</button>
@@ -156,7 +185,7 @@ export function Sitzungen() {
                           ) : (
                             <span className="truncate text-muted" title={d.hinweis}>{d.dateiname} — {d.hinweis ?? 'Adresse nicht verfügbar'}</span>
                           )}
-                          <span className={`text-[11px] uppercase tracking-[.08em] px-2.5 py-1 rounded-full border shrink-0 ${d.abgeholt_at ? 'border-[#4ec986] text-[#4ec986]' : 'border-muted text-muted'}`}>{d.abgeholt_at ? 'abgeholt ✓' : 'wartet'}</span>
+                          <span className={`text-[11px] uppercase tracking-[.08em] px-2.5 py-1 rounded-full border shrink-0 ${d.abgeholt_at ? 'border-[#4ec986] text-[#4ec986]' : 'border-muted text-muted'}`}>{d.abgeholt_at ? `abgeholt ✓ ${abgeholtText(d.abgeholt_at)}` : 'wartet'}</span>
                         </div>
                       ))}
                     </div>

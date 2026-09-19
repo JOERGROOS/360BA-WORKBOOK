@@ -1,15 +1,22 @@
 # 360BA Online-Workbook
 
 Stand: 19.09.2026 — Einladungslink + Admin-Übersicht mit Statistik (Task 1),
-Kunden-Landeseite mit Kacheln + Finanzdaten-Upload (Task 2) und Abholprogramm
-auf Jörgs Mac (Task 3) fertig.
+Kunden-Landeseite mit Kacheln + Finanzdaten-Upload (Task 2), Abholprogramm
+auf Jörgs Mac (Task 3) und ZIP-Download + „Auf meinen Mac abholen" je Kunde
+(Plan „Abholen je Kunde", Task 1) fertig.
 
-## Abholprogramm für Finanzdaten (Task 3)
-Holt neue Kunden-Uploads per launchd täglich um 08:00 und 14:00 aus dem Supabase-Bucket
-`finanzdaten` nach `/Users/joergroos/_JRB-SERVER/03-FULLFILMENT/360 GRAD
-BUSINESSANALYSE/1-Uploads von Kunden/<Firma>/` — Skript
-`scripts/finanzdaten-abholen.mjs`, Installation `scripts/abholer-installieren.sh`,
-Protokoll `~/Library/Logs/360ba-abholer.log`. Details: `docs/abholer.md`.
+## Abholprogramm für Finanzdaten (Task 3 + Plan „Abholen je Kunde")
+Holt neue Kunden-Uploads per launchd aus dem Supabase-Bucket `finanzdaten` nach
+`/Users/joergroos/_JRB-SERVER/03-FULLFILMENT/360 GRAD BUSINESSANALYSE/1-Uploads
+von Kunden/<Firma>/` — Skript `scripts/finanzdaten-abholen.mjs`, Installation
+`scripts/abholer-installieren.sh`, Protokoll `~/Library/Logs/360ba-abholer.log`.
+Zwei launchd-Jobs: Vollmodus täglich 08:00/14:00 (alle unabgeholten Dateien),
+`--nur-angefordert` alle 5 Minuten (nur Sitzungen mit gesetztem Signal
+`wb_sessions.abholen_angefordert`, gesetzt über den Admin-Knopf „Auf meinen Mac
+abholen" bzw. `POST /api/admin/sitzungen/[id]/abholen`). Admin kann außerdem
+alle Dateien einer Sitzung direkt als ZIP laden (`GET
+/api/admin/sitzungen/[id]/dateien/zip`, `lib/zip.ts`, Store-ZIP ohne
+Kompression). Details: `docs/abholer.md`.
 
 ## Was ist das
 Interaktives Online-Workbook zur 360° Business-Analyse für Jörg Roos' Kunden

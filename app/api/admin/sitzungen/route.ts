@@ -8,7 +8,7 @@ import type { Snapshot, Antworten } from '@/lib/db';
 export async function GET(req: Request) {
   if (!adminGeprueft(req)) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
   const { data, error } = await db.from('wb_sessions')
-    .select('id,token,vorname,nachname,firma,email,status,test,created_at,abgeschlossen_at,fragen_snapshot,antworten')
+    .select('id,token,vorname,nachname,firma,email,status,test,created_at,abgeschlossen_at,fragen_snapshot,antworten,abholen_angefordert')
     .order('created_at', { ascending: false });
   if (error) return dbFehler('sitzungen', error, 'Sitzungen konnten nicht geladen werden.');
   const aus = (data ?? []).map((s) => {
