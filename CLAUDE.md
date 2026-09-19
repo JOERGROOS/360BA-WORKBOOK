@@ -177,3 +177,6 @@ Ausführliche Anleitung: `docs/deployment.md`.
 ## Wichtig
 Änderungen am Fragebogen (`wb_questions`, `wb_chapters`) wirken nur auf neue
 Sitzungen — laufende `wb_sessions` behalten den Stand ihres Starts.
+
+## Übergabe
+Aktuellster Gesamtstand für einen neuen Chat: `docs/UEBERGABE-2026-09-19.md` (zuerst lesen).
