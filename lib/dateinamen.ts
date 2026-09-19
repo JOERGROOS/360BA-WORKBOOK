@@ -31,15 +31,36 @@ export function typErlaubt(dateiname: string, contentType: string): boolean {
   return !!erlaubte && erlaubte.includes(contentType);
 }
 
+// Entfernt den Zeitstempel-Präfix, den `uploadAdresse` beim Speichern voranstellt
+// (`<Date.now()>-<dateinameSicher(name)>`) — für die Anzeige/DB brauchen wir nur den
+// eigentlichen Namen. Abhängigkeitsfrei, damit der Abholer sie direkt importieren kann.
+export function dateinameAusStorageName(name: string): string {
+  return name.replace(/^\d+-/, '');
+}
+
+// Ein Name, der nur aus Punkten/Unterstrichen besteht (oder leer ist) — insbesondere "." und
+// "..", die in `path.join` als "aktuelles"/"übergeordnetes Verzeichnis" gelesen werden und
+// damit den Abholer aus dem Zielordner heraus schreiben lassen könnten (Pfad-Traversal).
+function nurPunkteOderLeer(s: string): boolean {
+  return /^[._]*$/.test(s);
+}
+
+// Führende Punkte (Versteck-/Traversal-Notation ".", "..", ".hidden") und abschließende
+// Punkte/Leerzeichen abschneiden — beides sind auf macOS/Windows unerwünschte Datei-/
+// Ordnernamen-Enden, keine normalen Zeichen mitten im Namen.
+function ohneRandpunkte(s: string): string {
+  return s.replace(/^\.+/, '').replace(/[.\s]+$/, '');
+}
+
 export function dateinameSicher(name: string): string {
-  const bereinigt = name.trim().replace(ZEICHEN_ERLAUBT, '_').slice(0, 150);
-  return bereinigt || 'datei';
+  const bereinigt = ohneRandpunkte(name.trim().replace(ZEICHEN_ERLAUBT, '_')).slice(0, 150);
+  return nurPunkteOderLeer(bereinigt) ? 'datei' : bereinigt;
 }
 
 // Ordnername für die Ablage beim Kunden (Firmenname), Regel aus den Global Constraints:
-// nur A-Za-z0-9 äöüÄÖÜß._- erlaubt, Rest → `_`, max. 80 Zeichen, leer → Kunde-<Sitzungs-ID kurz>.
+// nur A-Za-z0-9 äöüÄÖÜß._- erlaubt, Rest → `_`, max. 80 Zeichen, leer/nur Punkte →
+// Kunde-<Sitzungs-ID kurz>.
 export function ordnerName(firma: string, sitzungId: string): string {
-  const trimmed = firma.trim();
-  if (!trimmed) return `Kunde-${sitzungId.slice(0, 8)}`;
-  return trimmed.replace(ZEICHEN_ERLAUBT, '_').slice(0, 80);
+  const bereinigt = ohneRandpunkte(firma.trim().replace(ZEICHEN_ERLAUBT, '_')).slice(0, 80);
+  return nurPunkteOderLeer(bereinigt) ? `Kunde-${sitzungId.slice(0, 8)}` : bereinigt;
 }

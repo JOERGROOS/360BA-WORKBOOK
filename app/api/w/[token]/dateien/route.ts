@@ -25,11 +25,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
   if (!s) return NextResponse.json({ error: 'Link ungültig' }, { status: 404 });
   if (!bremse(`upload:${s.id}`, 60, 3600)) return NextResponse.json({ error: 'Zu viele Uploads. Bitte später erneut.' }, { status: 429 });
   const b = await req.json().catch(() => null);
-  if (!b || typeof b.pfad !== 'string' || typeof b.dateiname !== 'string') {
+  if (!b || typeof b.pfad !== 'string') {
     return NextResponse.json({ error: 'Ungültige Anfrage' }, { status: 400 });
   }
   try {
-    await dateiRegistrieren(s, { pfad: b.pfad, dateiname: b.dateiname });
+    await dateiRegistrieren(s, { pfad: b.pfad });
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof EingabeFehler) return NextResponse.json({ error: e.message }, { status: e.status });

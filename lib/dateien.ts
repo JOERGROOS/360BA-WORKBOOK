@@ -1,5 +1,5 @@
 import { db, type Sitzung } from './db';
-import { typErlaubt, dateinameSicher, MAX_BYTES, MAX_DATEIEN } from './dateinamen';
+import { typErlaubt, dateinameSicher, dateinameAusStorageName, MAX_BYTES, MAX_DATEIEN } from './dateinamen';
 
 const BUCKET = 'finanzdaten';
 
@@ -14,10 +14,6 @@ export class EingabeFehler extends Error {
     super(message);
     this.status = status;
   }
-}
-
-function dateinameAusStorageName(name: string): string {
-  return name.replace(/^\d+-/, '');
 }
 
 // Objekte, die im Speicher liegen, aber keine wb_dateien-Zeile haben (Kunde hat den Browser
@@ -77,9 +73,9 @@ export async function uploadAdresse(s: Sitzung, dateiname: string, contentType: 
 }
 
 // Registriert eine bereits hochgeladene Datei: prüft, dass sie wirklich im Bucket liegt
-// (storage.list) und übernimmt Größe/Typ von DORT — nicht vom Client, der hier lügen könnte.
-// Nur der Dateiname (reine Anzeige, keine Pfad-/Typ-Wirkung mehr) kommt vom Client.
-export async function dateiRegistrieren(s: Sitzung, meta: { pfad: string; dateiname: string }): Promise<void> {
+// (storage.list) und übernimmt Dateiname/Größe/Typ von DORT — nichts kommt mehr vom Client,
+// der hier sonst einen anderen Namen als den hochgeladenen unterschieben könnte.
+export async function dateiRegistrieren(s: Sitzung, meta: { pfad: string }): Promise<void> {
   if (!meta.pfad.startsWith(`${s.id}/`)) throw new EingabeFehler('Pfad gehört nicht zu dieser Sitzung.');
   const trennstelle = meta.pfad.lastIndexOf('/');
   const ordner = meta.pfad.slice(0, trennstelle);
@@ -93,7 +89,7 @@ export async function dateiRegistrieren(s: Sitzung, meta: { pfad: string; datein
   if ((count ?? 0) >= MAX_DATEIEN) throw new EingabeFehler('Höchstens 30 Dateien je Workbook.');
   const { error } = await db.from('wb_dateien').insert({
     session_id: s.id,
-    dateiname: meta.dateiname,
+    dateiname: dateinameAusStorageName(basisname),
     pfad: meta.pfad,
     bytes: objekt.metadata?.size ?? 0,
     content_type: objekt.metadata?.mimetype ?? 'application/octet-stream',
