@@ -16,7 +16,10 @@ export function Fortschritt({ kapitel, aktuellesKapitel, prozent }: { kapitel: {
                 boxShadow: jetzt ? '0 0 14px rgba(237,122,2,.5)' : 'none',
               }}>
               {/* Beschriftung bleibt im eigenen Abschnitt — sonst laufen lange Kapitelnamen ineinander. */}
-              <span className={`absolute top-3 left-0 right-1.5 text-[10px] font-medium uppercase tracking-wider truncate hidden md:block ${jetzt ? 'text-o' : 'text-muted'}`}>{kurz(k.titel)}</span>
+              <span
+                className={`absolute top-3 left-0 text-[10px] font-medium uppercase tracking-wider hidden md:block ${jetzt ? 'text-o' : 'text-muted'}`}
+                style={{ maxWidth: '100%', paddingRight: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >{kurz(k.titel)}</span>
             </b>
           );
         })}

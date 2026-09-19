@@ -136,6 +136,11 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
   if (!eintrag) return <main className="max-w-[620px] mx-auto px-8 py-24 text-center fine">Kein aktiver Fragebogen.</main>;
 
   const { kapitel, frage, kapitelIndex, frageIndex } = eintrag;
+  // Das Wasserzeichen zeigt die Nummer des Erfolgsfaktors, nicht die Kapitelnummer —
+  // sonst stünde über „Erfolgsfaktor 1 von 7" eine 02. Andere Kapitel bekommen keines.
+  const faktorNummer = kapitel.typ === 'faktor'
+    ? snapshot.kapitel.filter((k, i) => k.typ === 'faktor' && i <= kapitelIndex).length
+    : 0;
   const prozentInfo = fortschritt(snapshot, antworten);
   const istLetzte = pos === alle.length - 1;
   const tastenhinweis = frage.typ === 'text'
@@ -190,9 +195,11 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
       {zeigeEinleitung ? (
         <div className="max-w-[900px] mx-auto px-6 md:px-8 pt-12 pb-20">
           <div key={kapitel.id} className="glas erscheint px-7 py-12 md:px-14 md:py-16">
-            <span aria-hidden="true" className="pointer-events-none absolute right-4 md:right-10 -top-6 md:-top-10 font-semibold leading-none text-[150px] md:text-[220px] text-white/[.04] select-none">
-              {String(kapitelIndex + 1).padStart(2, '0')}
-            </span>
+            {faktorNummer > 0 && (
+              <span aria-hidden="true" className="pointer-events-none absolute right-4 md:right-10 -top-6 md:-top-10 font-semibold leading-none text-[150px] md:text-[220px] text-white/[.04] select-none">
+                {String(faktorNummer).padStart(2, '0')}
+              </span>
+            )}
             <div className="relative">
               <div className="eyebrow">{kapitel.untertitel}</div>
               <h1 className="font-semibold text-[34px] md:text-[46px] leading-[1.12] mt-3 mb-5">{kapitel.titel}</h1>
