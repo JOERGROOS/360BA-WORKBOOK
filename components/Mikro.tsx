@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 type Zustand = 'bereit' | 'nimmt-auf' | 'wandelt-um' | 'fehler';
-export type MikroStatus = { z: Zustand; sek: number; fehler: string };
+export type MikroStatus = { z: Zustand; sek: number; fehler: string; pegel: number };
 
 // Reiner Knopf ohne eigene Positionierung — der Slot in FrageText.tsx ist bereits absolut
 // positioniert; ein zweites `absolute` hier würde die Versätze aufaddieren. Die Statuszeile
@@ -12,12 +12,22 @@ export function Mikro({ token, onText, onStatus }: { token: string; onText: (t: 
   const [z, setZ] = useState<Zustand>('bereit');
   const [sek, setSek] = useState(0);
   const [fehler, setFehler] = useState('');
+  const [pegel, setPegel] = useState(0);
   const rec = useRef<MediaRecorder | null>(null);
   const teile = useRef<Blob[]>([]);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sekRef = useRef(0);
+  const audioCtx = useRef<AudioContext | null>(null);
+  const pegelTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => () => { rec.current?.stream.getTracks().forEach((t) => t.stop()); if (timer.current) clearInterval(timer.current); }, []);
-  useEffect(() => { onStatus?.({ z, sek, fehler }); }, [z, sek, fehler, onStatus]);
+  function pegelmessungStoppen() {
+    if (pegelTimer.current) { clearInterval(pegelTimer.current); pegelTimer.current = null; }
+    if (audioCtx.current) { void audioCtx.current.close(); audioCtx.current = null; }
+    setPegel(0);
+  }
+
+  useEffect(() => () => { rec.current?.stream.getTracks().forEach((t) => t.stop()); if (timer.current) clearInterval(timer.current); pegelmessungStoppen(); }, []);
+  useEffect(() => { onStatus?.({ z, sek, fehler, pegel }); }, [z, sek, fehler, pegel, onStatus]);
 
   async function start() {
     setFehler('');
@@ -30,16 +40,37 @@ export function Mikro({ token, onText, onStatus }: { token: string; onText: (t: 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const typ = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
       const r = new MediaRecorder(stream, typ ? { mimeType: typ } : undefined);
+      console.info('[mikro] start', { mimeType: r.mimeType, tracks: stream.getAudioTracks().map((t) => ({ label: t.label, enabled: t.enabled, muted: t.muted, settings: t.getSettings() })) });
       teile.current = [];
       r.ondataavailable = (e) => { if (e.data.size) teile.current.push(e.data); };
-      r.onstop = () => { stream.getTracks().forEach((t) => t.stop()); void hochladen(new Blob(teile.current, { type: r.mimeType })); };
-      r.start();
-      rec.current = r; setZ('nimmt-auf'); setSek(0);
-      timer.current = setInterval(() => setSek((s) => { if (s + 1 >= 300) stopp(); return s + 1; }), 1000);
+      r.onstop = () => { stream.getTracks().forEach((t) => t.stop()); pegelmessungStoppen(); void hochladen(new Blob(teile.current, { type: r.mimeType })); };
+      r.start(1000);
+      rec.current = r; setZ('nimmt-auf'); setSek(0); sekRef.current = 0;
+      timer.current = setInterval(() => setSek((s) => { const n = s + 1; sekRef.current = n; if (n >= 300) stopp(); return n; }), 1000);
+
+      // Live-Pegelanzeige als Beleg dafür, dass wirklich Ton ankommt.
+      const ctx = new AudioContext();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      ctx.createMediaStreamSource(stream).connect(analyser);
+      audioCtx.current = ctx;
+      const daten = new Uint8Array(analyser.fftSize);
+      pegelTimer.current = setInterval(() => {
+        analyser.getByteTimeDomainData(daten);
+        let summe = 0;
+        for (let i = 0; i < daten.length; i++) { const v = (daten[i] - 128) / 128; summe += v * v; }
+        setPegel(Math.sqrt(summe / daten.length));
+      }, 200);
     } catch { setZ('fehler'); setFehler('Kein Zugriff auf das Mikrofon. Bitte im Browser erlauben oder tippen.'); }
   }
   function stopp() { if (timer.current) clearInterval(timer.current); if (rec.current?.state === 'recording') rec.current.stop(); }
   async function hochladen(blob: Blob) {
+    console.info('[mikro] stopp', { teile: teile.current.length, bytes: blob.size, typ: blob.type, sekunden: sekRef.current });
+    if (blob.size < 2000) {
+      console.info('[mikro] leer', { bytes: blob.size });
+      setZ('fehler'); setFehler('Die Aufnahme war leer – das Mikrofon hat keinen Ton geliefert. Bitte Mikrofon prüfen und erneut versuchen.');
+      return;
+    }
     setZ('wandelt-um');
     const fd = new FormData();
     fd.append('audio', blob, blob.type.includes('mp4') ? 'aufnahme.mp4' : 'aufnahme.webm');
@@ -48,6 +79,10 @@ export function Mikro({ token, onText, onStatus }: { token: string; onText: (t: 
       const d = await res.json();
       if (!res.ok) throw new Error(d.error);
       if (typeof d.text !== 'string') throw new Error('Keine Antwort erhalten');
+      if (d.hinweis === 'leer' || d.text.trim() === '') {
+        setZ('fehler'); setFehler('Ich habe nichts verstanden – bitte näher ans Mikrofon oder erneut versuchen.');
+        return;
+      }
       onText(d.text); setZ('bereit');
     } catch (e) { setZ('fehler'); setFehler((e as Error).message || 'Aufnahme konnte nicht umgewandelt werden.'); }
   }

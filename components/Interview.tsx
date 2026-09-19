@@ -23,8 +23,26 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
   const [fehler, setFehler] = useState('');
   const [speichertGerade, setSpeichertGerade] = useState(false);
   const [linkHinweis, setLinkHinweis] = useState('');
-  const [mikroStatus, setMikroStatus] = useState<MikroStatus>({ z: 'bereit', sek: 0, fehler: '' });
+  const [mikroStatus, setMikroStatus] = useState<MikroStatus>({ z: 'bereit', sek: 0, fehler: '', pegel: 0 });
+  const [keinTonHinweis, setKeinTonHinweis] = useState(false);
+  const keinTonSeitRef = useRef<number | null>(null);
   const zeitgeberRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Beleg für "Mikro nimmt auf, aber es kommt kein Ton an": 3 Sekunden am Stück Pegel ~0.
+  useEffect(() => {
+    if (mikroStatus.z !== 'nimmt-auf') {
+      keinTonSeitRef.current = null;
+      if (keinTonHinweis) setKeinTonHinweis(false);
+      return;
+    }
+    if (mikroStatus.pegel < 0.01) {
+      if (keinTonSeitRef.current === null) keinTonSeitRef.current = Date.now();
+      if (Date.now() - keinTonSeitRef.current > 3000 && !keinTonHinweis) setKeinTonHinweis(true);
+    } else {
+      keinTonSeitRef.current = null;
+      if (keinTonHinweis) setKeinTonHinweis(false);
+    }
+  }, [mikroStatus.z, mikroStatus.pegel, keinTonHinweis]);
 
   const eintrag = alle[pos];
 
@@ -132,7 +150,23 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
   function mikroStatusZeile(s: MikroStatus) {
     if (s.z === 'nimmt-auf') {
       const mm = `${Math.floor(s.sek / 60)}:${String(s.sek % 60).padStart(2, '0')}`;
-      return <span><span className="inline-block w-2 h-2 rounded-full bg-[#ff5a4a] mr-2 animate-pulse" />Aufnahme läuft · {mm} · Stopp mit Klick oder Leertaste. Danach wandeln wir deine Antwort in Text um und glätten sie – du kannst sie noch anpassen.</span>;
+      const gefuellt = Math.min(8, Math.round(s.pegel * 30));
+      return (
+        <span className="flex items-center flex-wrap gap-x-2">
+          <span className="inline-block w-2 h-2 rounded-full bg-[#ff5a4a] mr-1 animate-pulse" />
+          Aufnahme läuft · {mm} ·
+          <span className="inline-flex items-end gap-[2px] h-3" aria-hidden="true">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <i key={i} className={`inline-block w-[3px] rounded-sm ${i < gefuellt ? 'bg-o' : 'bg-[#3a3f44]'}`} style={{ height: `${4 + i}px` }} />
+            ))}
+          </span>
+          {keinTonHinweis ? (
+            <span className="text-[#ff7a52]">Kein Ton – Mikrofon prüfen</span>
+          ) : (
+            <span>Stopp mit Klick oder Leertaste. Danach wandeln wir deine Antwort in Text um und glätten sie – du kannst sie noch anpassen.</span>
+          )}
+        </span>
+      );
     }
     if (s.z === 'wandelt-um') return <span>Wandle deine Antwort in Text um …</span>;
     if (s.z === 'fehler') return <span className="text-[#ff7a52]">{s.fehler}</span>;

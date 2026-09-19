@@ -34,7 +34,7 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
 
   const [aha, setAha] = useState(ahaStart);
   const [offen, setOffen] = useState<Record<string, boolean>>({});
-  const [mikroStatus, setMikroStatus] = useState<MikroStatus>({ z: 'bereit', sek: 0, fehler: '' });
+  const [mikroStatus, setMikroStatus] = useState<MikroStatus>({ z: 'bereit', sek: 0, fehler: '', pegel: 0 });
   const [speichertAb, setSpeichertAb] = useState(false);
   const [fehler, setFehler] = useState('');
 

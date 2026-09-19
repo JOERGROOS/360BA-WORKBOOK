@@ -15,9 +15,14 @@ export async function POST(req: Request) {
   const audio = form?.get('audio');
   if (!(audio instanceof File) || audio.size === 0) return NextResponse.json({ error: 'Keine Aufnahme erhalten' }, { status: 400 });
   if (audio.size > 25 * 1024 * 1024) return NextResponse.json({ error: 'Aufnahme zu groß' }, { status: 413 });
+  console.info('[transkribieren] eingang', { bytes: audio.size, typ: audio.type, name: audio.name });
+  const t0 = Date.now();
   try {
     const roh = await transkribiere(audio);
     const text = await glaette(roh);
+    const leer = roh.trim() === '';
+    console.info('[transkribieren] ergebnis', { rohZeichen: roh.length, geglaettetZeichen: text.length, ms: Date.now() - t0, leer });
+    if (leer) return NextResponse.json({ text: '', hinweis: 'leer' });
     return NextResponse.json({ text });
   } catch (e) {
     console.error('[transkribieren]', e);
