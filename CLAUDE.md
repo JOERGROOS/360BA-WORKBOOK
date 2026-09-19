@@ -146,9 +146,14 @@ einspielen und Seed-Ablauf: `supabase/README.md`.
   wieder an der zuletzt gespeicherten (weiter vorne liegenden) Frage fort.
 - **react-pdf-Eigenheiten** (`lib/pdf/Workbook.tsx`): kein `lineHeight` auf
   Seitenebene setzen — Yoga in react-pdf 4.9 überschreibt es sonst überall,
-  auch in der Fußzeile. Ein hier gesetzter `lineHeight` wird beim Rendern
-  fix mit 12/7 (≈1,714) multipliziert, unabhängig von der Schriftgröße —
-  `lineHeight: 1.35` im Code ergibt also ~2,31 auf der Seite. Kein
+  auch in der Fußzeile. `lineHeight` wirkt nur, wenn am selben Element auch
+  `fontSize` steht — dann gilt schlicht Zeilenabstand = `lineHeight` ×
+  `fontSize` (mit `pdftotext -bbox` gemessen: `fontSize: 11` plus
+  `lineHeight: 1.0` ergibt exakt 11,00 pt); fehlt `fontSize`, ignoriert
+  react-pdf den Wert und nimmt die natürliche Zeilenhöhe der Schrift, bei
+  Montserrat rund 1,36 × Schriftgröße. Ganzseitige Hintergrundbilder brauchen
+  feste Punktmaße (595,28 × 841,89) und `fixed`, sonst zählen sie im
+  Seitenumbruch mit und jede Seite wird zu zweien. Kein
   `fontStyle: 'italic'` verwenden, solange keine kursive Montserrat-Datei
   unter `public/fonts/` liegt.
 

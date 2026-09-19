@@ -16,20 +16,19 @@ const KARTE = '#F7F7F7', ZEBRA = '#FFFFFF', WASSER = '#F0F0F0', PILLE = '#FDEBD9
 // 1. Kein lineHeight auf Seitenebene (st.seite) — Yoga bringt sonst die feste
 //    Fußzeile (position:'absolute', bottom) aus dem Takt, sie wird gar nicht
 //    mehr gerendert. lineHeight deshalb nur an den Fließtext-Stilen.
-// 2. lineHeight ist KEIN Faktor auf die eigene Schriftgröße. Nachgemessen an
-//    zwei Stellen mit sehr unterschiedlicher Größe (Fließtext 10,8 pt und
-//    Überschrift 24 pt): der sichtbare Zeilenabstand ist beide Male
-//    lineHeight × ≈20,6 pt — also ein fester Wert, unabhängig von der
-//    Schriftgröße (12 pt Grundwert × dem dokumentierten Faktor 12/7). Praktisch
-//    heißt das: gewünschter Zeilenabstand in Punkt ÷ 20,6 = der Stil-Wert.
-//    Große Schrift braucht deshalb große Werte (24 pt Überschrift → 1.4),
-//    kleine Schrift kleine (10,8 pt Fließtext → 0.82 ≈ 17 pt Abstand).
-//    Wer hier den gleichen Wert für alles einsetzt, bekommt entweder
-//    übereinanderliegende Überschriften oder auseinandergerissenen Fließtext.
+// 2. lineHeight wirkt NUR, wenn am selben Element auch fontSize steht. Dann
+//    gilt schlicht: Zeilenabstand = lineHeight × fontSize (mit pdftotext -bbox
+//    nachgemessen: fontSize 11 + lineHeight 1.0 ergibt exakt 11,00 pt Abstand).
+//    Fehlt fontSize, ignoriert react-pdf den Wert und nimmt die natürliche
+//    Zeilenhöhe der Schrift — bei Montserrat rund 1,36 × Schriftgröße (10,8 pt
+//    Fließtext ohne eigenes fontSize maß 14,7 pt). Daher trägt hier JEDER Stil
+//    mit lineHeight auch ein fontSize. Der früher dokumentierte 12/7-Faktor
+//    existiert nicht.
 // 3. Kein fontStyle:'italic' — es liegt keine kursive Montserrat unter
 //    public/fonts/, react-pdf bricht sonst mit "Could not resolve font" ab.
 // ---------------------------------------------------------------------------
-const ZH = 0.82; // Fließtext 10,8–11 pt → ≈17 pt Zeilenabstand
+const GROESSE = 10.8;  // Fließtext
+const ZH = 1.35;       // Zeilenabstand als Vielfaches der Schriftgröße
 
 const st = StyleSheet.create({
   seite: { fontFamily: 'Montserrat', fontSize: 10.8, color: BLAU, paddingTop: 78, paddingBottom: 62, paddingHorizontal: 60 },
@@ -43,23 +42,23 @@ const st = StyleSheet.create({
   fuss: { position: 'absolute', bottom: 30, left: 60, right: 60, flexDirection: 'row', justifyContent: 'space-between', fontSize: 7.5, color: GRAU },
 
   eyebrow: { fontSize: 8.5, letterSpacing: 1.6, color: O, fontWeight: 600, textTransform: 'uppercase', marginBottom: 7 },
-  h1: { fontSize: 24, fontWeight: 600, marginBottom: 16, lineHeight: 1.4 },
-  h2: { fontSize: 12.5, fontWeight: 600, marginTop: 16, marginBottom: 5, lineHeight: 0.9 },
-  absatz: { marginBottom: 9, fontWeight: 300, lineHeight: ZH },
+  h1: { fontSize: 24, fontWeight: 600, marginBottom: 16, lineHeight: 1.25 },
+  h2: { fontSize: 12.5, fontWeight: 600, marginTop: 16, marginBottom: 5, lineHeight: 1.3 },
+  absatz: { marginBottom: 9, fontSize: GROESSE, fontWeight: 300, lineHeight: ZH },
 
   // Frage & Antwort
   frageZeile: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 5 },
   punkt: { width: 15, height: 15, borderRadius: 7.5, backgroundColor: O, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
   punktZahl: { fontSize: 7, color: '#FFFFFF', fontWeight: 600 },
-  frageText: { flex: 1, fontSize: 8.8, letterSpacing: 0.7, color: O, textTransform: 'uppercase', fontWeight: 600, lineHeight: 0.8, paddingTop: 1 },
+  frageText: { flex: 1, fontSize: 8.8, letterSpacing: 0.7, color: O, textTransform: 'uppercase', fontWeight: 600, lineHeight: 1.3, paddingTop: 1 },
   karte: { backgroundColor: KARTE, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: O, paddingVertical: 9, paddingHorizontal: 11, marginBottom: 13 },
-  antwort: { fontSize: 11, fontWeight: 400, lineHeight: 1.0 },
-  leer: { fontSize: 11, color: GRAU, fontWeight: 300, lineHeight: 1.0 },
+  antwort: { fontSize: 11, fontWeight: 400, lineHeight: ZH },
+  leer: { fontSize: 11, color: GRAU, fontWeight: 300, lineHeight: ZH },
 
   // Tabellen
-  zeile: { flexDirection: 'row', paddingVertical: 4.5, paddingHorizontal: 7 },
-  zelleText: { flex: 1, lineHeight: 0.9 },
-  zelleWert: { width: 44, textAlign: 'right', fontWeight: 600, lineHeight: 0.74 },
+  zeile: { flexDirection: 'row', paddingVertical: 5.5, paddingHorizontal: 7 },
+  zelleText: { flex: 1, fontSize: 10.5, lineHeight: ZH },
+  zelleWert: { width: 44, textAlign: 'right', fontSize: 10.5, fontWeight: 600, lineHeight: ZH },
   kopfzeile: { flexDirection: 'row', backgroundColor: BLAU, paddingVertical: 6, paddingHorizontal: 7, borderTopLeftRadius: 7, borderTopRightRadius: 7 },
   kopfzelle: { color: O, fontSize: 8.5, letterSpacing: 1, textTransform: 'uppercase', fontWeight: 600 },
 
@@ -121,7 +120,7 @@ function Kapiteltrenner({ nummer, titel, unter, id, seiten }: { nummer: string; 
       <View style={{ flex: 1, justifyContent: 'flex-end' }}>
         <Marke id={id} seiten={seiten} />
         {unter ? <Text style={{ fontSize: 9, letterSpacing: 1.8, color: O, textTransform: 'uppercase', fontWeight: 600, marginBottom: 10 }}>{unter}</Text> : null}
-        <Text style={{ fontSize: 32, fontWeight: 600, lineHeight: 1.6 }}>{titel}</Text>
+        <Text style={{ fontSize: 32, fontWeight: 600, lineHeight: 1.25 }}>{titel}</Text>
         <View style={{ width: 54, height: 3, backgroundColor: O, marginTop: 18 }} />
       </View>
     </Page>
@@ -297,7 +296,7 @@ export function Workbook({ s, texte, seiten }: { s: Sitzung; texte: Record<strin
           {t('finanzcheck_liste').split('\n').map((z, i) => (
             <View key={i} style={{ flexDirection: 'row', marginBottom: 5 }}>
               <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: O, marginTop: 5, marginRight: 9 }} />
-              <Text style={{ flex: 1, fontWeight: 300, lineHeight: ZH }}>{z}</Text>
+              <Text style={{ flex: 1, fontSize: GROESSE, fontWeight: 300, lineHeight: ZH }}>{z}</Text>
             </View>
           ))}
         </View>
@@ -329,7 +328,7 @@ export function Workbook({ s, texte, seiten }: { s: Sitzung; texte: Record<strin
             <Text style={{ width: 26, fontSize: 15, fontWeight: 600, color: O }}>{nr(i + 1)}</Text>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 11.5, fontWeight: 600, marginBottom: 2 }}>{k.titel}</Text>
-              <Text style={{ fontSize: 9.5, fontWeight: 300, color: GRAU, lineHeight: 0.7 }}>{k.einleitung}</Text>
+              <Text style={{ fontSize: 9.5, fontWeight: 300, color: GRAU, lineHeight: ZH }}>{k.einleitung}</Text>
             </View>
           </View>
         ))}
@@ -345,7 +344,7 @@ export function Workbook({ s, texte, seiten }: { s: Sitzung; texte: Record<strin
             <Text style={[st.h1, { paddingRight: 80 }]}>{k.titel}</Text>
             <Text style={[st.absatz, { paddingRight: 80 }]}>{k.einleitung}</Text>
 
-            <View style={{ marginTop: 10 }}>
+            <View style={{ marginTop: 18 }}>
               <View style={st.kopfzeile}>
                 <Text style={{ width: 20, ...st.kopfzelle }}>Nr</Text>
                 <Text style={[st.kopfzelle, { flex: 1 }]}>Aussage</Text>
@@ -353,8 +352,8 @@ export function Workbook({ s, texte, seiten }: { s: Sitzung; texte: Record<strin
               </View>
               {k.fragen.map((f, j) => (
                 <View key={f.id} style={[st.zeile, { backgroundColor: j % 2 === 0 ? '#FAFBFB' : '#FFFFFF' }]} wrap={false}>
-                  <Text style={{ width: 20, color: GRAU, fontSize: 9.5, lineHeight: 0.74 }}>{j + 1}</Text>
-                  <Text style={[st.zelleText, { fontSize: 10, fontWeight: 300, lineHeight: 0.85, paddingRight: 8 }]}>{f.text}</Text>
+                  <Text style={{ width: 20, color: GRAU, fontSize: 9.5, lineHeight: ZH }}>{j + 1}</Text>
+                  <Text style={[st.zelleText, { fontSize: 10, fontWeight: 300, lineHeight: ZH, paddingRight: 8 }]}>{f.text}</Text>
                   <View style={{ width: 44, alignItems: 'flex-end' }}>
                     <View style={{ backgroundColor: PILLE, borderRadius: 7, paddingHorizontal: 7, paddingVertical: 1.5 }}>
                       <Text style={{ fontSize: 9.5, fontWeight: 600, color: '#9F3C07' }}>
@@ -367,7 +366,7 @@ export function Workbook({ s, texte, seiten }: { s: Sitzung; texte: Record<strin
             </View>
 
             {p ? (
-              <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 16 }} wrap={false}>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginTop: 16, paddingTop: 12, borderTopWidth: 0.6, borderTopColor: LINIE }} wrap={false}>
                 <Text style={{ flex: 1, fontSize: 9, letterSpacing: 1.4, color: GRAU, textTransform: 'uppercase', fontWeight: 600, marginBottom: 6 }}>Gesamtpunkte</Text>
                 <Text style={{ fontSize: 28, fontWeight: 600, color: O, lineHeight: 0.6 }}>{p.summe}</Text>
                 <Text style={{ fontSize: 10, color: GRAU, marginLeft: 5, marginBottom: 3 }}>von {p.maximum}</Text>
@@ -406,7 +405,7 @@ export function Workbook({ s, texte, seiten }: { s: Sitzung; texte: Record<strin
         <Text style={st.absatz}>{t('aha_text')}</Text>
         <View style={{ backgroundColor: KARTE, borderRadius: 10, paddingVertical: 16, paddingHorizontal: 20, marginTop: 10, flexDirection: 'row' }}>
           <Text style={{ fontSize: 40, color: O, fontWeight: 600, lineHeight: 0.52, marginRight: 12 }}>“</Text>
-          <Text style={[s.aha ? st.antwort : st.leer, { flex: 1, fontSize: 12.5, lineHeight: 0.92, paddingTop: 2 }]}>
+          <Text style={[s.aha ? st.antwort : st.leer, { flex: 1, fontSize: 12.5, lineHeight: ZH, paddingTop: 2 }]}>
             {s.aha || '– noch nicht festgehalten –'}
           </Text>
         </View>
@@ -438,7 +437,7 @@ export function Workbook({ s, texte, seiten }: { s: Sitzung; texte: Record<strin
           <Marke id="kontakt" seiten={seiten} />
           <Image src={pub('logo-full-gradiant.png')} style={{ width: 190, height: 190 / 7.87, marginBottom: 34 }} />
           <View style={{ width: 54, height: 3, backgroundColor: O, marginBottom: 22 }} />
-          <Text style={{ fontSize: 13, fontWeight: 300, lineHeight: 0.95, color: '#E6EAED' }}>{t('kontakt')}</Text>
+          <Text style={{ fontSize: 13, fontWeight: 300, lineHeight: ZH, color: '#E6EAED' }}>{t('kontakt')}</Text>
           <Link src="https://joerg-roos.com" style={{ color: O, fontWeight: 600, fontSize: 12, marginTop: 20, textDecoration: 'none' }}>{t('ueber_web')}</Link>
         </View>
         <Text style={{ fontSize: 8, color: 'rgba(255,255,255,0.45)' }}>Copyright © {new Date().getFullYear()} · Jörg Roos</Text>
