@@ -50,7 +50,7 @@ const st = StyleSheet.create({
   frageZeile: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 5 },
   punkt: { width: 15, height: 15, borderRadius: 7.5, backgroundColor: O, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
   punktZahl: { fontSize: 7, color: '#FFFFFF', fontWeight: 600 },
-  frageText: { flex: 1, fontSize: 8.8, letterSpacing: 0.7, color: O, textTransform: 'uppercase', fontWeight: 600, lineHeight: 1.3, paddingTop: 1 },
+  frageText: { flex: 1, fontSize: 8.8, letterSpacing: 0.7, color: BLAU, textTransform: 'uppercase', fontWeight: 600, lineHeight: 1.3, paddingTop: 1 },
   karte: { backgroundColor: KARTE, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: O, paddingVertical: 9, paddingHorizontal: 11, marginBottom: 13 },
   antwort: { fontSize: 11, fontWeight: 400, lineHeight: ZH },
   leer: { fontSize: 11, color: GRAU, fontWeight: 300, lineHeight: ZH },
