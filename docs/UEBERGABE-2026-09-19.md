@@ -39,7 +39,7 @@ Plan als Datei in `docs/plans/`, je Aufgabe ein frischer Subagent (sonnet für U
 - Design auf dem Niveau von joerg-roos.com und dem B-OS: Plexus-Hintergrund, oranger Glow, Glaskacheln, ein Akzent Orange, Bewegung dezent. Referenz `docs/plans/2026-09-19-design-weltklasse.md`, `app/globals.css`.
 - Logo im PDF und in dunklen Flächen: nur die Variante mit orangem Verlaufs-Emblem (`public/logo-full-gradiant.png`), nie das flache weiße. Innenseiten hell mit schwarzem Logo.
 - PDF-Fakten-Kapitel: Fragetexte dunkelblau, Nummernpunkt orange, Antwort grau mit orangem Balken.
-- Kacheln gleich hoch, Untertexte drei Zeilen. Video oberhalb der Kacheln, Vimeo-Link im Admin (`video_url`), Platzhalter bis dahin.
+- Kacheln gleich hoch, Untertexte drei Zeilen. Video als schmale Kachel rechts im Einstiegstext, Text läuft drum herum, mit Knopf „Vergrößern“ (Overlay zwei Drittel Breite); Vimeo-Link im Admin (`video_url`), Platzhalter bis dahin (Jörg, 19.09. nachmittags).
 - Abholer zweimal täglich reicht; kein 10-Minuten-Takt für Downloads.
 - Kein zusätzliches Passwort für Kunden; der Einladungslink ist der Schlüssel.
 - Einladung sendet nicht automatisch Mail; eigener Knopf „Einladung per Mail senden“.
@@ -51,7 +51,7 @@ Plan als Datei in `docs/plans/`, je Aufgabe ein frischer Subagent (sonnet für U
 2. **Vimeo-Link** eintragen, sobald das Begrüßungsvideo da ist.
 3. **Datenschutz-Absatz** aus `docs/datenschutz-absatz.md` auf joerg-roos.com ergänzen (Sub-Prozessoren: Supabase EU, Vercel Frankfurt, OpenAI USA mit Standardvertragsklauseln, Anthropic, Resend, Vimeo wenn genutzt).
 4. **Sprachaufnahme in Chrome:** bei Jörgs erstem Test scheiterten 3 von 5 Aufnahmen clientseitig, bevor Audio hochging (Server sah nur 2 Aufrufe, beide ok). Messpunkte sind eingebaut (Server-Log `[transkribieren] eingang/ergebnis`, Browser-Log `[mikro] …` erscheint im Dev-Server-Terminal als `[browser]`, Pegelanzeige, Leer-Erkennung). Nächster Schritt: Jörg testet erneut in Chrome, Log lesen. Modellwechsel auf `gpt-4o-transcribe` mit Handwerker-Wortschatz-Prompt ist gemessen besser (Testskript-Idee in `scratchpad` der alten Sitzung, nicht im Repo) — nach Klärung der Aufnahme umstellen.
-5. **Entscheidungen bei Jörg:** ~~Video-Kachel schmaler~~ erledigt 19.09. (`53967af`, zwei Drittel Breite ab Tablet, mobil volle Breite). Foto auf der Über-Jörg-Seite (aktuell Shooting 2024, weißes Hemd) behalten?
+5. **Entscheidungen bei Jörg:** ~~Video-Kachel schmaler~~ erledigt 19.09. (jetzt rechts im Text schwimmend mit Vergrößern-Overlay, siehe Vorgaben). Foto auf der Über-Jörg-Seite (aktuell Shooting 2024, weißes Hemd) behalten?
 6. **Später / geparkt:** Admin-Workbook-Liste lädt je Sitzung Dateien + signierte URLs (N+1) · ZIP-Route hält alles im Speicher (30×50 MB Grenze) · Weiß auf Orange 2,8:1 (Markenvorgabe, bewusst) · `diktate`-Zähler nicht atomar (Statistik) · PDF 1,3 MB wegen PNG-Hintergrund (JPEG wäre ~150 KB).
 
 ## 9. Fallen, die Zeit gekostet haben

@@ -43,7 +43,13 @@ Begrüßung (`landing_titel`, alles nach dem Komma steht orange), Einstiegstext
 (`components/Videobotschaft.tsx` — `video_url` aus Admin → Texte; Vimeo wird als
 Player-Adresse mit `dnt=1` eingebettet, eine direkte `.mp4` als `<video>`, alles
 andere ergibt den Platzhalter mit `landing_video_hinweis`; Deutung und Prüfung:
-`lib/video.ts` + `scripts/check-video.mjs`), dann
+`lib/video.ts` + `scripts/check-video.mjs`). Die Kachel schwimmt ab Tablet rechts
+im Einstiegstext (`md:float-right`, 42 % Breite, Text läuft drum herum — der
+Textcontainer ist deshalb Block-Fluss mit `clear` am Ende, kein flex); mobil
+steht sie über dem Text. Knopf „Video vergrößern“ öffnet dieselbe Fläche als
+Overlay auf zwei Drittel Breite, per `createPortal` am `body` — innerhalb des
+Seitencontainers wirkt dessen Einblend-Animation als Bezugsrahmen für `fixed`
+und sperrt das Overlay auf 900 px ein. Dann
 zwei Kacheln, „Workbook starten" (Text je Status, führt zu `/interview`,
 `/ergebnis` oder `/fertig`) und „Finanzdaten senden" (öffnet
 `components/FinanzdatenUpload.tsx` als Overlay). Das Interview selbst

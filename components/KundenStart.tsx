@@ -68,11 +68,11 @@ export function KundenStart({ token, vorname, workbook, texte }: { token: string
         <h1 className="font-semibold text-[34px] md:text-[46px] leading-[1.14] mt-3 mb-5">
           <Zweifarbig text={gruss} wort={wort} />
         </h1>
-        <div className="max-w-[720px] text-[16px] md:text-[17px] leading-[1.65] text-[#C9CFD3] font-light flex flex-col gap-4">
+        {/* Video rechts, Text läuft drum herum — deshalb Block-Fluss statt flex, und ein clear am Ende. */}
+        <div className="text-[16px] md:text-[17px] leading-[1.65] text-[#C9CFD3] font-light [&>p+p]:mt-4 after:block after:clear-both after:content-['']">
+          <Videobotschaft adresse={texte.video_url} hinweis={texte.landing_video_hinweis} />
           {(texte.landing_intro ?? '').split('\n').filter((a) => a.trim()).map((a, i) => <p key={i}>{a}</p>)}
         </div>
-
-        <Videobotschaft adresse={texte.video_url} hinweis={texte.landing_video_hinweis} />
 
         <div className="eyebrow mt-10">{texte.kacheln_titel}</div>
         <div className="grid grid-cols-1 md:grid-cols-2 items-stretch gap-5 md:gap-6 mt-4">
