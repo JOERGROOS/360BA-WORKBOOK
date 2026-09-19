@@ -17,11 +17,16 @@ function log(zeile) {
 }
 
 // Findet einen freien Dateinamen im Zielordner — bei Namenskonflikt Suffix `-2`, `-3`, ...
-function freierPfad(ordner, dateiname) {
+// Ein Name gilt als vergeben, wenn er auf der Platte liegt ODER schon einer anderen Zeile
+// als `lokaler_name` gehört (`beanspruchteNamen`, Pfade relativ zu ZIEL_BASIS) — sonst
+// könnten zwei Zeilen im selben Lauf denselben freien Namen ziehen, solange die Datei
+// (z. B. wegen eines fehlgeschlagenen Downloads) noch gar nicht auf der Platte liegt.
+function freierPfad(ordner, dateiname, beanspruchteNamen) {
   const ext = path.extname(dateiname);
   const basis = dateiname.slice(0, dateiname.length - ext.length);
   let name = dateiname;
-  for (let i = 2; fs.existsSync(path.join(ordner, name)); i++) {
+  const vergeben = () => fs.existsSync(path.join(ordner, name)) || beanspruchteNamen.has(path.relative(ZIEL_BASIS, path.join(ordner, name)));
+  for (let i = 2; vergeben(); i++) {
     name = `${basis}-${i}${ext}`;
   }
   return path.join(ordner, name);
@@ -50,6 +55,17 @@ for (const datei of fs.existsSync(ZIEL_BASIS) ? fs.readdirSync(ZIEL_BASIS, { rec
 
 const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
+// Alle schon vergebenen lokalen Namen laden — auch von Zeilen, die noch nicht abgeholt
+// sind (Download kann noch laufen oder zuletzt fehlgeschlagen sein). Ohne diese Liste
+// könnte eine zweite Zeile im selben Lauf denselben Namen ziehen, weil die erste Zeile
+// ihre Datei noch gar nicht geschrieben hat.
+const { data: vergebeneNamen, error: eVergeben } = await db.from('wb_dateien').select('lokaler_name').not('lokaler_name', 'is', null);
+if (eVergeben) {
+  log(`FEHLER beanspruchte Namen konnten nicht geladen werden: ${eVergeben.message}`);
+  process.exit(1);
+}
+const beanspruchteNamen = new Set((vergebeneNamen ?? []).map((z) => z.lokaler_name));
+
 const { data: zeilen, error } = await db
   .from('wb_dateien')
   .select('id,dateiname,pfad,bytes,session_id,lokaler_name,wb_sessions(firma)')
@@ -72,7 +88,11 @@ for (const zeile of zeilen ?? []) {
       // bei Namenskonflikt) — IMMER an genau diesen Namen gebunden. Nie erneut über
       // `freierPfad` einen Namen suchen, sonst verwechseln sich zwei Zeilen mit gleichem
       // Namen UND gleicher Größe (der eigentliche Fehler, den `lokaler_name` behebt).
-      zielPfad = path.join(ordner, zeile.lokaler_name);
+      // Gespeichert relativ zu ZIEL_BASIS (`<Ordner>/<Datei>`), damit eine spätere
+      // Änderung des Firmennamens (→ neuer Ordner) den alten Pfad nicht verwaist —
+      // ein alter, bare Name ohne `/` (nur aus einem frühen Test, nicht im Bestand)
+      // wird als relativ zum HEUTIGEN Ordner gelesen.
+      zielPfad = zeile.lokaler_name.includes('/') ? path.join(ZIEL_BASIS, zeile.lokaler_name) : path.join(ordner, zeile.lokaler_name);
       if (fs.existsSync(zielPfad) && fs.statSync(zielPfad).size === zeile.bytes) {
         const { error: eUpdate } = await db.from('wb_dateien').update({ abgeholt_at: new Date().toISOString() }).eq('id', zeile.id);
         if (eUpdate) throw eUpdate;
@@ -82,12 +102,15 @@ for (const zeile of zeilen ?? []) {
       // Fehlt die Datei oder weicht die Größe ab → (erneut) genau an diesen Namen
       // schreiben, unten überschreibt der Download-Zweig sie über `.teil` + rename.
     } else {
-      // Erster Durchlauf für diese Zeile: freien Namen im Ordner vergeben und SOFORT auf
-      // der Zeile festschreiben — noch VOR dem Download. Erst danach ist die Zeile
-      // unverwechselbar an "ihre" Datei gebunden, auch wenn der Lauf gleich danach abbricht.
-      zielPfad = freierPfad(ordner, dateiname);
-      const { error: eName } = await db.from('wb_dateien').update({ lokaler_name: path.basename(zielPfad) }).eq('id', zeile.id);
+      // Erster Durchlauf für diese Zeile: freien Namen im Ordner vergeben (gegen Platte
+      // UND `beanspruchteNamen`) und SOFORT relativ zu ZIEL_BASIS auf der Zeile
+      // festschreiben — noch VOR dem Download. Erst danach ist die Zeile unverwechselbar
+      // an "ihre" Datei gebunden, auch wenn der Lauf gleich danach abbricht.
+      zielPfad = freierPfad(ordner, dateiname, beanspruchteNamen);
+      const relName = path.relative(ZIEL_BASIS, zielPfad);
+      const { error: eName } = await db.from('wb_dateien').update({ lokaler_name: relName }).eq('id', zeile.id);
       if (eName) throw eName;
+      beanspruchteNamen.add(relName);
     }
 
     const { data: blob, error: eDownload } = await db.storage.from('finanzdaten').download(zeile.pfad);
