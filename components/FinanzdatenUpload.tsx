@@ -20,6 +20,12 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
   const [meldeStatus, setMeldeStatus] = useState<'bereit' | 'sendet' | 'fertig'>('bereit');
   const [ueberZone, setUeberZone] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const kasten = useRef<HTMLDivElement>(null);
+
+  const laedtGerade = laufend.some((e) => e.status === 'laedt');
+
+  // Fokus ins Fenster holen, damit die Tastatur nicht hinter dem Overlay weiterläuft.
+  useEffect(() => { kasten.current?.focus(); }, []);
 
   async function laden() {
     const r = await fetch(`/api/w/${token}/dateien`);
@@ -78,10 +84,13 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
   }
 
   return (
+    // Escape schließt das Fenster — außer ein Upload läuft, der sonst abgeschnitten würde.
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center p-3 overflow-y-auto" onClick={schliessen}>
-      <div className="glas erscheint w-full max-w-[580px] my-6" onClick={(e) => e.stopPropagation()}>
+      <div ref={kasten} role="dialog" aria-modal="true" aria-labelledby="upload-titel" tabIndex={-1}
+        className="glas erscheint w-full max-w-[580px] my-6" onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => { if (e.key === 'Escape' && !laedtGerade) schliessen(); }}>
         <div className="flex items-center justify-between">
-          <div className="eyebrow">Finanzdaten senden</div>
+          <div className="eyebrow" id="upload-titel">Finanzdaten senden</div>
           <button type="button" aria-label="Schließen" className="text-muted text-2xl leading-none hover:text-white transition-colors" onClick={schliessen}>×</button>
         </div>
 

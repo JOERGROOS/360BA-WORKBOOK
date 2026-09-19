@@ -307,8 +307,11 @@ export function Workbook({ s, texte, seiten }: { s: Sitzung; texte: Record<strin
       {fakten.length > 0 ? (
         <Kapiteltrenner nummer="01" unter={fakten[0].untertitel} titel={fakten[0].titel} id={`kap-${fakten[0].id}`} seiten={seiten} />
       ) : null}
-      {fakten.map((k) => (
+      {fakten.map((k, i) => (
         <Rahmen key={k.id} kopf={k.titel}>
+          {/* Das erste Fakten-Kapitel trägt seine Marke schon auf dem Kapiteltrenner davor;
+              jedes weitere bekommt sie hier, sonst bliebe seine Seitenzahl im Inhalt leer. */}
+          {i > 0 ? <Marke id={`kap-${k.id}`} seiten={seiten} /> : null}
           <Text style={st.eyebrow}>{k.untertitel}</Text>
           <Text style={st.h1}>{k.titel}</Text>
           {k.fragen.map((f, i) => (

@@ -1,11 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Ring } from './Ring';
 
 export type RingZustand = 'laeuft' | 'fertig' | 'fehler';
 
 const SCHRITTE = ['Antworten sammeln', 'Erfolgsrad zeichnen', 'Workbook setzen', 'Versenden'];
-const R = 54;
-const UMFANG = 2 * Math.PI * R;
 
 // Der Server meldet keinen echten Fortschritt — der Ring nähert sich deshalb weich 88 % an,
 // solange die Anfrage läuft, und springt erst mit der Antwort auf 100. Bewusst nie vorher,
@@ -13,8 +12,13 @@ const UMFANG = 2 * Math.PI * R;
 export function Fortschrittsring({ zustand, fehler, schliessen }: { zustand: RingZustand; fehler?: string; schliessen?: () => void }) {
   const [ruhig, setRuhig] = useState(false);
   const [prozent, setProzent] = useState(0);
+  const kasten = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setRuhig(window.matchMedia('(prefers-reduced-motion: reduce)').matches); }, []);
+
+  // Fokus wandert ins Fenster, damit Tastatur und Screenreader nicht hinter dem Overlay
+  // weiterlaufen; die Tabulatortaste bleibt danach drin (siehe onKeyDown).
+  useEffect(() => { kasten.current?.focus(); }, []);
 
   useEffect(() => {
     if (zustand !== 'laeuft' || ruhig) return;
@@ -35,35 +39,38 @@ export function Fortschrittsring({ zustand, fehler, schliessen }: { zustand: Rin
   // Beim Fehler bleibt der Ring stehen und wird stumpf; im Ruhemodus zeigt er einen festen Bogen.
   const anteil = zustand === 'fehler' ? gezeigt : ruhig && zustand === 'laeuft' ? 25 : gezeigt;
 
+  function aufTaste(e: React.KeyboardEvent) {
+    // Abbrechen nur im Fehlerfall — während der Erzeugung würde Escape das Fenster
+    // schließen, obwohl die Anfrage weiterläuft.
+    if (e.key === 'Escape') {
+      if (zustand === 'fehler' && schliessen) schliessen();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const ziele = kasten.current?.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (!ziele?.length) { e.preventDefault(); return; }
+    const erste = ziele[0], letzte = ziele[ziele.length - 1];
+    if (e.shiftKey && document.activeElement === erste) { e.preventDefault(); letzte.focus(); }
+    else if (!e.shiftKey && document.activeElement === letzte) { e.preventDefault(); erste.focus(); }
+  }
+
   return (
-    <div role="dialog" aria-modal="true" aria-live="polite" aria-label="Workbook wird erstellt"
-      className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/70 backdrop-blur-sm">
-      <div className="glas erscheint w-full max-w-[430px] text-center px-8 py-12">
-        <div className="relative w-[150px] h-[150px] mx-auto">
-          <svg viewBox="0 0 150 150" className="w-full h-full -rotate-90">
-            <defs>
-              <linearGradient id="ring-verlauf" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#9F3C07" /><stop offset="55%" stopColor="#ED7A02" /><stop offset="100%" stopColor="#F0902C" />
-              </linearGradient>
-            </defs>
-            <circle cx="75" cy="75" r={R} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="9" />
-            <circle cx="75" cy="75" r={R} fill="none"
-              stroke={zustand === 'fehler' ? 'rgba(175,179,181,.45)' : 'url(#ring-verlauf)'}
-              strokeWidth="9" strokeLinecap="round"
-              strokeDasharray={UMFANG} strokeDashoffset={UMFANG * (1 - anteil / 100)}
-              style={{ transition: ruhig ? 'none' : 'stroke-dashoffset .25s ease-out' }} />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            {zustand === 'fertig' ? (
-              <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="#ED7A02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m4 12.5 5.5 5.5L20 7" /></svg>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/70 backdrop-blur-sm">
+      <div ref={kasten} role="dialog" aria-modal="true" aria-label="Workbook wird erstellt" tabIndex={-1} onKeyDown={aufTaste}
+        className="glas erscheint w-full max-w-[430px] text-center px-8 py-12">
+        {/* Die tickende Zahl ist nur fürs Auge — vorgelesen wird der Schritt darunter. */}
+        <div className="mx-auto w-[150px]">
+          <Ring prozent={anteil} groesse={150} strich={9} tempo={ruhig ? '0s' : '.25s'}
+            farbe={zustand === 'fehler' ? 'rgba(175,179,181,.45)' : undefined}
+            kinder={zustand === 'fertig' ? (
+              <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="#ED7A02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m4 12.5 5.5 5.5L20 7" /></svg>
             ) : (
-              <span className="font-semibold text-[38px] leading-none tabular-nums">{gezeigt}<span className="text-[20px] text-muted"> %</span></span>
-            )}
-          </div>
+              <span aria-hidden="true" className="font-semibold text-[38px] leading-none tabular-nums">{gezeigt}<span className="text-[20px] text-muted"> %</span></span>
+            )} />
         </div>
 
         <div className="eyebrow mt-8">{zustand === 'fehler' ? 'Fehler' : 'Dein Workbook entsteht'}</div>
-        <p className="text-[17px] font-medium mt-2.5">{schritt}</p>
+        <p className="text-[17px] font-medium mt-2.5" aria-live="polite">{schritt}</p>
         {zustand === 'fehler' ? (
           <>
             <p className="text-[15px] leading-relaxed text-[#ff7a52] mt-4">{fehler}</p>
