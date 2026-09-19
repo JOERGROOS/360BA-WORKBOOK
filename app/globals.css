@@ -4,19 +4,77 @@
 @font-face{font-family:'Montserrat';src:url('/fonts/Montserrat-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:'Montserrat';src:url('/fonts/Montserrat-Medium.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
 @font-face{font-family:'Montserrat';src:url('/fonts/Montserrat-SemiBold.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
-:root{--o:#ED7A02;--od:#9F3C07;--blue:#0F1B23;--ink:#0A1118;--paper:#EEEEEE;--surf:#16212A;--line:#2A353D;--muted:#AFB3B5}
+
+:root{
+  --o:#ED7A02;--o-hell:#F0902C;--od:#9F3C07;--blue:#0F1B23;--ink:#0A1118;--paper:#EEEEEE;
+  --surf:#16212A;--line:#2A353D;--muted:#AFB3B5;--text:#C9CFD3;
+  --glas:rgba(22,33,42,.55);--glas-rand:rgba(255,255,255,.08);--glas-schatten:0 10px 30px rgba(0,0,0,.35);
+}
 body{background:var(--ink);color:#fff;font-family:'Montserrat',Arial,sans-serif;-webkit-font-smoothing:antialiased}
 h1{overflow-wrap:break-word}
+
+/* ===== Hintergrund — wie auf joerg-roos.com: Verlauf, Glow oben links,
+   Plexus-Linien nur in den Seitenzonen (die Mitte der Grafik ist bewusst leer),
+   dazu ein zweiter, sehr dezenter Orange-Schein unten rechts für lange Seiten. ===== */
 .bg{position:fixed;inset:0;z-index:-1;background:
- radial-gradient(1200px 700px at 78% -10%,rgba(237,122,2,.28),rgba(159,60,7,.12) 35%,rgba(15,27,35,0) 70%),
- radial-gradient(900px 600px at 10% 110%,rgba(61,77,92,.35),rgba(10,17,24,0) 60%),
- linear-gradient(180deg,#0F1B23 0%,#0A1118 100%)}
-.card{background:var(--surf);border:1px solid var(--line);border-radius:20px;padding:32px}
-.btn{display:inline-flex;align-items:center;gap:10px;background:var(--o);color:#fff;border:0;border-radius:12px;padding:16px 28px;font-weight:600;font-size:16px;cursor:pointer}
-.btn:disabled{opacity:.5;cursor:default}
+ radial-gradient(760px 520px at 88% 108%,rgba(237,122,2,.14),rgba(10,17,24,0) 70%),
+ radial-gradient(1100px 680px at 14% -12%,rgba(237,122,2,.26),rgba(159,60,7,.11) 38%,rgba(15,27,35,0) 72%),
+ linear-gradient(180deg,#0B141B 0%,#0F1B23 55%,#0A1118 100%)}
+.bg::before{content:'';position:absolute;inset:0;
+ background:url('/bg-plexus.svg') center/cover no-repeat;opacity:.5;pointer-events:none}
+
+@layer components {
+/* ===== Glaskarte ===== */
+.glas{position:relative;overflow:hidden;background:var(--glas);
+ backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ border:1px solid var(--glas-rand);border-radius:20px;box-shadow:var(--glas-schatten);padding:32px;
+ transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.glas::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+ background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent)}
+.glas--betont{border-color:rgba(237,122,2,.42);
+ background:linear-gradient(180deg,rgba(237,122,2,.10),rgba(22,33,42,.62));
+ box-shadow:0 10px 30px rgba(0,0,0,.35),0 0 44px rgba(237,122,2,.12)}
+.glas--hebt:hover{transform:translateY(-2px);border-color:rgba(237,122,2,.45);
+ box-shadow:0 16px 40px rgba(0,0,0,.42),0 0 36px rgba(237,122,2,.10)}
+/* Bestehende Aufrufe von .card behalten ihr Verhalten, sehen aber wie Glas aus. */
+.card{position:relative;overflow:hidden;background:var(--glas);
+ backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ border:1px solid var(--glas-rand);border-radius:20px;box-shadow:var(--glas-schatten);padding:32px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+ background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent)}
+
+/* ===== Knöpfe ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;
+ background:linear-gradient(180deg,#F0902C,#ED7A02);color:#fff;border:0;border-radius:12px;
+ padding:16px 28px;font-weight:600;font-size:16px;cursor:pointer;
+ transition:box-shadow .15s ease,transform .1s ease,background .15s ease}
+.btn:hover:not(:disabled){box-shadow:0 8px 24px rgba(237,122,2,.35)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn-sek{background:transparent;border:1px solid rgba(237,122,2,.6);color:#fff}
+.btn-sek:hover:not(:disabled){background:rgba(237,122,2,.10);box-shadow:0 8px 24px rgba(237,122,2,.18)}
 .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.btn-ghost:hover:not(:disabled){border-color:rgba(237,122,2,.45);color:#fff;box-shadow:none}
+
+/* Sichtbarer Fokus überall — Tastatur muss man sehen können. */
+:focus-visible{outline:2px solid var(--o-hell);outline-offset:2px;border-radius:4px}
+
 .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--o);font-weight:600}
 label{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:500}
-input,textarea,select{width:100%;background:#0F1B23;border:1px solid var(--line);border-radius:12px;color:#fff;font:inherit;font-size:16px;padding:14px 16px;outline:none}
-input:focus,textarea:focus{border-color:var(--o)}
-.fine{font-size:13.5px;color:var(--muted);line-height:1.5}
+input,textarea,select{width:100%;background:rgba(11,20,27,.6);border:1px solid var(--glas-rand);border-radius:12px;
+ color:#fff;font:inherit;font-size:16px;padding:14px 16px;outline:none;line-height:1.55;
+ transition:border-color .15s ease,box-shadow .15s ease}
+input:focus,textarea:focus,select:focus{border-color:var(--o);box-shadow:0 0 0 3px rgba(237,122,2,.14)}
+input::placeholder,textarea::placeholder{color:#7C868E}
+.fine{font-size:14px;color:var(--muted);line-height:1.6}
+}
+
+/* ===== Bewegung ===== */
+@keyframes wb-erscheint{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.erscheint{animation:wb-erscheint .24s ease-out both}
+@keyframes wb-puls{0%{box-shadow:0 0 0 0 rgba(237,122,2,.55)}100%{box-shadow:0 0 0 18px rgba(237,122,2,0)}}
+.puls{animation:wb-puls 1.4s infinite}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  .erscheint{animation:none}
+}

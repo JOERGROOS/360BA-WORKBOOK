@@ -1,4 +1,5 @@
 import { sitzungLaden } from '@/lib/sitzung';
+import { UngueltigerLink } from '@/components/Mitteilung';
 import { texteLaden } from '@/lib/texte';
 import { fortschritt } from '@/lib/punkte';
 import { KundenStart } from '@/components/KundenStart';
@@ -9,22 +10,19 @@ export default async function LandeSeite({ params }: { params: Promise<{ token: 
   const { token } = await params;
   const s = await sitzungLaden(token);
   if (!s) {
-    return (
-      <main className="max-w-[620px] mx-auto px-8 py-24 text-center">
-        <p className="fine">Dieser Link ist ungültig. Schreib uns an <a className="underline" href="mailto:office@joerg-roos.com">office@joerg-roos.com</a>.</p>
-      </main>
-    );
+    return <UngueltigerLink />;
   }
   const texte = await texteLaden();
   const prozent = fortschritt(s.fragen_snapshot, s.antworten).prozent;
+  // Der Prozentwert steht jetzt als eigener Chip auf der Kachel, nicht mehr im Knopftext.
   const workbook = s.status === 'eingeladen'
-    ? { text: 'Interview starten →', href: `/w/${token}/interview` }
+    ? { text: 'Interview starten', href: `/w/${token}/interview`, prozent, zeigtFortschritt: false }
     : s.status === 'laufend'
-      ? { text: `Weitermachen · ${prozent} % →`, href: `/w/${token}/interview` }
+      ? { text: 'Weitermachen', href: `/w/${token}/interview`, prozent, zeigtFortschritt: true }
       : s.status === 'ergebnis'
-        ? { text: 'Zum Ergebnis →', href: `/w/${token}/ergebnis` }
+        ? { text: 'Zum Ergebnis', href: `/w/${token}/ergebnis`, prozent, zeigtFortschritt: true }
         : s.pdf_path
-          ? { text: 'Fertig – Workbook herunterladen', href: `/w/${token}/fertig` }
-          : { text: 'Zum Ergebnis →', href: `/w/${token}/ergebnis` };
+          ? { text: 'Workbook herunterladen', href: `/w/${token}/fertig`, prozent, zeigtFortschritt: false }
+          : { text: 'Zum Ergebnis', href: `/w/${token}/ergebnis`, prozent, zeigtFortschritt: true };
   return <KundenStart token={token} vorname={s.vorname} workbook={workbook} texte={texte} />;
 }

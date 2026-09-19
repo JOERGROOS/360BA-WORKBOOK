@@ -52,7 +52,8 @@ export default function AdminSeite() {
   if (!angemeldet) {
     return (
       <main className="min-h-screen flex items-center justify-center px-6">
-        <form className="card w-full max-w-sm" onSubmit={anmelden}>
+        <form className="glas erscheint w-full max-w-sm" onSubmit={anmelden}>
+          <img src="/logo-full-white.svg" alt="JOERG ROOS" className="h-5 mb-7" />
           <div className="eyebrow mb-5">Admin · Anmeldung</div>
           <label htmlFor="pw">Passwort</label>
           <input id="pw" type="password" value={passwort} onChange={(e) => setPasswort(e.target.value)} autoFocus />
@@ -72,13 +73,13 @@ export default function AdminSeite() {
 
   return (
     <div className="grid grid-cols-[250px_1fr] min-h-screen">
-      <aside className="bg-surf border-r border-line p-6">
+      <aside className="bg-[rgba(11,20,27,.55)] backdrop-blur-xl border-r border-white/10 p-6">
         <img src="/logo-full-white.svg" alt="JOERG ROOS" className="h-6 mb-8" />
         <nav className="flex flex-col gap-1">
           {BEREICHE.map((b) => (
-            <button key={b.key} onClick={() => setBereich(b.key)} className={`text-left text-sm px-3 py-2.5 rounded-[10px] ${bereich === b.key ? 'bg-o/15 text-white font-medium' : 'text-[#C9CFD3]'}`}>{b.label}</button>
+            <button key={b.key} onClick={() => setBereich(b.key)} className={`text-left text-sm px-3 py-2.5 rounded-[10px] transition-colors ${bereich === b.key ? 'bg-o/15 text-white font-medium border border-o/35' : 'text-[#C9CFD3] border border-transparent hover:bg-white/[.05]'}`}>{b.label}</button>
           ))}
-          <button onClick={vorschauAlsKunde} className="text-left text-sm px-3 py-2.5 rounded-[10px] text-[#C9CFD3]">Vorschau als Kunde</button>
+          <button onClick={vorschauAlsKunde} className="text-left text-sm px-3 py-2.5 rounded-[10px] text-[#C9CFD3] hover:bg-white/[.05] transition-colors">Vorschau als Kunde</button>
         </nav>
         {bereich === 'fragebogen' && (
           <>

@@ -62,7 +62,7 @@ export function Fragebogen({ kapitel, fragen, neuLaden }: { kapitel: Kapitel[]; 
               </div>
               <div className="flex flex-col gap-2 mt-4.5">
                 {kFragen.map((f, fi) => (
-                  <div key={f.id} className={`grid grid-cols-[44px_1fr_110px_44px_90px] gap-3.5 items-center bg-surf border border-line rounded-xl px-4 py-3 text-sm ${!f.aktiv ? 'opacity-60' : ''}`}>
+                  <div key={f.id} className={`grid grid-cols-[44px_1fr_110px_44px_90px] gap-3.5 items-center bg-white/[.04] border border-white/10 rounded-xl px-4 py-3 text-sm hover:border-o/40 transition-colors ${!f.aktiv ? 'opacity-60' : ''}`}>
                     <span className="flex gap-1.5 text-muted">
                       <button disabled={fi === 0} onClick={() => frageVerschieben(f.id, 'hoch')} className="disabled:opacity-25">↑</button>
                       <button disabled={fi === kFragen.length - 1} onClick={() => frageVerschieben(f.id, 'runter')} className="disabled:opacity-25">↓</button>

@@ -8,6 +8,7 @@ import { FrageText } from './FrageText';
 import { Mikro, type MikroStatus } from './Mikro';
 import { FrageSkala } from './FrageSkala';
 import { FrageTabelle } from './FrageTabelle';
+import { Kopf } from './Kopf';
 
 function introKey(token: string, kapitelId: string): string {
   return `wb-intro-${token}-${kapitelId}`;
@@ -157,7 +158,7 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
           Aufnahme läuft · {mm} ·
           <span className="inline-flex items-end gap-[2px] h-3" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, i) => (
-              <i key={i} className={`inline-block w-[3px] rounded-sm ${i < gefuellt ? 'bg-o' : 'bg-[#3a3f44]'}`} style={{ height: `${4 + i}px` }} />
+              <i key={i} className={`inline-block w-[3px] rounded-sm transition-all duration-150 ${i < gefuellt ? 'bg-o' : 'bg-white/15'}`} style={{ height: `${4 + i}px`, opacity: i < gefuellt ? 1 : .6 }} />
             ))}
           </span>
           {keinTonHinweis ? (
@@ -175,58 +176,68 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
 
   return (
     <main>
-      <div className="flex items-center justify-between px-12 py-6 gap-4 flex-wrap">
-        <img src="/logo-full-white.svg" alt="JOERG ROOS" className="h-6" />
-        <div className="flex items-center gap-5">
-          {linkHinweis && <span className="fine">{linkHinweis}</span>}
-          <button type="button" className="text-[12.5px] text-muted border border-line rounded-lg px-3 py-1.5 hover:border-o" onClick={spaeter}>Später weitermachen</button>
-          <span className="text-[13px] tracking-[.14em] uppercase text-muted whitespace-nowrap">Frage {pos + 1} von {alle.length} · {prozentInfo.prozent} %</span>
-        </div>
+      <div className="sticky top-0 z-30 border-b border-white/[.07] bg-[rgba(11,20,27,.72)] backdrop-blur-xl pb-7 md:pb-8">
+        <Kopf kinder={
+          <div className="flex items-center gap-4 md:gap-5 flex-wrap">
+            {linkHinweis && <span className="fine">{linkHinweis}</span>}
+            <button type="button" className="text-[12.5px] text-muted border border-white/10 rounded-lg px-3 py-1.5 hover:border-o/60 hover:text-white transition-colors" onClick={spaeter}>Später weitermachen</button>
+            <span className="text-[13px] tracking-[.14em] uppercase text-muted whitespace-nowrap">Frage {pos + 1} von {alle.length} · {prozentInfo.prozent} %</span>
+          </div>
+        } />
+        <Fortschritt kapitel={snapshot.kapitel} aktuellesKapitel={kapitelIndex} prozent={prozentInfo.prozent} />
       </div>
-      <Fortschritt kapitel={snapshot.kapitel} aktuellesKapitel={kapitelIndex} prozent={prozentInfo.prozent} />
 
       {zeigeEinleitung ? (
-        <div className="max-w-[820px] mx-auto px-8 pt-16 pb-20">
-          <div className="eyebrow">{kapitel.untertitel}</div>
-          <h1 className="font-semibold text-[44px] leading-[1.12] my-4">{kapitel.titel}</h1>
-          <p className="text-[17px] leading-relaxed text-[#C9CFD3] font-light max-w-[620px]">{kapitel.einleitung}</p>
-          <button type="button" className="btn mt-8" onClick={losGehts}>Los geht&apos;s →</button>
+        <div className="max-w-[900px] mx-auto px-6 md:px-8 pt-12 pb-20">
+          <div key={kapitel.id} className="glas erscheint px-7 py-12 md:px-14 md:py-16">
+            <span aria-hidden="true" className="pointer-events-none absolute right-4 md:right-10 -top-6 md:-top-10 font-semibold leading-none text-[150px] md:text-[220px] text-white/[.04] select-none">
+              {String(kapitelIndex + 1).padStart(2, '0')}
+            </span>
+            <div className="relative">
+              <div className="eyebrow">{kapitel.untertitel}</div>
+              <h1 className="font-semibold text-[34px] md:text-[46px] leading-[1.12] mt-3 mb-5">{kapitel.titel}</h1>
+              <p className="text-[16px] md:text-[17px] leading-relaxed text-[#C9CFD3] font-light max-w-[620px]">{kapitel.einleitung}</p>
+              <button type="button" className="btn mt-9" onClick={losGehts}>Los geht&apos;s →</button>
+            </div>
+          </div>
         </div>
       ) : (
-        <div className="max-w-[820px] mx-auto px-8 pb-20">
-          <div className="text-[14px] text-muted mt-14">Kapitel {kapitelIndex + 1} · {kapitel.titel}</div>
-          {kapitel.typ === 'faktor' && (
-            <div className="inline-flex items-center rounded-full border border-o/35 bg-o/10 px-3.5 py-1.5 text-[13px] font-medium mt-4">
-              Erfolgsfaktor · {kapitel.titel} · Aussage {frageIndex + 1} von {kapitel.fragen.length}
+        <div className="max-w-[900px] mx-auto px-6 md:px-8 pt-10 pb-20">
+          <div key={frage.id} className="glas erscheint px-6 py-9 md:px-12 md:py-12">
+            <div className="text-[14px] text-muted">Kapitel {kapitelIndex + 1} · {kapitel.titel}</div>
+            {kapitel.typ === 'faktor' && (
+              <div className="inline-flex items-center rounded-full border border-o/35 bg-o/10 px-3.5 py-1.5 text-[13px] font-medium mt-4">
+                Erfolgsfaktor · {kapitel.titel} · Aussage {frageIndex + 1} von {kapitel.fragen.length}
+              </div>
+            )}
+            <div className="font-medium text-[27px] md:text-[34px] leading-[1.26] mt-4 mb-2">{frage.text}</div>
+            {frage.hinweis && <p className="text-[15px] text-[#C9CFD3] font-light mb-2 leading-relaxed">{frage.hinweis}</p>}
+
+            {frage.typ === 'text' && (
+              <>
+                <FrageText
+                  wert={(antworten[frage.id] as string) ?? ''}
+                  onChange={setzeWert}
+                  onWeiter={() => weiter()}
+                  mikro={<Mikro key={frage.id} token={token} onText={(t) => setAntworten((a) => { const alt = (a[frage.id] as string) ?? ''; return { ...a, [frage.id]: alt ? alt.trimEnd() + '\n\n' + t : t }; })} onStatus={setMikroStatus} />}
+                />
+                <div className="mt-3.5 text-[14px] text-[#C9CFD3] min-h-[22px]">{mikroStatusZeile(mikroStatus)}</div>
+              </>
+            )}
+            {frage.typ === 'skala' && (
+              <FrageSkala wert={antworten[frage.id] as number | undefined} onChange={skalaWaehlen} />
+            )}
+            {frage.typ === 'tabelle' && frage.optionen && (
+              <FrageTabelle optionen={frage.optionen} wert={(antworten[frage.id] as TabellenWert) ?? {}} onChange={setzeWert} />
+            )}
+
+            {fehler && <p className="mt-4 text-[#ff7a52]">{fehler}</p>}
+
+            <div className="flex justify-between items-center mt-10 gap-4 flex-wrap">
+              <button type="button" className="btn btn-ghost" disabled={pos === 0} onClick={zurueck}>← Zurück</button>
+              <span className="text-[12.5px] text-muted order-last w-full text-center md:order-none md:w-auto">{tastenhinweis}</span>
+              <button type="button" className="btn" disabled={speichertGerade} onClick={() => weiter()}>{istLetzte ? 'Abschließen →' : 'Weiter →'}</button>
             </div>
-          )}
-          <div className="font-medium text-[34px] leading-[1.28] mt-3.5 mb-2">{frage.text}</div>
-          {frage.hinweis && <p className="text-[15px] text-[#C9CFD3] font-light mb-7 leading-relaxed">{frage.hinweis}</p>}
-
-          {frage.typ === 'text' && (
-            <>
-              <FrageText
-                wert={(antworten[frage.id] as string) ?? ''}
-                onChange={setzeWert}
-                onWeiter={() => weiter()}
-                mikro={<Mikro key={frage.id} token={token} onText={(t) => setAntworten((a) => { const alt = (a[frage.id] as string) ?? ''; return { ...a, [frage.id]: alt ? alt.trimEnd() + '\n\n' + t : t }; })} onStatus={setMikroStatus} />}
-              />
-              <div className="mt-3.5 text-sm text-[#C9CFD3] min-h-[22px]">{mikroStatusZeile(mikroStatus)}</div>
-            </>
-          )}
-          {frage.typ === 'skala' && (
-            <FrageSkala wert={antworten[frage.id] as number | undefined} onChange={skalaWaehlen} />
-          )}
-          {frage.typ === 'tabelle' && frage.optionen && (
-            <FrageTabelle optionen={frage.optionen} wert={(antworten[frage.id] as TabellenWert) ?? {}} onChange={setzeWert} />
-          )}
-
-          {fehler && <p className="mt-4 text-[#ff7a52]">{fehler}</p>}
-
-          <div className="flex justify-between items-center mt-9 gap-4 flex-wrap">
-            <button type="button" className="btn btn-ghost" disabled={pos === 0} onClick={zurueck}>← Zurück</button>
-            <span className="text-[12.5px] text-muted">{tastenhinweis}</span>
-            <button type="button" className="btn" disabled={speichertGerade} onClick={() => weiter()}>{istLetzte ? 'Abschließen →' : 'Weiter →'}</button>
           </div>
         </div>
       )}

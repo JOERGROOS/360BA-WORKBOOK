@@ -31,7 +31,7 @@ export function KapitelFormular({ kapitel, hatFragen, schliessen, neuLaden }: {
   }
 
   return (
-    <aside className="bg-blue border-l border-line p-7">
+    <aside className="bg-[rgba(11,20,27,.55)] backdrop-blur-xl border-l border-white/10 p-7">
       <h3 className="text-[18px] font-semibold mb-5">{kapitel ? 'Kapitel bearbeiten' : 'Neues Kapitel'}</h3>
       <div className="mb-4.5"><label htmlFor="kt">Titel</label><input id="kt" value={f.titel} onChange={(e) => setF({ ...f, titel: e.target.value })} /></div>
       <div className="mb-4.5"><label htmlFor="ku">Untertitel</label><input id="ku" value={f.untertitel} onChange={(e) => setF({ ...f, untertitel: e.target.value })} /></div>

@@ -35,7 +35,7 @@ export function FrageFormular({ frage, chapterId, schliessen, neuLaden }: {
   }
 
   return (
-    <aside className="bg-blue border-l border-line p-7">
+    <aside className="bg-[rgba(11,20,27,.55)] backdrop-blur-xl border-l border-white/10 p-7">
       <h3 className="text-[18px] font-semibold mb-5">{frage ? 'Frage bearbeiten' : 'Neue Frage'}</h3>
       <div className="mb-4.5"><label htmlFor="ft">Fragetext</label><textarea id="ft" style={{ minHeight: 90 }} value={f.text} onChange={(e) => setF({ ...f, text: e.target.value })} /></div>
       <div className="mb-4.5"><label htmlFor="fh">Hinweis für den Kunden (optional)</label><input id="fh" value={f.hinweis} onChange={(e) => setF({ ...f, hinweis: e.target.value })} /></div>

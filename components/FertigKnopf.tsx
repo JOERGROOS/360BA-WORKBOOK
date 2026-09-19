@@ -20,9 +20,14 @@ export function FertigKnopf({ token }: { token: string }) {
   }
 
   return (
-    <div>
-      <button type="button" className="btn text-[16px] px-8 py-4" disabled={laedt} onClick={herunterladen}>
-        {laedt ? 'Öffne dein Workbook …' : 'Workbook jetzt herunterladen'}
+    <div className="text-center">
+      <button type="button" className="btn text-[17px] px-9 py-5" disabled={laedt} onClick={herunterladen}>
+        {laedt ? 'Öffne dein Workbook …' : (
+          <>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M4 20h16" /></svg>
+            Workbook jetzt herunterladen
+          </>
+        )}
       </button>
       {fehler && <p className="mt-4 text-[#ff7a52]">{fehler}</p>}
     </div>

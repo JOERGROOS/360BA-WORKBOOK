@@ -18,6 +18,7 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
   const [laufend, setLaufend] = useState<Laufend[]>([]);
   const [etwasHochgeladen, setEtwasHochgeladen] = useState(false);
   const [meldeStatus, setMeldeStatus] = useState<'bereit' | 'sendet' | 'fertig'>('bereit');
+  const [ueberZone, setUeberZone] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function laden() {
@@ -77,19 +78,22 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center p-3 overflow-y-auto" onClick={schliessen}>
-      <div className="card w-full max-w-[560px] my-6" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center p-3 overflow-y-auto" onClick={schliessen}>
+      <div className="glas erscheint w-full max-w-[580px] my-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <div className="eyebrow">Finanzdaten senden</div>
-          <button type="button" aria-label="Schließen" className="text-muted text-2xl leading-none" onClick={schliessen}>×</button>
+          <button type="button" aria-label="Schließen" className="text-muted text-2xl leading-none hover:text-white transition-colors" onClick={schliessen}>×</button>
         </div>
 
         <label
-          className="mt-5 flex flex-col items-center justify-center gap-2 border border-dashed border-line rounded-xl px-6 py-10 cursor-pointer hover:border-o text-center"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => { e.preventDefault(); dateienAnnehmen(e.dataTransfer.files); }}
+          className={`mt-6 flex flex-col items-center justify-center gap-2.5 border border-dashed rounded-2xl px-6 py-12 cursor-pointer text-center normal-case tracking-normal text-white transition-all duration-150 ${ueberZone ? 'border-o bg-o/10' : 'border-white/15 hover:border-o/60 hover:bg-white/[.03]'}`}
+          style={ueberZone ? { boxShadow: '0 0 34px rgba(237,122,2,.25) inset' } : undefined}
+          onDragOver={(e) => { e.preventDefault(); setUeberZone(true); }}
+          onDragLeave={() => setUeberZone(false)}
+          onDrop={(e) => { e.preventDefault(); setUeberZone(false); dateienAnnehmen(e.dataTransfer.files); }}
         >
-          <span className="text-[15px]">Dateien hierher ziehen oder auswählen</span>
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#ED7A02" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 16V4" /><path d="m7 9 5-5 5 5" /><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /></svg>
+          <span className="text-[15.5px]">Dateien hierher ziehen oder auswählen</span>
           <span className="fine">PDF, Excel, Word, Text oder PowerPoint · bis 50 MB je Datei</span>
           <input ref={inputRef} type="file" multiple accept={ENDUNGEN} className="hidden" onChange={(e) => { dateienAnnehmen(e.target.files); e.target.value = ''; }} />
         </label>
@@ -99,7 +103,7 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
             {laufend.map((e, i) => (
               <div key={i} className="text-[14px]">
                 <div className="flex justify-between gap-3"><span className="truncate">{e.name}</span><span className={e.status === 'fehler' ? 'text-[#ff7a52]' : 'text-muted'}>{e.status === 'fertig' ? '✓' : e.status === 'fehler' ? e.fehler : `${e.fortschritt} %`}</span></div>
-                {e.status === 'laedt' && <div className="h-1 rounded bg-line overflow-hidden mt-1"><i className="block h-full bg-o" style={{ width: `${e.fortschritt}%` }} /></div>}
+                {e.status === 'laedt' && <div className="h-1.5 rounded-full bg-white/[.07] overflow-hidden mt-1.5"><i className="block h-full rounded-full transition-[width] duration-200" style={{ width: `${e.fortschritt}%`, background: 'linear-gradient(90deg,#9F3C07,#F0902C)' }} /></div>}
               </div>
             ))}
           </div>
@@ -110,7 +114,7 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
             <div className="fine mb-2">Bereits gesendet</div>
             <div className="flex flex-col gap-1.5">
               {gesendet.map((d, i) => (
-                <div key={i} className="flex justify-between gap-3 text-[14px] text-[#C9CFD3]"><span className="truncate">{d.dateiname}</span><span className="text-muted shrink-0">{groesse(d.bytes)}</span></div>
+                <div key={i} className="flex justify-between gap-3 text-[14px] text-[#C9CFD3] border-t border-white/[.06] pt-1.5 first:border-t-0 first:pt-0"><span className="truncate">{d.dateiname}</span><span className="text-muted shrink-0">{groesse(d.bytes)}</span></div>
               ))}
             </div>
           </div>

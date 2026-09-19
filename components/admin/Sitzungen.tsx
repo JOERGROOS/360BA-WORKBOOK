@@ -136,7 +136,7 @@ export function Sitzungen() {
                 : { t: `In Arbeit · ${s.prozent} %`, c: 'border-line text-[#C9CFD3]' };
           const detail = details[s.id];
           return (
-            <div key={s.id} className="bg-surf border border-line rounded-xl px-4 py-3.5 text-sm">
+            <div key={s.id} className="bg-white/[.04] border border-white/10 rounded-xl px-4 py-3.5 text-sm">
               <div className="grid grid-cols-[1fr_1fr_120px_150px_1fr] gap-3.5 items-center">
                 <span>{s.vorname} {s.nachname}{s.test && <em className="text-muted"> (Test)</em>}</span>
                 <span className="text-[#C9CFD3]">{s.firma}</span>
@@ -163,7 +163,7 @@ export function Sitzungen() {
                 </span>
               </div>
               {offen === s.id && (
-                <div className="mt-4 border-t border-line pt-4">
+                <div className="mt-4 border-t border-white/10 pt-4">
                   {!detail ? <p className="fine">Lädt …</p> : (
                     <div className="flex flex-col gap-3">
                       {detail.fragen_snapshot.kapitel.map((k) => k.fragen.map((f) => (
@@ -183,7 +183,7 @@ export function Sitzungen() {
                 </div>
               )}
               {dateienOffen === s.id && (
-                <div className="mt-4 border-t border-line pt-4">
+                <div className="mt-4 border-t border-white/10 pt-4">
                   {(dateien[s.id]?.length ?? 0) === 0 ? <p className="fine">Noch keine Dateien.</p> : (
                     <div className="flex flex-col gap-2">
                       {dateien[s.id].map((d, i) => (

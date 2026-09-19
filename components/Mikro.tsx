@@ -92,7 +92,8 @@ export function Mikro({ token, onText, onStatus }: { token: string; onText: (t: 
   }, [z]);
   return (
     <button type="button" onClick={() => (z === 'nimmt-auf' ? stopp() : start())} disabled={z === 'wandelt-um'} aria-label={z === 'nimmt-auf' ? 'Aufnahme stoppen' : 'Antwort einsprechen'}
-      className={`w-[52px] h-[52px] rounded-full bg-o flex items-center justify-center ${z === 'nimmt-auf' ? 'animate-pulse' : ''}`}>
+      style={{ background: 'linear-gradient(180deg,#F0902C,#ED7A02)', boxShadow: z === 'nimmt-auf' ? undefined : '0 6px 20px rgba(237,122,2,.32)' }}
+      className={`w-[52px] h-[52px] rounded-full flex items-center justify-center transition-transform duration-150 active:scale-95 ${z === 'nimmt-auf' ? 'puls' : ''} ${z === 'wandelt-um' ? 'opacity-60' : ''}`}>
       {z === 'nimmt-auf' ? <span className="block w-4 h-4 bg-white rounded-sm" /> : <svg viewBox="0 0 24 24" className="w-[22px] h-[22px] fill-white"><path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 1 0-8 0v5a4 4 0 0 0 4 4zm6-4a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z" /></svg>}
     </button>
   );
