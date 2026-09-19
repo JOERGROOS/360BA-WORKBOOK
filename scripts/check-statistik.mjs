@@ -24,4 +24,15 @@ assert.equal(s.staerkster, 'Finanzen');
 assert.equal(s.diktatAnteil, 67, '2 von 3 genutzten Sitzungen haben mindestens ein Diktat');
 assert.equal(s.diktateGesamt, 3, '0 + 2 + 1, Test-Sitzung zählt nicht mit');
 
+// Leere Liste (z. B. ganz frisches Projekt) darf nicht werfen — alle Zähler auf 0/null.
+const leer = berechneStatistik([]);
+assert.deepEqual(leer.anzahl, { eingeladen: 0, laufend: 0, ergebnis: 0, abgeschlossen: 0, gesamt: 0 });
+assert.deepEqual(leer.dauerMinuten, { median: null, mittel: null, n: 0 });
+assert.deepEqual(leer.fortschrittLaufend, { mittelProzent: null, n: 0 });
+assert.deepEqual(leer.faktoren, []);
+assert.equal(leer.schwaechster, null);
+assert.equal(leer.staerkster, null);
+assert.equal(leer.diktatAnteil, null);
+assert.equal(leer.diktateGesamt, 0);
+
 console.log('ok');

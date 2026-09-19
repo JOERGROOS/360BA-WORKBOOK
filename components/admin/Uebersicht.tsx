@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Statistik } from '@/lib/statistik';
 import { EinladungFormular } from './EinladungFormular';
 import { ErfolgsradSvg } from '../ErfolgsradSvg';
+import { aufruf, fehlertext } from './Fragebogen';
 
 function stunden(min: number): string {
   const h = Math.floor(min / 60), rest = Math.round(min % 60);
@@ -20,14 +21,16 @@ function Karte({ label, wert }: { label: string; wert: string }) {
 
 export function Uebersicht() {
   const [s, setS] = useState<Statistik | null>(null);
+  const [fehler, setFehler] = useState('');
   const [neueEinladung, setNeueEinladung] = useState(false);
 
   async function laden() {
-    const r = await fetch('/api/admin/statistik');
-    if (r.ok) setS(await r.json());
+    try { setS(await aufruf('/api/admin/statistik', 'GET')); setFehler(''); }
+    catch (e) { setFehler(fehlertext(e)); }
   }
   useEffect(() => { laden(); }, []);
 
+  if (fehler) return <main className="p-8 max-w-[1100px]"><p className="text-[#ff7a52]">{fehler}</p></main>;
   if (!s) return null;
 
   return (

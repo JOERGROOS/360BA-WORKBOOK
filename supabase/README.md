@@ -1,6 +1,6 @@
 # Supabase
 
-Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabellen und den `workbooks`-Bucket anfassen).
+Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabellen und die Buckets `workbooks` und `finanzdaten` anfassen).
 
 ## Migrationen
 

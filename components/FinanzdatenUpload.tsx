@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { ERLAUBT, MAX_BYTES } from '@/lib/dateinamen';
+import { ERLAUBT, MAX_BYTES, endung } from '@/lib/dateinamen';
 
 type DateiZeile = { dateiname: string; bytes: number; created_at: string };
 type Laufend = { name: string; fortschritt: number; status: 'laedt' | 'fertig' | 'fehler'; fehler?: string };
@@ -32,9 +32,14 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
 
     if (datei.size > MAX_BYTES) { setzeEintrag({ status: 'fehler', fehler: 'Größer als 50 MB' }); return; }
 
+    // Content-Type kommt aus der Endung, nicht von `datei.type` (der Browser rät den oft
+    // falsch, z. B. bei .docx als application/zip) — dieselbe Liste, die auch der Server prüft.
+    const contentType = ERLAUBT[endung(datei.name)]?.[0];
+    if (!contentType) { setzeEintrag({ status: 'fehler', fehler: 'Dieser Dateityp ist nicht erlaubt.' }); return; }
+
     const anfrage = await fetch(`/api/w/${token}/dateien/upload-url`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dateiname: datei.name, contentType: datei.type, bytes: datei.size }),
+      body: JSON.stringify({ dateiname: datei.name, contentType, bytes: datei.size }),
     });
     const adr = await anfrage.json().catch(() => ({}));
     if (!anfrage.ok) { setzeEintrag({ status: 'fehler', fehler: adr.error ?? 'Dateityp nicht erlaubt' }); return; }
@@ -42,7 +47,7 @@ export function FinanzdatenUpload({ token, hinweis, schliessen }: { token: strin
     const hochgeladen = await new Promise<boolean>((resolve) => {
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', adr.signedUrl);
-      xhr.setRequestHeader('Content-Type', datei.type || 'application/octet-stream');
+      xhr.setRequestHeader('Content-Type', contentType);
       xhr.upload.onprogress = (e) => { if (e.lengthComputable) setzeEintrag({ fortschritt: Math.round((e.loaded / e.total) * 100) }); };
       xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300);
       xhr.onerror = () => resolve(false);

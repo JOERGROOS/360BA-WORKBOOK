@@ -1,5 +1,17 @@
 # Das Abholprogramm für Finanzdaten
 
+## Voraussetzungen
+
+- Datei `~/.config/360ba-workbook/.env.local` mit `SUPABASE_URL` und
+  `SUPABASE_SERVICE_ROLE_KEY` — fehlt einer der beiden, bricht das Programm
+  sofort ab und schreibt `FEHLER Umgebungsvariablen fehlen (…)` ins Protokoll.
+- Node ab Version 22.18 (auf diesem Mac unter `/Users/joergroos/.local/bin/node`).
+- **Nach jeder Code-Änderung erst `./scripts/sync-lokal.sh` ausführen** — der
+  launchd-Dienst startet das Skript aus der Arbeitskopie
+  (`/Users/joergroos/dev/360ba-workbook/`), nicht aus diesem Laufwerksordner.
+  Ohne den Abgleich läuft der nächste automatische Durchlauf noch mit dem
+  alten Stand.
+
 ## Was es macht
 
 Kunden laden ihre Finanzdaten (BWA, Kontoauszüge usw.) direkt über das

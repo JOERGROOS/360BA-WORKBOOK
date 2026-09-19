@@ -94,7 +94,10 @@ export async function dateiRegistrieren(s: Sitzung, meta: { pfad: string }): Pro
     bytes: objekt.metadata?.size ?? 0,
     content_type: objekt.metadata?.mimetype ?? 'application/octet-stream',
   });
-  if (error) throw error;
+  // 23505 = unique-Verletzung auf `pfad` — die Datei ist schon registriert (z. B. ein
+  // zweiter Aufruf nach einem abgebrochenen Request). Das ist kein Fehler, sondern das
+  // gewünschte Ergebnis: einmal registriert bleibt registriert.
+  if (error && (error as { code?: string }).code !== '23505') throw error;
 }
 
 export async function dateienFuer(sitzungId: string): Promise<DateiEintrag[]> {
