@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react';
 
 const NAMEN: Record<string, string> = {
-  start_titel: 'Start · Titel', start_text: 'Start · Einleitung', start_hinweise: 'Start · Hinweise (getrennt durch ·)',
+  zugang_text: 'Start · Zugangs-Hinweis (öffentliche Seite ohne Formular)',
+  einladung_titel: 'Einladung · Titel', einladung_text: 'Einladung · Text',
   willkommen_titel: 'PDF · Titel Willkommen', willkommen_text: 'PDF · Schön, dass du dabei bist',
   bestandteile_titel: 'PDF · Titel Bestandteile', bestandteile_text: 'PDF · Bestandteile-Text',
   finanzcheck_titel: 'PDF · Titel Finanz-Check', finanzcheck_text: 'PDF · Finanz-Check Text',

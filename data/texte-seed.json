@@ -1,4 +1,7 @@
 {
+ "zugang_text": "Dieses Workbook ist für eingeladene Kunden der 360° Business-Analyse. Den persönlichen Link hast du per E-Mail von uns bekommen. Fragen? office@joerg-roos.com",
+ "einladung_titel": "Schön, dass du dabei bist, {vorname}",
+ "einladung_text": "Prüf kurz deine Daten und starte dann dein Workbook. Dein Link bleibt gültig – du kannst jederzeit pausieren und hier weitermachen.",
  "start_titel": "Dein Workbook zur 360° Business-Analyse",
  "start_text": "Bevor wir uns einen Tag lang deinem Unternehmen widmen, gehen wir gemeinsam durch das, was dich und deinen Betrieb ausmacht. Ich stelle dir eine Frage nach der anderen. Du antwortest – getippt oder gesprochen. Nimm dir Zeit und sei ehrlich zu dir selbst. Nur so wird der gemeinsame Tag wertvoll.",
  "start_hinweise": "ca. 2–3 Stunden · jederzeit pausieren, wir schicken dir deinen Link · tippen oder einsprechen",

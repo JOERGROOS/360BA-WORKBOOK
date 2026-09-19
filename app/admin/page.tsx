@@ -40,7 +40,8 @@ export default function AdminSeite() {
   }
 
   async function vorschauAlsKunde() {
-    const r = await fetch('/api/admin/sitzungen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ test: true }) });
+    const kontakt = { vorname: 'Jörg', nachname: 'Test', firma: 'JOERG ROOS', telefon: '', email: 'office@joerg-roos.com' };
+    const r = await fetch('/api/admin/sitzungen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...kontakt, test: true }) });
     const d = await r.json();
     if (r.ok) window.open(d.link, '_blank');
   }

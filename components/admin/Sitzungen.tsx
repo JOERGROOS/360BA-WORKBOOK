@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import type { Sitzung } from '@/lib/db';
+import { EinladungFormular } from './EinladungFormular';
 
-type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at'> & { prozent: number };
+type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at'> & { prozent: number; link: string };
 
 function antwortAnzeigen(a: unknown): string {
   if (a === undefined || a === null || a === '') return '—';
@@ -22,6 +23,8 @@ export function Sitzungen() {
   const [details, setDetails] = useState<Record<string, Omit<Sitzung, 'token'>>>({});
   const [laeuft, setLaeuft] = useState<string | null>(null);
   const [fehler, setFehler] = useState('');
+  const [neueEinladung, setNeueEinladung] = useState(false);
+  const [kopiert, setKopiert] = useState<string | null>(null);
 
   async function laden() {
     const r = await fetch('/api/admin/sitzungen');
@@ -60,8 +63,8 @@ export function Sitzungen() {
     setLaeuft(null);
     if (!r.ok) setFehler(await fehlerAus(r, 'Das hat nicht geklappt.'));
   }
-  async function loeschen(id: string) {
-    if (!confirm('Sitzung inklusive PDF wirklich löschen?')) return;
+  async function zurueckziehen(id: string) {
+    if (!confirm('Einladung zurückziehen? Der Link wird sofort ungültig.')) return;
     setLaeuft(id); setFehler('');
     const r = await fetch(`/api/admin/sitzungen/${id}`, { method: 'DELETE' });
     setLaeuft(null);
@@ -69,11 +72,20 @@ export function Sitzungen() {
     await laden();
   }
 
+  async function linkKopieren(s: SitzungListe) {
+    await navigator.clipboard.writeText(s.link);
+    setKopiert(s.id); setTimeout(() => setKopiert(null), 2000);
+  }
+
   if (!liste) return null;
 
   return (
     <main className="p-8 max-w-[1100px]">
-      <div className="eyebrow">Admin · Ausgefüllte Workbooks</div>
+      <div className="flex items-center justify-between">
+        <div className="eyebrow">Admin · Ausgefüllte Workbooks</div>
+        <button className="btn" onClick={() => setNeueEinladung((v) => !v)}>{neueEinladung ? 'Schließen' : 'Neue Einladung'}</button>
+      </div>
+      {neueEinladung && <div className="mt-4"><EinladungFormular angelegt={laden} /></div>}
       {fehler && <p className="text-[#ff7a52] mt-3">{fehler}</p>}
       <div className="flex flex-col gap-2 mt-6">
         {liste.map((s) => {
@@ -81,7 +93,9 @@ export function Sitzungen() {
             ? { t: 'PDF versandt', c: 'border-[#4ec986] text-[#4ec986]' }
             : s.status === 'ergebnis'
               ? { t: 'Ergebnis offen', c: 'border-line text-[#C9CFD3]' }
-              : { t: `In Arbeit · ${s.prozent} %`, c: 'border-line text-[#C9CFD3]' };
+              : s.status === 'eingeladen'
+                ? { t: 'Eingeladen', c: 'border-muted text-muted' }
+                : { t: `In Arbeit · ${s.prozent} %`, c: 'border-line text-[#C9CFD3]' };
           const detail = details[s.id];
           return (
             <div key={s.id} className="bg-surf border border-line rounded-xl px-4 py-3.5 text-sm">
@@ -92,10 +106,11 @@ export function Sitzungen() {
                 <span className={`text-[11px] uppercase tracking-[.08em] px-2.5 py-1 rounded-full border text-center ${badge.c}`}>{badge.t}</span>
                 <span className="flex gap-3 justify-end flex-wrap text-[13px]">
                   <button className="text-o font-medium" onClick={() => ausklappen(s.id)}>Antworten</button>
+                  {s.status !== 'abgeschlossen' && <button className="text-o font-medium" onClick={() => linkKopieren(s)}>{kopiert === s.id ? 'Kopiert ✓' : 'Link kopieren'}</button>}
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => pdfOeffnen(s.id)}>PDF öffnen</button>
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => pdfNeu(s.id)}>PDF neu erzeugen</button>
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => linkErneut(s.id)}>Link erneut senden</button>
-                  <button className="text-[#ff7a52] font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => loeschen(s.id)}>Löschen</button>
+                  <button className="text-[#ff7a52] font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => zurueckziehen(s.id)}>Zurückziehen</button>
                 </span>
               </div>
               {offen === s.id && (

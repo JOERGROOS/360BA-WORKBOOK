@@ -14,6 +14,7 @@ export default async function ErgebnisSeite({ params }: { params: Promise<{ toke
       </main>
     );
   }
+  if (s.status === 'eingeladen') redirect(`/w/${token}`);
   // Nur mit fertiger PDF weiter zur Fertig-Seite — sonst bleibt der Kunde hier, wo der Retry-Knopf sitzt.
   if (s.status === 'abgeschlossen' && s.pdf_path) redirect(`/w/${token}/fertig`);
   if (s.status === 'laufend') await db.from('wb_sessions').update({ status: 'ergebnis' }).eq('id', s.id);

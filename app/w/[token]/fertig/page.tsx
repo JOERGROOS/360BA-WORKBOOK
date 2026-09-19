@@ -15,6 +15,7 @@ export default async function FertigSeite({ params, searchParams }: { params: Pr
       </main>
     );
   }
+  if (s.status === 'eingeladen') redirect(`/w/${token}`);
   // Ohne PDF nichts zu zeigen — auch bei status "abgeschlossen" (gestrandete Zeile) zurück zum Ergebnis.
   if (s.status !== 'abgeschlossen' || !s.pdf_path) redirect(`/w/${token}/ergebnis`);
   const punkte = punkteJeFaktor(s.fragen_snapshot, s.antworten);

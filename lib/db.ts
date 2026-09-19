@@ -17,7 +17,7 @@ export type Antworten = Record<string, Antwort>;
 
 export type Sitzung = {
   id: string; token: string; vorname: string; nachname: string; firma: string; telefon: string; email: string;
-  status: 'laufend' | 'ergebnis' | 'abgeschlossen'; test: boolean;
+  status: 'eingeladen' | 'laufend' | 'ergebnis' | 'abgeschlossen'; test: boolean;
   fragen_snapshot: Snapshot; antworten: Antworten; aha: string; aktuelle_frage: number;
   pdf_path: string | null; created_at: string; updated_at: string; abgeschlossen_at: string | null;
 };

@@ -7,6 +7,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ token: st
   const { token } = await params;
   const s = await sitzungLaden(token);
   if (!s) return NextResponse.json({ error: 'Link ungültig' }, { status: 404 });
+  if (s.status === 'eingeladen') return NextResponse.json({ error: 'Bitte zuerst das Interview starten' }, { status: 409 });
   if (!bremse(`link:${s.id}`, 3, 3600)) return NextResponse.json({ error: 'Der Link wurde gerade schon geschickt.' }, { status: 429 });
   try {
     await linkMailSenden(s);

@@ -14,5 +14,5 @@ for (const k of s.kapitel) for (const f of k.fragen) { assert.ok(f.text.trim().l
 const verboten = /\b(vielleicht|könnte|man sollte|häufig|gefühlt|eventuell|ganzheitlich|garantiert|Fixkosten)\b/i;
 for (const [k, v] of Object.entries(t)) assert.ok(!verboten.test(v), `verbotenes Wort in Text ${k}`);
 for (const k of s.kapitel) for (const f of k.fragen) assert.ok(!verboten.test(f.text + ' ' + (f.hinweis ?? '')), `verbotenes Wort in Frage: ${f.text}`);
-for (const key of ['willkommen_text','bestandteile_text','finanzcheck_liste','faktoren_einleitung','ergebnis_text','aha_frage','ueber_text','mail_link_text','mail_fertig_text']) assert.ok(t[key], `Text ${key} fehlt`);
+for (const key of ['zugang_text','einladung_titel','einladung_text','willkommen_text','bestandteile_text','finanzcheck_liste','faktoren_einleitung','ergebnis_text','aha_frage','ueber_text','mail_link_text','mail_fertig_text']) assert.ok(t[key], `Text ${key} fehlt`);
 console.log('ok');

@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { sitzungLaden } from '@/lib/sitzung';
+import { texteLaden } from '@/lib/texte';
 import { Interview } from '@/components/Interview';
+import { EinladungStart } from '@/components/EinladungStart';
 
 export default async function InterviewSeite({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ frage?: string }> }) {
   const { token } = await params;
@@ -12,6 +14,11 @@ export default async function InterviewSeite({ params, searchParams }: { params:
         <p className="fine">Dieser Link ist ungültig. Schreib uns an <a className="underline" href="mailto:office@joerg-roos.com">office@joerg-roos.com</a>.</p>
       </main>
     );
+  }
+  if (s.status === 'eingeladen') {
+    const texte = await texteLaden();
+    const kontakt = { vorname: s.vorname, nachname: s.nachname, firma: s.firma, telefon: s.telefon, email: s.email };
+    return <EinladungStart token={token} kontakt={kontakt} texte={texte} />;
   }
   // Nur mit fertiger PDF auf die Fertig-Seite — eine gestrandete "abgeschlossen"-Zeile ohne pdf_path
   // (Prozess mitten im Rendern beendet) landet stattdessen auf dem Ergebnis, wo der Retry-Knopf sitzt.

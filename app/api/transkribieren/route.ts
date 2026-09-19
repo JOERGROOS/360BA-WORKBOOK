@@ -10,6 +10,7 @@ export async function POST(req: Request) {
   const token = req.headers.get('x-wb-token') ?? '';
   const s = await sitzungLaden(token);
   if (!s || s.status === 'abgeschlossen') return NextResponse.json({ error: 'Keine gültige Sitzung' }, { status: 401 });
+  if (s.status === 'eingeladen') return NextResponse.json({ error: 'Bitte zuerst das Interview starten' }, { status: 409 });
   if (!bremse(`stt:${s.id}`, 60, 3600)) return NextResponse.json({ error: 'Zu viele Aufnahmen in kurzer Zeit.' }, { status: 429 });
   const form = await req.formData().catch(() => null);
   const audio = form?.get('audio');

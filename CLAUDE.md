@@ -1,6 +1,6 @@
 # 360BA Online-Workbook
 
-Stand: 18.09.2026 — Tasks 1–11 fertig, bereit für den ersten Deploy.
+Stand: 19.09.2026 — Einladungslink (Task 1) fertig.
 
 ## Was ist das
 Interaktives Online-Workbook zur 360° Business-Analyse für Jörg Roos' Kunden
@@ -8,16 +8,34 @@ Interaktives Online-Workbook zur 360° Business-Analyse für Jörg Roos' Kunden
 Ergebnis-Auswertung mit Erfolgsrad, PDF-Export, Admin-Bereich zum Pflegen von
 Fragen/Texten/Sitzungen.
 
+## Einladungs-Prinzip — keine öffentliche Startseite
+Sitzungen entstehen ausschließlich im Admin-Bereich (`/admin` → „Neue
+Einladung"), nie über eine öffentliche Startseite. `app/page.tsx` zeigt nur
+noch einen neutralen Zugangs-Hinweis (`zugang_text`), ohne Formular, und ist
+per `robots.txt` sowie `metadata.robots` von Suchmaschinen ausgeschlossen.
+Status-Kette einer Sitzung (`wb_sessions.status`):
+
+`eingeladen` (Admin hat angelegt, Kunde hat noch nicht bestätigt) →
+`laufend` (Kunde hat auf der Einladungsseite gestartet) → `ergebnis` →
+`abgeschlossen`.
+
+Der Kunde öffnet seinen Link, bestätigt/korrigiert seine Daten auf der
+Einladungsseite (`components/EinladungStart.tsx`) und startet damit erst das
+Interview (`POST /api/w/[token]/start`, wechselt auf `laufend`). Vor dem
+Start liefern `link`, `transkribieren` und `antwort` einen 409.
+
 ## Stack
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 3 · Supabase
 (Tabellen-Präfix `wb_`) · Anthropic SDK + OpenAI SDK (Sprache→Text, Glättung)
 · Resend (Mail) · @react-pdf/renderer (PDF-Export).
 
 ## Ordner & Routen
-- `app/page.tsx` Start-Formular · `app/w/[token]/` Interview, Ergebnis,
-  Fertig-Seite · `app/admin/` Login, Fragebogen, Texte, Sitzungen.
-- `app/api/start` Sitzung anlegen · `app/api/w/[token]/{antwort,abschluss,
-  pdf,link}` Kunden-API · `app/api/admin/*` Admin-API (Cookie-Auth) ·
+- `app/page.tsx` neutrale Zugangs-Seite (kein Formular) · `app/w/[token]/`
+  Einladungsbestätigung, Interview, Ergebnis, Fertig-Seite · `app/admin/`
+  Login, Fragebogen, Texte, Sitzungen (inkl. „Neue Einladung").
+- `app/api/w/[token]/start` Interview starten · `app/api/w/[token]/{antwort,
+  abschluss,pdf,link}` Kunden-API · `app/api/admin/*` Admin-API (Cookie-Auth,
+  `POST sitzungen` legt Einladung an) ·
   `app/api/transkribieren` Sprache→Text.
 - `lib/` Fachlogik (sitzung, punkte, pdf, glaettung, mail-html, bremse) ·
   `data/` Seed-JSON · `supabase/migrations/` Schema.

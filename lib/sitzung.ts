@@ -27,11 +27,13 @@ export function linkFuer(s: { token: string }): string {
   return `${process.env.APP_URL ?? 'http://localhost:3000'}/w/${s.token}`;
 }
 
-export async function sitzungAnlegen(k: Kontakt, test = false): Promise<Sitzung> {
+// Einladung anlegen (Admin): Sitzung startet im Status 'eingeladen', Snapshot wird trotzdem gezogen
+// (Spalte ist NOT NULL) und beim tatsächlichen Start noch einmal frisch gezogen.
+export async function einladungAnlegen(k: Kontakt, test = false): Promise<Sitzung> {
   const snapshot = await snapshotZiehen();
   if (!snapshot.kapitel.length) throw new Error('Kein aktiver Fragebogen');
   const token = randomBytes(32).toString('base64url');
-  const { data, error } = await db.from('wb_sessions').insert({ ...k, token, test, fragen_snapshot: snapshot }).select('*').single();
+  const { data, error } = await db.from('wb_sessions').insert({ ...k, token, test, status: 'eingeladen', fragen_snapshot: snapshot }).select('*').single();
   if (error) throw error;
   return data as Sitzung;
 }
@@ -42,9 +44,22 @@ export async function sitzungLaden(token: string): Promise<Sitzung | null> {
   return (data as Sitzung) ?? null;
 }
 
+// Kunde bestätigt/korrigiert seine Daten auf der Einladungsseite und startet damit das Interview.
+export async function sitzungStarten(token: string, k: Kontakt): Promise<Sitzung> {
+  const s = await sitzungLaden(token);
+  if (!s) throw new Error('Sitzung nicht gefunden');
+  if (s.status !== 'eingeladen') throw new Error('Interview ist bereits gestartet');
+  const snapshot = await snapshotZiehen();
+  if (!snapshot.kapitel.length) throw new Error('Kein aktiver Fragebogen');
+  const { data, error } = await db.from('wb_sessions').update({ ...k, status: 'laufend', aktuelle_frage: 0, fragen_snapshot: snapshot, updated_at: new Date().toISOString() }).eq('id', s.id).select('*').single();
+  if (error) throw error;
+  return data as Sitzung;
+}
+
 export async function antwortSpeichern(token: string, frageId: string, wert: Antwort, position: number): Promise<void> {
   const s = await sitzungLaden(token);
   if (!s) throw new Error('Sitzung nicht gefunden');
+  if (s.status === 'eingeladen') throw new Error('Sitzung noch nicht gestartet');
   if (s.status === 'abgeschlossen') throw new Error('Sitzung ist abgeschlossen');
   if (frageId === '__aha') {
     if (typeof wert !== 'string') throw new Error('Ungültiger Wert');

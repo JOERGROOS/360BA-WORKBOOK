@@ -6,6 +6,7 @@ Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabe
 
 - `001_workbook.sql` — Schema (`wb_*`-Tabellen, Bucket `workbooks`)
 - `002_rls.sql` — Row Level Security auf allen `wb_*`-Tabellen, `anon`/`authenticated` gesperrt
+- `003_einladung.sql` — Status `eingeladen` in `wb_sessions.status` erlaubt
 
 ## Migration einspielen
 

@@ -59,7 +59,15 @@ Danach auf „Deploy" klicken. Der erste Durchlauf dauert ein bis zwei Minuten.
 3. Das kann bis zu einer Stunde dauern, bis es überall wirkt. Vercel zeigt
    auf der Domains-Seite ein grünes Häkchen, sobald es funktioniert.
 
-## 5. Nach dem ersten Deploy testen
+## 5. Laufender Betrieb: Einladung anlegen
+
+Das Workbook hat keine öffentliche Startseite mehr. Jede Sitzung entsteht im
+Admin-Bereich: `/admin` → „Ausgefüllte Workbooks" → „Neue Einladung" → Kontaktdaten
+eintragen → „Einladung anlegen". Danach den Link kopieren oder direkt per Mail
+verschicken. In der Praxis: **Einladung anlegen → Link in die Mail nach
+Zahlungseingang** für die 360° Business-Analyse.
+
+## 6. Nach dem ersten Deploy testen
 
 1. `https://workbook.joerg-roos.com/admin` öffnen und mit deinem
    Admin-Passwort anmelden.
@@ -69,13 +77,13 @@ Danach auf „Deploy" klicken. Der erste Durchlauf dauert ein bis zwei Minuten.
 5. Prüfen: Ist die Kunden-Mail mit dem Link angekommen, und die interne
    Mail an das Team auch?
 
-## 6. Resend — nichts zu tun
+## 7. Resend — nichts zu tun
 
 Der Absender `noreply@joerg-roos.com` ist bei Resend bereits verifiziert
 (über das JOERG-AI-Projekt). Für das Workbook ist hier kein weiterer Schritt
 nötig.
 
-## 7. Supabase — nichts zu tun
+## 8. Supabase — nichts zu tun
 
 Die Datenbank-Migration ist bereits eingespielt, und der Speicherbereich
 („Bucket") `workbooks` für die PDFs existiert schon. Auch hier ist kein
