@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Kontakt } from '@/lib/sitzung';
+import type { Kontakt } from '@/lib/db';
 
 // Inline statt lib/texte-Import: lib/texte.ts zieht lib/db.ts nach, das serverseitige Umgebungsvariablen
 // erwartet — ein Import hier würde das in den Browser-Bundle ziehen.

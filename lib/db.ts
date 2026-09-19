@@ -15,6 +15,8 @@ export type TabellenWert = Record<string, Record<string, string>>; // zeile → 
 export type Antwort = string | number | TabellenWert;
 export type Antworten = Record<string, Antwort>;
 
+export type Kontakt = { vorname: string; nachname: string; firma: string; telefon: string; email: string };
+
 export type Sitzung = {
   id: string; token: string; vorname: string; nachname: string; firma: string; telefon: string; email: string;
   status: 'eingeladen' | 'laufend' | 'ergebnis' | 'abgeschlossen'; test: boolean;

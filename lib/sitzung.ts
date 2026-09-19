@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
-import { db, type Snapshot, type SnapshotKapitel, type Sitzung, type Antwort, type Kapitel, type Frage, type TabellenOptionen } from './db';
+import { db, type Snapshot, type SnapshotKapitel, type Sitzung, type Antwort, type Kapitel, type Frage, type TabellenOptionen, type Kontakt } from './db';
 
-export type Kontakt = { vorname: string; nachname: string; firma: string; telefon: string; email: string };
+export type { Kontakt };
 
 function platzhalterJahr(s: string): string {
   const jahr = new Date().getFullYear();
@@ -45,14 +45,17 @@ export async function sitzungLaden(token: string): Promise<Sitzung | null> {
 }
 
 // Kunde bestätigt/korrigiert seine Daten auf der Einladungsseite und startet damit das Interview.
+// Der Status-Filter im Update macht den Start atomar: Bei zwei fast gleichzeitigen Aufrufen
+// gewinnt genau einer, der zweite bekommt keine Zeile zurück und wirft.
 export async function sitzungStarten(token: string, k: Kontakt): Promise<Sitzung> {
   const s = await sitzungLaden(token);
   if (!s) throw new Error('Sitzung nicht gefunden');
-  if (s.status !== 'eingeladen') throw new Error('Interview ist bereits gestartet');
+  if (s.status !== 'eingeladen') throw new Error('Sitzung ist bereits gestartet');
   const snapshot = await snapshotZiehen();
   if (!snapshot.kapitel.length) throw new Error('Kein aktiver Fragebogen');
-  const { data, error } = await db.from('wb_sessions').update({ ...k, status: 'laufend', aktuelle_frage: 0, fragen_snapshot: snapshot, updated_at: new Date().toISOString() }).eq('id', s.id).select('*').single();
+  const { data, error } = await db.from('wb_sessions').update({ ...k, status: 'laufend', aktuelle_frage: 0, fragen_snapshot: snapshot, updated_at: new Date().toISOString() }).eq('id', s.id).eq('status', 'eingeladen').select('*').maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error('Sitzung ist bereits gestartet');
   return data as Sitzung;
 }
 
