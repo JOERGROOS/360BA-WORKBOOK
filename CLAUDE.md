@@ -38,6 +38,12 @@ Status-Kette einer Sitzung (`wb_sessions.status`):
 ## Kunden-Landeseite und Finanzdaten-Upload
 
 `/w/[token]` ist für JEDEN Status die Landeseite (`components/KundenStart.tsx`):
+Begrüßung (`landing_titel`, alles nach dem Komma steht orange), Einstiegstext
+(`landing_intro`, ein Zeilenumbruch je Absatz), Videobotschaft
+(`components/Videobotschaft.tsx` — `video_url` aus Admin → Texte; Vimeo wird als
+Player-Adresse mit `dnt=1` eingebettet, eine direkte `.mp4` als `<video>`, alles
+andere ergibt den Platzhalter mit `landing_video_hinweis`; Deutung und Prüfung:
+`lib/video.ts` + `scripts/check-video.mjs`), dann
 zwei Kacheln, „Workbook starten" (Text je Status, führt zu `/interview`,
 `/ergebnis` oder `/fertig`) und „Finanzdaten senden" (öffnet
 `components/FinanzdatenUpload.tsx` als Overlay). Das Interview selbst

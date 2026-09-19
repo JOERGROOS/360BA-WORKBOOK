@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FinanzdatenUpload } from './FinanzdatenUpload';
 import { Kopf } from './Kopf';
 import { Zweifarbig } from './Zweifarbig';
+import { Videobotschaft } from './Videobotschaft';
 
 type Kachel = { text: string; href: string; prozent: number; zeigtFortschritt: boolean };
 
@@ -42,21 +43,40 @@ function Symbolkreis({ kinder }: { kinder: React.ReactNode }) {
   );
 }
 
+// Der Titel sitzt in beiden Kacheln im festen Abstand unter der Symbolreihe — dadurch
+// stehen beide Überschriften auf derselben Linie, egal wie lang der Text darunter wird.
+function Kacheltitel({ text }: { text: string }) {
+  return (
+    <div className="font-semibold text-[26px] leading-tight mt-7 flex items-center gap-2.5">
+      {text}
+      <span className="text-o transition-transform duration-150 group-hover:translate-x-1"><IconPfeil /></span>
+    </div>
+  );
+}
+
 export function KundenStart({ token, vorname, workbook, texte }: { token: string; vorname: string; workbook: Kachel; texte: Record<string, string> }) {
   const [upload, setUpload] = useState(false);
-  const gruss = `Hallo ${vorname}, schön dass du da bist`;
+  const gruss = (texte.landing_titel ?? '').replace(/\{vorname\}/g, vorname);
+  // Alles nach dem ersten Komma steht orange — so bleibt die Zweifarbigkeit erhalten,
+  // auch wenn Jörg den Begrüßungstext im Admin ändert.
+  const wort = gruss.includes(',') ? gruss.slice(gruss.indexOf(',') + 1).trim() : '';
   return (
     <main>
       <Kopf kinder={<span className="text-[13px] tracking-[.14em] uppercase text-muted">360° Business-Analyse</span>} />
       <div className="max-w-[900px] mx-auto px-6 md:px-8 pb-24 pt-8 erscheint">
         <div className="eyebrow">Dein Workbook</div>
-        <h1 className="font-semibold text-[34px] md:text-[46px] leading-[1.14] mt-3 mb-3">
-          <Zweifarbig text={gruss} wort="schön dass du da bist" />
+        <h1 className="font-semibold text-[34px] md:text-[46px] leading-[1.14] mt-3 mb-5">
+          <Zweifarbig text={gruss} wort={wort} />
         </h1>
-        <p className="text-[16px] md:text-[17px] leading-relaxed text-[#C9CFD3] font-light max-w-[620px]">{texte.kacheln_titel}</p>
+        <div className="max-w-[720px] text-[16px] md:text-[17px] leading-[1.65] text-[#C9CFD3] font-light flex flex-col gap-4">
+          {(texte.landing_intro ?? '').split('\n').filter((a) => a.trim()).map((a, i) => <p key={i}>{a}</p>)}
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 mt-9">
-          <Link href={workbook.href} className="glas glas--hebt min-h-[250px] flex flex-col justify-between group">
+        <Videobotschaft adresse={texte.video_url} hinweis={texte.landing_video_hinweis} />
+
+        <div className="eyebrow mt-10">{texte.kacheln_titel}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 items-stretch gap-5 md:gap-6 mt-4">
+          <Link href={workbook.href} className="glas glas--hebt h-full flex flex-col group">
             <div className="flex items-start justify-between gap-4">
               <Symbolkreis kinder={<IconWorkbook />} />
               {workbook.zeigtFortschritt && (
@@ -68,26 +88,20 @@ export function KundenStart({ token, vorname, workbook, texte }: { token: string
                 </span>
               )}
             </div>
-            <div>
-              <div className="font-semibold text-[26px] leading-tight mt-7 flex items-center gap-2.5">
-                {workbook.text}
-                <span className="text-o transition-transform duration-150 group-hover:translate-x-1"><IconPfeil /></span>
-              </div>
-              <p className="fine mt-2.5">{texte.kachel_workbook}</p>
-            </div>
+            <Kacheltitel text={workbook.text} />
+            <p className="fine mt-2.5">{texte.kachel_workbook}</p>
           </Link>
 
-          <button type="button" onClick={() => setUpload(true)} className="glas glas--hebt min-h-[250px] flex flex-col justify-between text-left group">
-            <Symbolkreis kinder={<IconUpload />} />
-            <div>
-              <div className="font-semibold text-[26px] leading-tight mt-7 flex items-center gap-2.5">
-                Finanzdaten senden
-                <span className="text-o transition-transform duration-150 group-hover:translate-x-1"><IconPfeil /></span>
-              </div>
-              <p className="fine mt-2.5">{texte.kachel_finanzdaten}</p>
+          <button type="button" onClick={() => setUpload(true)} className="glas glas--hebt h-full flex flex-col text-left group">
+            <div className="flex items-start gap-4">
+              <Symbolkreis kinder={<IconUpload />} />
             </div>
+            <Kacheltitel text="Finanzdaten senden" />
+            <p className="fine mt-2.5">{texte.kachel_finanzdaten}</p>
           </button>
         </div>
+
+        <p className="fine mt-8">{texte.kontakt}</p>
       </div>
       {upload && <FinanzdatenUpload token={token} hinweis={texte.upload_hinweis} schliessen={() => setUpload(false)} />}
     </main>

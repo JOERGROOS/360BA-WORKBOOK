@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 const NAMEN: Record<string, string> = {
   zugang_text: 'Start · Zugangs-Hinweis (öffentliche Seite ohne Formular)',
   einladung_titel: 'Einladung · Titel', einladung_text: 'Einladung · Text',
+  landing_titel: 'Landeseite · Begrüßung (alles nach dem Komma steht orange)',
+  landing_intro: 'Landeseite · Einstiegstext (jeder Zeilenumbruch beginnt einen Absatz)',
+  video_url: 'Landeseite · Videobotschaft (Vimeo-Link)',
+  landing_video_hinweis: 'Landeseite · Hinweis, solange kein Video hinterlegt ist',
+  kacheln_titel: 'Landeseite · Überschrift über den Kacheln',
+  kachel_workbook: 'Landeseite · Kachel Workbook', kachel_finanzdaten: 'Landeseite · Kachel Finanzdaten',
+  upload_hinweis: 'Landeseite · Hinweis im Upload-Fenster',
   willkommen_titel: 'PDF · Titel Willkommen', willkommen_text: 'PDF · Schön, dass du dabei bist',
   bestandteile_titel: 'PDF · Titel Bestandteile', bestandteile_text: 'PDF · Bestandteile-Text',
   finanzcheck_titel: 'PDF · Titel Finanz-Check', finanzcheck_text: 'PDF · Finanz-Check Text',
