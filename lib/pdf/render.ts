@@ -25,7 +25,17 @@ export function pdfDateiname(s: Sitzung): string {
   return `360BA-Workbook-${name}-${new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })}.pdf`;
 }
 
+// Zwei Durchläufe: react-pdf kennt die Seitenzahl eines Abschnitts erst beim
+// Umbruch. Durchlauf 1 rendert nur, damit die <Marke>-Elemente per
+// render={({pageNumber})} in die Karte schreiben, auf welcher Seite ihr
+// Abschnitt landet. Durchlauf 2 rendert dasselbe Dokument mit gefüllter Karte —
+// erst dort stehen die Seitenzahlen im Inhaltsverzeichnis. Nur dieses Ergebnis
+// wird ausgeliefert. Die Zeilen des Verzeichnisses haben eine feste Höhe und
+// eine Zahlenspalte fester Breite, dadurch verschiebt sich zwischen den beiden
+// Durchläufen nichts.
 export async function pdfErzeugen(s: Sitzung, texte: Record<string, string>): Promise<Buffer> {
   schriftenRegistrieren();
-  return Buffer.from(await renderToBuffer(Workbook({ s, texte })));
+  const seiten = new Map<string, number>();
+  await renderToBuffer(Workbook({ s, texte, seiten }));
+  return Buffer.from(await renderToBuffer(Workbook({ s, texte, seiten })));
 }

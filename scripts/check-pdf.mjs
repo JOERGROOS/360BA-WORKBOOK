@@ -24,6 +24,6 @@ if (seiten === 0) {
   const count = text.match(/\/Type\s*\/Pages[^>]*\/Count\s+(\d+)/) ?? text.match(/\/Count\s+(\d+)[^>]*\/Type\s*\/Pages/);
   if (count) { seiten = Number(count[1]); quelle = '/Type /Pages · /Count (Object-Streams verstecken /Type /Page)'; }
 }
-if (seiten < 14) throw new Error(`zu wenig Seiten: ${seiten} (Quelle: ${quelle})`);
+if (seiten < 20) throw new Error(`zu wenig Seiten: ${seiten} (Quelle: ${quelle})`);
 
 console.log(`ok · ${seiten} Seiten (${quelle}) · ${Math.round(buf.length / 1024)} KB · ${Date.now() - t0} ms`);
