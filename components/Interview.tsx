@@ -9,6 +9,7 @@ import { Mikro, type MikroStatus } from './Mikro';
 import { FrageSkala } from './FrageSkala';
 import { FrageTabelle } from './FrageTabelle';
 import { Kopf } from './Kopf';
+import { Ring } from './Ring';
 
 function introKey(token: string, kapitelId: string): string {
   return `wb-intro-${token}-${kapitelId}`;
@@ -186,7 +187,14 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
           <div className="flex items-center gap-4 md:gap-5 flex-wrap">
             {linkHinweis && <span className="fine">{linkHinweis}</span>}
             <button type="button" className="text-[12.5px] text-muted border border-white/10 rounded-lg px-3 py-1.5 hover:border-o/60 hover:text-white transition-colors" onClick={spaeter}>Später weitermachen</button>
-            <span className="text-[13px] tracking-[.14em] uppercase text-muted whitespace-nowrap">Frage {pos + 1} von {alle.length} · {prozentInfo.prozent} %</span>
+            <span className="flex items-center gap-3">
+              <span className="text-[13px] tracking-[.14em] uppercase text-muted whitespace-nowrap">Frage {pos + 1} von {alle.length}</span>
+              {/* Auf dem Handy steht der Gesamtfortschritt hier, auf dem Rechner in der Kapitel-Leiste. */}
+              <span className="md:hidden">
+                <Ring prozent={prozentInfo.prozent} groesse={44} strich={4}
+                  kinder={<span className="text-[12px] font-semibold tabular-nums">{prozentInfo.prozent}</span>} />
+              </span>
+            </span>
           </div>
         } />
         <Fortschritt kapitel={snapshot.kapitel} aktuellesKapitel={kapitelIndex} prozent={prozentInfo.prozent} />
