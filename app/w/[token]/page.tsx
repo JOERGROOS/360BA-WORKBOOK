@@ -1,12 +1,12 @@
-import { redirect } from 'next/navigation';
 import { sitzungLaden } from '@/lib/sitzung';
 import { texteLaden } from '@/lib/texte';
-import { Interview } from '@/components/Interview';
-import { EinladungStart } from '@/components/EinladungStart';
+import { fortschritt } from '@/lib/punkte';
+import { KundenStart } from '@/components/KundenStart';
 
-export default async function InterviewSeite({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ frage?: string }> }) {
+// Landeseite für JEDEN Sitzungsstatus: zwei Kacheln, Workbook und Finanzdaten-Upload.
+// Das Interview selbst (inkl. Einladungsbestätigung) liegt unter /interview.
+export default async function LandeSeite({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const { frage } = await searchParams;
   const s = await sitzungLaden(token);
   if (!s) {
     return (
@@ -15,15 +15,16 @@ export default async function InterviewSeite({ params, searchParams }: { params:
       </main>
     );
   }
-  if (s.status === 'eingeladen') {
-    const texte = await texteLaden();
-    const kontakt = { vorname: s.vorname, nachname: s.nachname, firma: s.firma, telefon: s.telefon, email: s.email };
-    return <EinladungStart token={token} kontakt={kontakt} texte={texte} />;
-  }
-  // Nur mit fertiger PDF auf die Fertig-Seite — eine gestrandete "abgeschlossen"-Zeile ohne pdf_path
-  // (Prozess mitten im Rendern beendet) landet stattdessen auf dem Ergebnis, wo der Retry-Knopf sitzt.
-  if (s.status === 'abgeschlossen' && s.pdf_path) redirect(`/w/${token}/fertig`);
-  if (s.status === 'abgeschlossen') redirect(`/w/${token}/ergebnis`);
-  const start = frage !== undefined && Number.isInteger(Number(frage)) && Number(frage) >= 0 ? Number(frage) : s.aktuelle_frage;
-  return <Interview token={token} snapshot={s.fragen_snapshot} antworten={s.antworten} start={start} vorname={s.vorname} zurueckZumErgebnis={frage !== undefined} />;
+  const texte = await texteLaden();
+  const prozent = fortschritt(s.fragen_snapshot, s.antworten).prozent;
+  const workbook = s.status === 'eingeladen'
+    ? { text: 'Interview starten →', href: `/w/${token}/interview` }
+    : s.status === 'laufend'
+      ? { text: `Weitermachen · ${prozent} % →`, href: `/w/${token}/interview` }
+      : s.status === 'ergebnis'
+        ? { text: 'Zum Ergebnis →', href: `/w/${token}/ergebnis` }
+        : s.pdf_path
+          ? { text: 'Fertig – Workbook herunterladen', href: `/w/${token}/fertig` }
+          : { text: 'Zum Ergebnis →', href: `/w/${token}/ergebnis` };
+  return <KundenStart token={token} vorname={s.vorname} workbook={workbook} texte={texte} />;
 }

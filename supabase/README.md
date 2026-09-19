@@ -8,6 +8,7 @@ Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabe
 - `002_rls.sql` — Row Level Security auf allen `wb_*`-Tabellen, `anon`/`authenticated` gesperrt
 - `003_einladung.sql` — Status `eingeladen` in `wb_sessions.status` erlaubt
 - `004_statistik.sql` — `wb_sessions.gestartet_at` (Start des Interviews) und `wb_sessions.diktate` (Zähler erfolgreicher Spracheingaben) für die Admin-Übersicht
+- `005_finanzdaten.sql` — Tabelle `wb_dateien` (Metadaten je hochgeladener Datei) und der private Bucket `finanzdaten` (Finanzdaten-Upload der Kunden, 50 MB je Datei, nur die neun erlaubten Dateitypen aus `lib/dateinamen.ts`)
 
 ## Migration einspielen
 

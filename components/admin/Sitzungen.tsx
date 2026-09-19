@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import type { Sitzung } from '@/lib/db';
+import type { DateiEintragAdmin } from '@/lib/dateien';
 import { EinladungFormular } from './EinladungFormular';
 
 type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at'> & { prozent: number; link: string };
@@ -21,6 +22,8 @@ export function Sitzungen() {
   const [liste, setListe] = useState<SitzungListe[] | null>(null);
   const [offen, setOffen] = useState<string | null>(null);
   const [details, setDetails] = useState<Record<string, Omit<Sitzung, 'token'>>>({});
+  const [dateien, setDateien] = useState<Record<string, DateiEintragAdmin[]>>({});
+  const [dateienOffen, setDateienOffen] = useState<string | null>(null);
   const [laeuft, setLaeuft] = useState<string | null>(null);
   const [fehler, setFehler] = useState('');
   const [neueEinladung, setNeueEinladung] = useState(false);
@@ -28,7 +31,15 @@ export function Sitzungen() {
 
   async function laden() {
     const r = await fetch('/api/admin/sitzungen');
-    if (r.ok) setListe(await r.json());
+    if (!r.ok) return;
+    const d: SitzungListe[] = await r.json();
+    setListe(d);
+    // Dateien je Sitzung gleich mitladen — so steht die Anzahl im Knopf, ohne zusätzlichen Klick.
+    const paare = await Promise.all(d.map(async (s) => {
+      const rd = await fetch(`/api/admin/sitzungen/${s.id}/dateien`);
+      return [s.id, rd.ok ? await rd.json() : []] as const;
+    }));
+    setDateien(Object.fromEntries(paare));
   }
   useEffect(() => { laden(); }, []);
 
@@ -106,6 +117,7 @@ export function Sitzungen() {
                 <span className={`text-[11px] uppercase tracking-[.08em] px-2.5 py-1 rounded-full border text-center ${badge.c}`}>{badge.t}</span>
                 <span className="flex gap-3 justify-end flex-wrap text-[13px]">
                   <button className="text-o font-medium" onClick={() => ausklappen(s.id)}>Antworten</button>
+                  <button className="text-o font-medium" onClick={() => setDateienOffen((o) => (o === s.id ? null : s.id))}>Dateien ({dateien[s.id]?.length ?? 0})</button>
                   {s.status !== 'abgeschlossen' && <button className="text-o font-medium" onClick={() => linkKopieren(s)}>{kopiert === s.id ? 'Kopiert ✓' : 'Link kopieren'}</button>}
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => pdfOeffnen(s.id)}>PDF öffnen</button>
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => pdfNeu(s.id)}>PDF neu erzeugen</button>
@@ -129,6 +141,20 @@ export function Sitzungen() {
                           <div className="text-[15px] text-[#E6E9EB] font-light">{detail.aha}</div>
                         </div>
                       )}
+                    </div>
+                  )}
+                </div>
+              )}
+              {dateienOffen === s.id && (
+                <div className="mt-4 border-t border-line pt-4">
+                  {(dateien[s.id]?.length ?? 0) === 0 ? <p className="fine">Noch keine Dateien.</p> : (
+                    <div className="flex flex-col gap-2">
+                      {dateien[s.id].map((d, i) => (
+                        <div key={i} className="flex justify-between items-center gap-3 text-[14px]">
+                          <a className="underline text-o truncate" href={d.url} target="_blank" rel="noreferrer">{d.dateiname}</a>
+                          <span className={`text-[11px] uppercase tracking-[.08em] px-2.5 py-1 rounded-full border shrink-0 ${d.abgeholt_at ? 'border-[#4ec986] text-[#4ec986]' : 'border-muted text-muted'}`}>{d.abgeholt_at ? 'abgeholt ✓' : 'wartet'}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

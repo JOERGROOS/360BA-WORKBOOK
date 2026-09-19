@@ -85,9 +85,11 @@ nötig.
 
 ## 8. Supabase — nichts zu tun
 
-Die Datenbank-Migration ist bereits eingespielt, und der Speicherbereich
-(„Bucket") `workbooks` für die PDFs existiert schon. Auch hier ist kein
+Die Datenbank-Migrationen sind bereits eingespielt, und die Speicherbereiche
+(„Buckets") `workbooks` (PDFs) und `finanzdaten` (Finanzdaten-Upload der
+Kunden, privat, 50 MB je Datei) existieren schon. Auch hier ist kein
 weiterer Schritt nötig. Row Level Security ist auf allen `wb_*`-Tabellen aktiv
-(Migration `002_rls.sql`) — nur der Server mit dem Service-Role-Key kommt
-noch an die Daten, ein Browser-Zugriff mit dem öffentlichen Anon-Key läuft
-ins Leere.
+(Migrationen `002_rls.sql` und `005_finanzdaten.sql`) — nur der Server mit dem
+Service-Role-Key kommt noch an die Daten, ein Browser-Zugriff mit dem
+öffentlichen Anon-Key läuft ins Leere. Details zu den Migrationen:
+`supabase/README.md`.

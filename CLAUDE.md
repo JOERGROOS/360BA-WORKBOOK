@@ -1,6 +1,7 @@
 # 360BA Online-Workbook
 
-Stand: 19.09.2026 — Einladungslink + Admin-Übersicht mit Statistik (Task 1) fertig.
+Stand: 19.09.2026 — Einladungslink + Admin-Übersicht mit Statistik (Task 1) und
+Kunden-Landeseite mit Kacheln + Finanzdaten-Upload (Task 2) fertig.
 
 ## Was ist das
 Interaktives Online-Workbook zur 360° Business-Analyse für Jörg Roos' Kunden
@@ -19,6 +20,34 @@ Status-Kette einer Sitzung (`wb_sessions.status`):
 `laufend` (Kunde hat auf der Einladungsseite gestartet) → `ergebnis` →
 `abgeschlossen`.
 
+## Kunden-Landeseite und Finanzdaten-Upload
+
+`/w/[token]` ist für JEDEN Status die Landeseite (`components/KundenStart.tsx`):
+zwei Kacheln, „Workbook starten" (Text je Status, führt zu `/interview`,
+`/ergebnis` oder `/fertig`) und „Finanzdaten senden" (öffnet
+`components/FinanzdatenUpload.tsx` als Overlay). Das Interview selbst
+(inkl. Einladungsbestätigung über `EinladungStart`) liegt unter
+`/w/[token]/interview` — Deep-Links zu einzelnen Fragen (`?frage=`, aus
+`Ergebnis.tsx`) zeigen dorthin.
+
+Finanzdaten-Upload läuft direkt vom Browser in den privaten Bucket
+`finanzdaten` (Vercel-Funktionen haben eine 4,5-MB-Grenze für den
+Funktionskörper selbst, deshalb signierte Adressen statt Server-Upload):
+`POST /api/w/[token]/dateien/upload-url` liefert eine signierte Adresse
+(`lib/dateien.ts` → `uploadAdresse`, prüft Typ/Größe vorher), der Browser lädt
+per `XMLHttpRequest PUT` auf diese Adresse hoch (getestet — PUT funktioniert,
+kein POST/FormData nötig), danach meldet `POST /api/w/[token]/dateien` die
+Datei an (`dateiRegistrieren`, prüft Existenz im Speicher + Grenze 30 Dateien
+je Sitzung), `POST /api/w/[token]/dateien/melden` schickt eine interne Mail
+(`lib/mail.ts` → `finanzdatenMailSenden`). Upload ist in JEDEM Sitzungsstatus
+erlaubt, auch `eingeladen` und `abgeschlossen`. Erlaubte Typen, Größen- und
+Mengengrenze: `lib/dateinamen.ts` (`ERLAUBT`, `MAX_BYTES`, `MAX_DATEIEN`) —
+bewusst abhängigkeitsfrei, damit ein Abholprogramm auf Jörgs Mac (Task 3) sie
+mit einfachem `node` importieren kann, ohne Next.js oder Supabase im Gepäck.
+Geprüft mit `scripts/check-dateinamen.mjs`. Admin sieht die Dateien je
+Sitzung in `components/admin/Sitzungen.tsx` („Dateien (n)", ausklappbar,
+Download-Link + Abhol-Status `abgeholt_at`).
+
 Der Kunde öffnet seinen Link, bestätigt/korrigiert seine Daten auf der
 Einladungsseite (`components/EinladungStart.tsx`) und startet damit erst das
 Interview (`POST /api/w/[token]/start`, wechselt auf `laufend`). Vor dem
@@ -31,15 +60,19 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 3 · Supabase
 
 ## Ordner & Routen
 - `app/page.tsx` neutrale Zugangs-Seite (kein Formular) · `app/w/[token]/`
-  Einladungsbestätigung, Interview, Ergebnis, Fertig-Seite · `app/admin/`
-  Login, **Übersicht (Startansicht)**, Fragebogen, Texte, Sitzungen (inkl.
+  **Landeseite mit Kacheln** (jeder Status), `interview/` Einladungsbestätigung
+  + Interview, `ergebnis/`, `fertig/` · `app/admin/` Login,
+  **Übersicht (Startansicht)**, Fragebogen, Texte, Sitzungen (inkl.
   „Neue Einladung").
 - `app/api/w/[token]/start` Interview starten · `app/api/w/[token]/{antwort,
-  abschluss,pdf,link}` Kunden-API · `app/api/admin/*` Admin-API (Cookie-Auth,
-  `POST sitzungen` legt Einladung an, `GET statistik` Nutzungs-Statistik) ·
+  abschluss,pdf,link}` Kunden-API · `app/api/w/[token]/dateien{,/upload-url,
+  /melden}` Finanzdaten-Upload · `app/api/admin/*` Admin-API (Cookie-Auth,
+  `POST sitzungen` legt Einladung an, `GET statistik` Nutzungs-Statistik,
+  `GET sitzungen/[id]/dateien` Finanzdaten-Liste mit Download-Adressen) ·
   `app/api/transkribieren` Sprache→Text (zählt `diktate` bei Erfolg hoch).
 - `lib/` Fachlogik (sitzung, punkte, statistik, pdf, glaettung, mail-html,
-  bremse) · `data/` Seed-JSON · `supabase/migrations/` Schema.
+  bremse, dateinamen, dateien) · `data/` Seed-JSON · `supabase/migrations/`
+  Schema.
 
 ## Admin-Übersicht
 
@@ -60,8 +93,8 @@ Sprachanteil aus dem Zähler `wb_sessions.diktate`.
 3. Test-Sitzung: `/admin` öffnen, „Vorschau als Kunde" — legt eine echte
    Sitzung mit Jörgs eigenen Daten an, zum kompletten Durchklicken.
 4. Prüfskripte: `npm run check` (check-seed, check-punkte, check-geometrie,
-   check-admin-auth, check-statistik) · `node scripts/check-glaettung.mjs`
-   (braucht ANTHROPIC_API_KEY) ·
+   check-admin-auth, check-statistik, check-dateinamen) · `node
+   scripts/check-glaettung.mjs` (braucht ANTHROPIC_API_KEY) ·
    `node scripts/check-mail-html.mjs` · `node scripts/check-pdf.mjs` (braucht
    laufenden Dev-Server, schreibt `docs/beispiel/beispiel.pdf`).
 
@@ -71,14 +104,20 @@ Spec: `docs/specs/2026-09-18-online-workbook-design.md` · Plan:
 
 ## Datenbank
 Supabase-Projekt `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur
-`wb_*`-Tabellen und den Bucket `workbooks` anfassen). Migration einspielen
-und Seed-Ablauf: `supabase/README.md`.
+`wb_*`-Tabellen und die Buckets `workbooks`/`finanzdaten` anfassen). Migration
+einspielen und Seed-Ablauf: `supabase/README.md`.
 
 ## Bekannte Grenzen
 - **Bremse im Modulspeicher:** `lib/bremse.ts` zählt Aufrufe in einer
   In-Memory-Map. Vercel-Funktionen starten kalt und teilen sie nicht —
   reicht als Missbrauchsbremse für ein Vorbereitungs-Tool, ist aber kein
   verlässliches globales Limit. Bei Bedarf auf Upstash Redis umstellen.
+- **Admin-Löschen räumt den `finanzdaten`-Bucket nicht auf:** Die
+  „Zurückziehen"-Route (`app/api/admin/sitzungen/[id]/route.ts`) entfernt beim
+  Löschen einer Sitzung nur den PDF-Ordner im Bucket `workbooks`. Die
+  `wb_dateien`-Zeilen verschwinden zwar per `ON DELETE CASCADE`, die
+  hochgeladenen Dateien selbst bleiben aber als verwaiste Objekte im Bucket
+  `finanzdaten` liegen. Folge-Aufgabe ist als Vorschlag hinterlegt.
 - **Positionen per Pfeil:** Der „← Zurück"-Pfeil im Interview ändert die
   Position nur lokal im Browser. Der Server-Stand `aktuelle_frage` wird nur
   beim „Weiter" gespeichert. Schließt jemand nach dem Zurückblättern den Tab

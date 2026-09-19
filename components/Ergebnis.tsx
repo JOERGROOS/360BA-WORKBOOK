@@ -88,7 +88,7 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
 
       {fehlend.length > 0 && (
         <div className="card mt-8" style={{ borderColor: '#ED7A02' }}>
-          <p>Dir fehlen noch {fehlend.length} Skala-Antwort{fehlend.length === 1 ? '' : 'en'} — <a className="underline text-o" href={`/w/${token}?frage=${alle.indexOf(fehlend[0])}`}>zur ersten offenen</a></p>
+          <p>Dir fehlen noch {fehlend.length} Skala-Antwort{fehlend.length === 1 ? '' : 'en'} — <a className="underline text-o" href={`/w/${token}/interview?frage=${alle.indexOf(fehlend[0])}`}>zur ersten offenen</a></p>
         </div>
       )}
 
@@ -123,7 +123,7 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
                   <div className="flex items-center gap-4 flex-wrap">
                     <span className="fine">{aussagen.length} Aussagen · {fw?.summe ?? 0} von {fw?.maximum ?? 0} Punkten</span>
                     <button type="button" className="underline text-o text-[13px]" onClick={() => setOffen((o) => ({ ...o, [kapitel.id]: !o[kapitel.id] }))}>{offen[kapitel.id] ? 'einklappen' : 'Details'}</button>
-                    <a className="underline text-o text-[13px]" href={`/w/${token}?frage=${i}`}>bearbeiten</a>
+                    <a className="underline text-o text-[13px]" href={`/w/${token}/interview?frage=${i}`}>bearbeiten</a>
                   </div>
                 </div>
                 {offen[kapitel.id] && (
@@ -147,7 +147,7 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
                 ) : frage.optionen ? (
                   <div className="flex-1 min-w-0 overflow-x-auto"><MiniTabelle optionen={frage.optionen} wert={(antworten[frage.id] as TabellenWert) ?? {}} /></div>
                 ) : null}
-                <a className="underline text-o text-[13px] shrink-0" href={`/w/${token}?frage=${i}`}>bearbeiten</a>
+                <a className="underline text-o text-[13px] shrink-0" href={`/w/${token}/interview?frage=${i}`}>bearbeiten</a>
               </div>
             </div>
           );

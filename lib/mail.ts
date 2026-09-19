@@ -23,3 +23,13 @@ export async function linkMailSenden(s: Sitzung): Promise<void> {
   const werte = { vorname: s.vorname, link: linkFuer(s) };
   await sendeMail({ an: [s.email], betreff: fuelle(t.mail_link_betreff, werte), text: fuelle(t.mail_link_text, werte) });
 }
+
+// Interne Mail nach dem Finanzdaten-Upload — keine Anhänge, nur ein Hinweis für das Team.
+export async function finanzdatenMailSenden(s: Sitzung, namen: string[]): Promise<void> {
+  const mehrzahl = namen.length === 1 ? '' : 'en';
+  await sendeMail({
+    an: [INTERN],
+    betreff: `Neue Finanzdaten von ${s.firma}: ${namen.length} Datei${mehrzahl}`,
+    text: `${s.vorname} ${s.nachname} (${s.firma}) hat ${namen.length} Datei${mehrzahl} hochgeladen:\n\n${namen.join('\n')}`,
+  });
+}
