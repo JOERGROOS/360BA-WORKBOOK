@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `594a307`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `53967af`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -51,7 +51,7 @@ Plan als Datei in `docs/plans/`, je Aufgabe ein frischer Subagent (sonnet für U
 2. **Vimeo-Link** eintragen, sobald das Begrüßungsvideo da ist.
 3. **Datenschutz-Absatz** aus `docs/datenschutz-absatz.md` auf joerg-roos.com ergänzen (Sub-Prozessoren: Supabase EU, Vercel Frankfurt, OpenAI USA mit Standardvertragsklauseln, Anthropic, Resend, Vimeo wenn genutzt).
 4. **Sprachaufnahme in Chrome:** bei Jörgs erstem Test scheiterten 3 von 5 Aufnahmen clientseitig, bevor Audio hochging (Server sah nur 2 Aufrufe, beide ok). Messpunkte sind eingebaut (Server-Log `[transkribieren] eingang/ergebnis`, Browser-Log `[mikro] …` erscheint im Dev-Server-Terminal als `[browser]`, Pegelanzeige, Leer-Erkennung). Nächster Schritt: Jörg testet erneut in Chrome, Log lesen. Modellwechsel auf `gpt-4o-transcribe` mit Handwerker-Wortschatz-Prompt ist gemessen besser (Testskript-Idee in `scratchpad` der alten Sitzung, nicht im Repo) — nach Klärung der Aufnahme umstellen.
-5. **Entscheidungen bei Jörg:** Video-Kachel schmaler (`max-w` in `components/Videobotschaft.tsx`), damit die Kacheln auf 1440 px über der Falz bleiben? Foto auf der Über-Jörg-Seite (aktuell Shooting 2024, weißes Hemd) behalten?
+5. **Entscheidungen bei Jörg:** ~~Video-Kachel schmaler~~ erledigt 19.09. (`53967af`, zwei Drittel Breite ab Tablet, mobil volle Breite). Foto auf der Über-Jörg-Seite (aktuell Shooting 2024, weißes Hemd) behalten?
 6. **Später / geparkt:** Admin-Workbook-Liste lädt je Sitzung Dateien + signierte URLs (N+1) · ZIP-Route hält alles im Speicher (30×50 MB Grenze) · Weiß auf Orange 2,8:1 (Markenvorgabe, bewusst) · `diktate`-Zähler nicht atomar (Statistik) · PDF 1,3 MB wegen PNG-Hintergrund (JPEG wäre ~150 KB).
 
 ## 9. Fallen, die Zeit gekostet haben
