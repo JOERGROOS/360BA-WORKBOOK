@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-const { endung, typErlaubt, dateinameSicher, dateinameAusStorageName, ordnerName, ERLAUBT, MAX_BYTES, MAX_DATEIEN } = await import('../lib/dateinamen.ts');
+const { endung, typErlaubt, dateinameSicher, dateinameAusStorageName, ordnerName, contentDispositionAttachment, ERLAUBT, MAX_BYTES, MAX_DATEIEN } = await import('../lib/dateinamen.ts');
 
 // Endungs-/Typ-Prüfung
 assert.equal(endung('bwa.PDF'), '.pdf', 'Endung wird kleingeschrieben');
@@ -34,5 +34,17 @@ assert.equal(ordnerName('X'.repeat(100), 'abc12345-6789').length, 80, 'Kappung b
 assert.equal(ordnerName('..', 'abc12345-6789'), 'Kunde-abc12345', '".." wäre das übergeordnete Verzeichnis → Platzhalter');
 assert.equal(ordnerName('.', 'abc12345-6789'), 'Kunde-abc12345', '"." wäre das aktuelle Verzeichnis → Platzhalter');
 assert.equal(ordnerName('.hidden', 'abc12345-6789'), 'hidden', 'führender Punkt fällt weg, kein Versteck-Ordner');
+
+// contentDispositionAttachment: ASCII-Fallback + UTF-8-kodierte Fassung
+assert.equal(
+  contentDispositionAttachment('Finanzdaten-Müller Bedachungen GmbH.zip'),
+  `attachment; filename="Finanzdaten-M_ller Bedachungen GmbH.zip"; filename*=UTF-8''${encodeURIComponent('Finanzdaten-Müller Bedachungen GmbH.zip')}`,
+  'Umlaute im ASCII-Fallback werden zu `_`, filename* trägt den echten Namen',
+);
+assert.equal(
+  contentDispositionAttachment('Finanzdaten-ABC GmbH.zip'),
+  'attachment; filename="Finanzdaten-ABC GmbH.zip"; filename*=UTF-8\'\'Finanzdaten-ABC%20GmbH.zip',
+  'reiner ASCII-Name bleibt in beiden Feldern gleich',
+);
 
 console.log('ok');

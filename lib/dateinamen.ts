@@ -64,3 +64,11 @@ export function ordnerName(firma: string, sitzungId: string): string {
   const bereinigt = ohneRandpunkte(firma.trim().replace(ZEICHEN_ERLAUBT, '_')).slice(0, 80);
   return nurPunkteOderLeer(bereinigt) ? `Kunde-${sitzungId.slice(0, 8)}` : bereinigt;
 }
+
+// Content-Disposition mit Umlauten (z. B. aus `ordnerName`): ASCII-Fallback fürs alte
+// `filename`-Feld (manche Clients ignorieren `filename*`) plus die UTF-8-kodierte Fassung
+// nach RFC 6266/5987, die moderne Browser für den echten Dateinamen nehmen.
+export function contentDispositionAttachment(name: string): string {
+  const ascii = name.replace(/[^\x20-\x7E]/g, '_');
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(name)}`;
+}

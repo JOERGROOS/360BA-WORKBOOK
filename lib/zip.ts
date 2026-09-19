@@ -28,14 +28,33 @@ function dosZeitDatum(d: Date): { zeit: number; datum: number } {
   return { zeit, datum };
 }
 
+// Gleicher Namenskonflikt-Trick wie im Abholer (`freierPfad` in
+// scripts/finanzdaten-abholen.mjs): zwei Einträge mit demselben Namen würden sich sonst im
+// ZIP gegenseitig überschreiben (die meisten Entpacker zeigen nur den letzten). Zweiter
+// Treffer bekommt `-2`, dritter `-3`, ...
+function eindeutigeNamen(eintraege: ZipEintrag[]): string[] {
+  const vergeben = new Set<string>();
+  return eintraege.map((e) => {
+    const punkt = e.name.lastIndexOf('.');
+    const ext = punkt === -1 ? '' : e.name.slice(punkt);
+    const basis = punkt === -1 ? e.name : e.name.slice(0, punkt);
+    let name = e.name;
+    for (let i = 2; vergeben.has(name); i++) name = `${basis}-${i}${ext}`;
+    vergeben.add(name);
+    return name;
+  });
+}
+
 export function zipStoreStream(eintraege: ZipEintrag[]): ReadableStream<Uint8Array> {
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       const { zeit, datum } = dosZeitDatum(new Date());
+      const namen = eindeutigeNamen(eintraege);
       const zentral: Buffer[] = [];
       let offset = 0;
-      for (const eintrag of eintraege) {
-        const name = Buffer.from(eintrag.name, 'utf8');
+      for (let i = 0; i < eintraege.length; i++) {
+        const eintrag = eintraege[i];
+        const name = Buffer.from(namen[i], 'utf8');
         const daten = Buffer.from(await eintrag.daten());
         const crc = crc32(daten);
         const groesse = u32(daten.length);
@@ -61,4 +80,20 @@ export function zipStoreStream(eintraege: ZipEintrag[]): ReadableStream<Uint8Arr
       controller.close();
     },
   });
+}
+
+// Sammelt den Stream vollständig in einen Buffer — für Fälle, in denen erst alles fertig
+// im Speicher liegen soll, bevor überhaupt eine Antwort beginnt (kein Mitten-im-Stream-Abbruch
+// mehr möglich).
+export async function zipStoreBuffer(eintraege: ZipEintrag[]): Promise<Buffer> {
+  // `getReader()` statt `for await`: der DOM-Typ von ReadableStream (den tsc hier zieht)
+  // deklariert kein Symbol.asyncIterator, obwohl Node es zur Laufzeit unterstützt.
+  const reader = zipStoreStream(eintraege).getReader();
+  const teile: Buffer[] = [];
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    teile.push(Buffer.from(value));
+  }
+  return Buffer.concat(teile);
 }

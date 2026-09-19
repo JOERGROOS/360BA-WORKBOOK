@@ -59,7 +59,8 @@ if (nurAngefordert) {
   }
   angeforderteSessionIds = (sessions ?? []).map((s) => s.id);
   if (angeforderteSessionIds.length === 0) {
-    log(`Modus: ${modus} · 0 Dateien`);
+    // Nichts angefordert — der Normalfall bei diesem alle-5-Minuten-Job. Keine Log-Zeile,
+    // sonst wächst das Protokoll ungebremst mit Zeilen, die nichts sagen.
     process.exit(0);
   }
 }
@@ -100,7 +101,7 @@ if (error) {
   process.exit(1);
 }
 
-log(`Modus: ${modus} · ${(zeilen ?? []).length} Dateien`);
+let fehlerAufgetreten = false;
 
 for (const zeile of zeilen ?? []) {
   const dateiname = dateinameSicher(zeile.dateiname);
@@ -148,8 +149,17 @@ for (const zeile of zeilen ?? []) {
     if (eUpdate) throw eUpdate;
     log(`ok ${zielPfad}`);
   } catch (e) {
+    fehlerAufgetreten = true;
     log(`FEHLER ${dateiname}: ${e.message ?? e}`);
   }
+}
+
+// Zusammenfassungs-Zeile: im Vollmodus immer (fester Rhythmus 08:00/14:00, ein Eintrag ist
+// erwartet). Im 5-Minuten-Job NUR, wenn wirklich etwas passiert ist — sonst besteht das
+// Protokoll bald nur noch aus "0 Dateien"-Zeilen aus dem Leerlauf.
+const anzahlDateien = (zeilen ?? []).length;
+if (!nurAngefordert || anzahlDateien > 0 || fehlerAufgetreten) {
+  log(`Modus: ${modus} · ${anzahlDateien} Dateien`);
 }
 
 // Signal für "Auf meinen Mac abholen" löschen. Im angeforderten Modus für JEDE angefragte

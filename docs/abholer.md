@@ -24,8 +24,8 @@ Workbook hoch. Die Dateien landen dabei zunächst nur in der Datenbank
 - **Sofort-Modus** (`de.joerg-roos.360ba-abholer-sofort`) — prüft alle 5
   Minuten NUR die Sitzungen, bei denen im Admin-Bereich der Knopf „Auf
   meinen Mac abholen" gedrückt wurde. Ist nichts angefordert (der
-  Normalfall), stellt er nur eine einzige, sehr billige Abfrage und ist
-  sofort wieder fertig.
+  Normalfall), stellt er nur eine einzige, sehr billige Abfrage, ist sofort
+  wieder fertig und schreibt dafür auch nichts ins Protokoll.
 
 Beide:
 - Legen für die jeweilige Firma einen Ordner an (falls noch nicht
@@ -70,10 +70,14 @@ Was tatsächlich passiert ist, steht im gemeinsamen Protokoll:
 tail -f ~/Library/Logs/360ba-abholer.log
 ```
 
-Jeder Durchlauf beginnt mit einer Zeile `Modus: voll · n Dateien` bzw.
-`Modus: angefordert · n Dateien`. Jede abgeholte Datei bekommt danach eine
-eigene Zeile mit Zeitstempel und Zielpfad. Bei einem Fehler steht `FEHLER`
-in der Zeile statt `ok`.
+Der Vollmodus schreibt bei jedem Durchlauf eine Zusammenfassung `Modus: voll
+· n Dateien` (auch bei `0`, damit man sieht, dass 08:00/14:00 gelaufen ist).
+Der 5-Minuten-Job dagegen bleibt STILL, solange nichts angefordert ist und
+kein Fehler auftritt — sonst würde das Protokoll nur noch aus
+Leerlauf-Zeilen bestehen. Eine Zeile `Modus: angefordert · n Dateien`
+erscheint dort nur, wenn wirklich etwas abgeholt wurde oder etwas
+schiefging. Jede abgeholte Datei bekommt ihre eigene Zeile mit Zeitstempel
+und Zielpfad. Bei einem Fehler steht `FEHLER` in der Zeile statt `ok`.
 
 ## Jetzt sofort abholen (ohne auf 08:00/14:00 zu warten)
 

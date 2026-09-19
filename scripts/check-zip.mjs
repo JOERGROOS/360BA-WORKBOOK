@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-const { zipStoreStream } = await import('../lib/zip.ts');
+const { zipStoreStream, zipStoreBuffer } = await import('../lib/zip.ts');
 
 async function sammeln(stream) {
   const teile = [];
@@ -44,5 +44,24 @@ const liste = execFileSync('unzip', ['-l', zipPfad], { encoding: 'utf8' });
 assert.ok(liste.includes('eins.txt'), 'unzip -l zeigt eins.txt');
 assert.ok(liste.includes('ordner/zwei.txt'), 'unzip -l zeigt ordner/zwei.txt');
 rmSync(tmp, { recursive: true, force: true });
+
+// Zwei Einträge mit gleichem Namen: der zweite wird umbenannt (wie `freierPfad` im Abholer).
+const dupZip = await sammeln(zipStoreStream([
+  { name: 'gleich.txt', daten: async () => Buffer.from('eins') },
+  { name: 'gleich.txt', daten: async () => Buffer.from('zwei') },
+]));
+assert.ok(dupZip.includes(Buffer.from('gleich.txt')), 'erster Name bleibt gleich.txt');
+assert.ok(dupZip.includes(Buffer.from('gleich-2.txt')), 'zweiter Name wird gleich-2.txt');
+const dupTmp = mkdtempSync(path.join(os.tmpdir(), 'check-zip-dup-'));
+const dupPfad = path.join(dupTmp, 'dup.zip');
+writeFileSync(dupPfad, dupZip);
+const dupListe = execFileSync('unzip', ['-l', dupPfad], { encoding: 'utf8' });
+assert.ok(dupListe.includes('gleich.txt') && dupListe.includes('gleich-2.txt'), 'unzip -l zeigt beide eindeutigen Namen');
+rmSync(dupTmp, { recursive: true, force: true });
+
+// zipStoreBuffer: gleiches Ergebnis wie zipStoreStream, nur direkt als Buffer.
+const buf = await zipStoreBuffer([{ name: 'a.txt', daten: async () => Buffer.from('hi') }]);
+assert.equal(buf.readUInt32LE(0), 0x04034b50, 'zipStoreBuffer liefert ein gültiges ZIP');
+assert.ok(buf.includes(Buffer.from('a.txt')), 'zipStoreBuffer enthält den Dateinamen');
 
 console.log('ok');

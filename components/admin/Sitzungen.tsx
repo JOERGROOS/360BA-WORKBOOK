@@ -53,6 +53,14 @@ export function Sitzungen() {
   }
   useEffect(() => { laden(); }, []);
 
+  // Solange irgendeine Sitzung auf den Abholer wartet, alle 60 s neu laden — sonst sieht man
+  // erst nach einem manuellen Reload, dass "angefordert · HH:MM" verschwunden ist.
+  useEffect(() => {
+    if (!liste?.some((s) => s.abholen_angefordert)) return;
+    const intervall = setInterval(laden, 60_000);
+    return () => clearInterval(intervall);
+  }, [liste]);
+
   async function ausklappen(id: string) {
     if (offen === id) { setOffen(null); return; }
     setOffen(id);
