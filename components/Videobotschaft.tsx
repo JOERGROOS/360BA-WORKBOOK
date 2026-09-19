@@ -5,7 +5,7 @@ import { videoQuelle } from '@/lib/video';
 export function Videobotschaft({ adresse, hinweis }: { adresse: string; hinweis: string }) {
   const quelle = videoQuelle(adresse);
   return (
-    <div className="glas mt-9 p-3 md:p-4">
+    <div className="glas mt-9 p-3 md:p-4 md:max-w-[66%] md:mx-auto">
       <div className="relative rounded-[14px] overflow-hidden bg-[#0B141B]" style={{ aspectRatio: '16 / 9' }}>
         {quelle?.art === 'vimeo' && (
           <iframe
