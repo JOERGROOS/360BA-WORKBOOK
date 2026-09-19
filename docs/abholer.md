@@ -1,0 +1,68 @@
+# Das Abholprogramm für Finanzdaten
+
+## Was es macht
+
+Kunden laden ihre Finanzdaten (BWA, Kontoauszüge usw.) direkt über das
+Workbook hoch. Die Dateien landen dabei zunächst nur in der Datenbank
+(Supabase) — nicht auf deinem Mac. Das Abholprogramm holt sie von dort ab:
+
+- Es prüft alle 10 Minuten, ob neue Dateien warten.
+- Findet es welche, legt es für die jeweilige Firma einen Ordner an
+  (falls noch nicht vorhanden) und lädt die Datei dort hinein:
+  ```
+  /Users/joergroos/_JRB-SERVER/03-FULLFILMENT/360 GRAD BUSINESSANALYSE/1-Uploads von Kunden/<Firma>/
+  ```
+- Danach markiert es die Datei in der Datenbank als „abgeholt" — sie wird
+  nie zweimal heruntergeladen.
+- Läuft eine Datei einmal nicht durch (z. B. kurzer Internet-Ausfall), bleibt
+  sie einfach unabgeholt und wird beim nächsten Durchlauf erneut versucht.
+  Andere Dateien im selben Durchlauf sind davon nicht betroffen.
+
+## Installieren (einmalig, ein Befehl)
+
+Im Terminal:
+
+```bash
+cd "/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook"
+bash scripts/abholer-installieren.sh
+```
+
+Das Skript kann beliebig oft erneut ausgeführt werden (z. B. nach einer
+Code-Änderung) — es ersetzt einfach die vorherige Installation.
+
+## Prüfen, ob es läuft
+
+```bash
+launchctl list | grep 360ba
+```
+
+Erscheint eine Zeile mit `de.joerg-roos.360ba-abholer`, ist der Dienst
+eingerichtet. Die Zahl in der mittleren Spalte ist der letzte Rückgabewert:
+`0` heißt, der letzte Durchlauf war fehlerfrei.
+
+Was tatsächlich passiert ist, steht im Protokoll:
+
+```bash
+tail -f ~/Library/Logs/360ba-abholer.log
+```
+
+Jede abgeholte Datei bekommt dort eine eigene Zeile mit Zeitstempel und
+Zielpfad. Bei einem Fehler steht `FEHLER` in der Zeile statt `ok`. Kein
+neuer Eintrag heißt: Es gab beim letzten Durchlauf nichts Neues abzuholen —
+das ist der Normalfall.
+
+## Stoppen
+
+```bash
+launchctl bootout gui/$(id -u)/de.joerg-roos.360ba-abholer
+```
+
+Das Programm läuft danach nicht mehr automatisch. Ein erneuter Aufruf von
+`scripts/abholer-installieren.sh` startet es wieder.
+
+## Was passiert, wenn der Mac aus ist?
+
+Nichts Schlimmes. Die Dateien warten sicher in der Datenbank, solange sie
+nicht abgeholt sind — nichts geht verloren. Sobald der Mac wieder läuft,
+holt das Programm beim nächsten Durchlauf (spätestens nach 10 Minuten) alle
+inzwischen aufgelaufenen Dateien nach.

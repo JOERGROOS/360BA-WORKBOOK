@@ -1,7 +1,15 @@
 # 360BA Online-Workbook
 
-Stand: 19.09.2026 — Einladungslink + Admin-Übersicht mit Statistik (Task 1) und
-Kunden-Landeseite mit Kacheln + Finanzdaten-Upload (Task 2) fertig.
+Stand: 19.09.2026 — Einladungslink + Admin-Übersicht mit Statistik (Task 1),
+Kunden-Landeseite mit Kacheln + Finanzdaten-Upload (Task 2) und Abholprogramm
+auf Jörgs Mac (Task 3) fertig.
+
+## Abholprogramm für Finanzdaten (Task 3)
+Holt neue Kunden-Uploads per launchd alle 10 Minuten aus dem Supabase-Bucket
+`finanzdaten` nach `/Users/joergroos/_JRB-SERVER/03-FULLFILMENT/360 GRAD
+BUSINESSANALYSE/1-Uploads von Kunden/<Firma>/` — Skript
+`scripts/finanzdaten-abholen.mjs`, Installation `scripts/abholer-installieren.sh`,
+Protokoll `~/Library/Logs/360ba-abholer.log`. Details: `docs/abholer.md`.
 
 ## Was ist das
 Interaktives Online-Workbook zur 360° Business-Analyse für Jörg Roos' Kunden

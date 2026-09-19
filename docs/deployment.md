@@ -77,6 +77,13 @@ Zahlungseingang** für die 360° Business-Analyse.
 5. Prüfen: Ist die Kunden-Mail mit dem Link angekommen, und die interne
    Mail an das Team auch?
 
+## 6a. Abholprogramm auf deinem Mac einrichten
+
+Damit hochgeladene Finanzdaten auch tatsächlich in deinem Ordner
+`1-Uploads von Kunden` ankommen, muss auf deinem Mac einmalig das
+Abholprogramm eingerichtet werden — Details, Installation und Prüfung:
+`docs/abholer.md`.
+
 ## 7. Resend — nichts zu tun
 
 Der Absender `noreply@joerg-roos.com` ist bei Resend bereits verifiziert

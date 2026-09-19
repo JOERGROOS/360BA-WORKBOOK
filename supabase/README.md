@@ -10,6 +10,11 @@ Projekt: `zzmomqmegzjibnqrmzyo` (JOERG AI Produktion, shared — nur `wb_*`-Tabe
 - `004_statistik.sql` — `wb_sessions.gestartet_at` (Start des Interviews) und `wb_sessions.diktate` (Zähler erfolgreicher Spracheingaben) für die Admin-Übersicht
 - `005_finanzdaten.sql` — Tabelle `wb_dateien` (Metadaten je hochgeladener Datei) und der private Bucket `finanzdaten` (Finanzdaten-Upload der Kunden, 50 MB je Datei, nur die neun erlaubten Dateitypen aus `lib/dateinamen.ts`)
 
+Hinweis: `wb_dateien.abgeholt_at` wird nicht von der App gesetzt, sondern vom
+Abholprogramm auf Jörgs Mac (`scripts/finanzdaten-abholen.mjs`, siehe
+`docs/abholer.md`) — es lädt jede Datei mit `abgeholt_at is null` herunter und
+setzt das Feld danach.
+
 ## Migration einspielen
 
 Wie bei JOERG AI über die Management-API, kein CLI-Login nötig:
