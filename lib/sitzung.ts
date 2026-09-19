@@ -23,8 +23,15 @@ export async function snapshotZiehen(): Promise<Snapshot> {
   return { kapitel: kap, erstellt: new Date().toISOString() };
 }
 
+// Basis-Adresse: APP_URL (eigene Domain) → von Vercel gesetzte Produktions-Adresse → lokal.
+// Ohne diese Kette landen Einladungslinks in Produktion auf localhost, wenn APP_URL fehlt.
+export function basisAdresse(): string {
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  return 'http://localhost:3000';
+}
 export function linkFuer(s: { token: string }): string {
-  return `${process.env.APP_URL ?? 'http://localhost:3000'}/w/${s.token}`;
+  return `${basisAdresse()}/w/${s.token}`;
 }
 
 // Einladung anlegen (Admin): Sitzung startet im Status 'eingeladen', Snapshot wird trotzdem gezogen
