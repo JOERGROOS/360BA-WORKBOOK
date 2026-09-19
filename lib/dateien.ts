@@ -23,27 +23,36 @@ function dateinameAusStorageName(name: string): string {
 // Objekte, die im Speicher liegen, aber keine wb_dateien-Zeile haben (Kunde hat den Browser
 // zwischen PUT und Registrieren geschlossen), automatisch nachtragen — mit den echten Werten
 // aus dem Speicher, nicht erfunden. Läuft vor jeder Leseliste, damit nichts verloren geht.
+// Best-effort: ein Speicher-Hänger hier darf NIE die eigentliche Liste (die DB-bekannten
+// Zeilen) verhindern — sonst wird aus einer kurzen Störung ein 500 beim Kunden und ein
+// dauerhaft blockierter „Fertig"-Knopf. Scheitert der Abgleich, wird er übersprungen und
+// nur gewarnt; beim nächsten Aufruf greift er wieder.
 async function verwaisteObjekteRegistrieren(sitzungId: string): Promise<void> {
-  const { data: objekte, error: eListe } = await db.storage.from(BUCKET).list(sitzungId);
-  if (eListe) throw eListe;
-  if (!objekte || objekte.length === 0) return;
-  const { data: zeilen, error: eZeilen } = await db.from('wb_dateien').select('pfad').eq('session_id', sitzungId);
-  if (eZeilen) throw eZeilen;
-  const bekannt = new Set((zeilen ?? []).map((z) => z.pfad as string));
-  const neu = objekte
-    .filter((o) => !bekannt.has(`${sitzungId}/${o.name}`))
-    .map((o) => ({
-      session_id: sitzungId,
-      dateiname: dateinameAusStorageName(o.name),
-      pfad: `${sitzungId}/${o.name}`,
-      bytes: o.metadata?.size ?? 0,
-      content_type: o.metadata?.mimetype ?? 'application/octet-stream',
-    }));
-  if (neu.length === 0) return;
-  // upsert statt insert: zwei fast gleichzeitige Nachtrag-Läufe (z. B. Kunde + Admin öffnen
-  // beide gerade die Liste) sollen sich nicht an der unique-Spalte `pfad` verschlucken.
-  const { error: eInsert } = await db.from('wb_dateien').upsert(neu, { onConflict: 'pfad', ignoreDuplicates: true });
-  if (eInsert) throw eInsert;
+  try {
+    const { data: objekte, error: eListe } = await db.storage.from(BUCKET).list(sitzungId);
+    if (eListe) throw eListe;
+    if (!objekte || objekte.length === 0) return;
+    const { data: zeilen, error: eZeilen } = await db.from('wb_dateien').select('pfad').eq('session_id', sitzungId);
+    if (eZeilen) throw eZeilen;
+    const bekannt = new Set((zeilen ?? []).map((z) => z.pfad as string));
+    const neu = objekte
+      .filter((o) => !bekannt.has(`${sitzungId}/${o.name}`))
+      .map((o) => ({
+        session_id: sitzungId,
+        dateiname: dateinameAusStorageName(o.name),
+        pfad: `${sitzungId}/${o.name}`,
+        bytes: o.metadata?.size ?? 0,
+        content_type: o.metadata?.mimetype ?? 'application/octet-stream',
+      }));
+    if (neu.length === 0) return;
+    // upsert statt insert: zwei fast gleichzeitige Nachtrag-Läufe (z. B. Kunde + Admin öffnen
+    // beide gerade die Liste) sollen sich nicht an der unique-Spalte `pfad` verschlucken.
+    const { error: eInsert } = await db.from('wb_dateien').upsert(neu, { onConflict: 'pfad', ignoreDuplicates: true });
+    if (eInsert) throw eInsert;
+  } catch (e) {
+    console.warn('[dateien] Abgleich übersprungen', e);
+    return;
+  }
 }
 
 // Signierte Adresse für einen Kunden-Upload direkt vom Browser in den privaten Bucket.
