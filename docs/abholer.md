@@ -18,7 +18,7 @@ Kunden laden ihre Finanzdaten (BWA, Kontoauszüge usw.) direkt über das
 Workbook hoch. Die Dateien landen dabei zunächst nur in der Datenbank
 (Supabase) — nicht auf deinem Mac. Das Abholprogramm holt sie von dort ab:
 
-- Es prüft alle 10 Minuten, ob neue Dateien warten.
+- Es prüft täglich um 08:00 und 14:00, ob neue Dateien warten.
 - Findet es welche, legt es für die jeweilige Firma einen Ordner an
   (falls noch nicht vorhanden) und lädt die Datei dort hinein:
   ```
@@ -63,6 +63,15 @@ Zielpfad. Bei einem Fehler steht `FEHLER` in der Zeile statt `ok`. Kein
 neuer Eintrag heißt: Es gab beim letzten Durchlauf nichts Neues abzuholen —
 das ist der Normalfall.
 
+## Jetzt sofort abholen (ohne auf 08:00/14:00 zu warten)
+
+```bash
+launchctl kickstart gui/$(id -u)/de.joerg-roos.360ba-abholer
+```
+
+Startet einen einzelnen Durchlauf sofort. Direkt danach steht das Ergebnis
+im Protokoll (`tail -n 5 ~/Library/Logs/360ba-abholer.log`).
+
 ## Stoppen
 
 ```bash
@@ -76,5 +85,6 @@ Das Programm läuft danach nicht mehr automatisch. Ein erneuter Aufruf von
 
 Nichts Schlimmes. Die Dateien warten sicher in der Datenbank, solange sie
 nicht abgeholt sind — nichts geht verloren. Sobald der Mac wieder läuft,
-holt das Programm beim nächsten Durchlauf (spätestens nach 10 Minuten) alle
-inzwischen aufgelaufenen Dateien nach.
+holt das Programm beim nächsten planmäßigen Durchlauf (08:00 oder 14:00)
+alle inzwischen aufgelaufenen Dateien nach — oder sofort per
+`launchctl kickstart` (siehe oben).

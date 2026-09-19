@@ -1,6 +1,6 @@
 #!/bin/bash
-# Installiert das Abholprogramm als launchd-Dienst (läuft alle 10 Minuten, auch nach Neustart).
-# Erneutes Ausführen ist ungefährlich — hängt einen laufenden Dienst zuerst aus.
+# Installiert das Abholprogramm als launchd-Dienst (läuft täglich um 08:00 und 14:00, auch nach
+# Neustart). Erneutes Ausführen ist ungefährlich — hängt einen laufenden Dienst zuerst aus.
 set -euo pipefail
 
 LABEL="de.joerg-roos.360ba-abholer"
@@ -31,10 +31,23 @@ cat > "$PLIST" <<EOF
   </array>
   <key>WorkingDirectory</key>
   <string>/Users/joergroos/dev/360ba-workbook</string>
-  <key>StartInterval</key>
-  <integer>600</integer>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict>
+      <key>Hour</key>
+      <integer>8</integer>
+      <key>Minute</key>
+      <integer>0</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
+      <integer>14</integer>
+      <key>Minute</key>
+      <integer>0</integer>
+    </dict>
+  </array>
   <key>RunAtLoad</key>
-  <true/>
+  <false/>
   <key>StandardOutPath</key>
   <string>$LOG</string>
   <key>StandardErrorPath</key>
