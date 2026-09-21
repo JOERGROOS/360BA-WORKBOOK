@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `9fc318e`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `e0e0af0`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -97,3 +97,21 @@ Grenze bei nativen Datumsfeldern), stattdessen den exakten Auslöser nachgebaut
 (Zwischen-Ereignis mit leerem Wert) und geprüft: Feld bleibt editierbar und fokussiert,
 kein Speichervorgang läuft an; ein vollständiges Datum löst beim Verlassen genau einen
 PATCH aus. `9fc318e` auf bau+main.
+
+## 13. Nachtrag 21.09.2026 abends #2 · Falsche „Fehler beim Speichern"-Meldung bei Texten
+
+Jörg gemeldet: Text im Admin-Bereich „Texte" (Beispiel Start-Zugangshinweis) geändert,
+gespeichert → „Fehler beim Speichern", der Text stand aber tatsächlich schon drin.
+Kam wiederholt vor. Nicht lokal reproduzierbar — ein sauberer Einzel-Speichervorgang
+lief immer glatt durch, lokal wie über die API. Wahrscheinlichste Erklärung (⚠
+Annahme, nicht durch ein Live-Log bestätigt — kein Zugriff auf Vercel-Logs von hier
+aus): bei der gepoolten Datenbank-Verbindung geht der Schreibvorgang manchmal durch,
+nur die Bestätigung auf dem Rückweg verloren. `PUT /api/admin/texte` prüft bei einem
+gemeldeten Fehler jetzt einmal nach, ob der Wert trotzdem angekommen ist, bevor
+wirklich „Fehler" gemeldet wird — betrifft die Bereiche Texte UND E-Mails, die
+dieselbe Route nutzen. `e0e0af0` auf bau+main.
+
+**Falls die Meldung wiederkommt:** dann ist die Erklärung oben falsch (der Wert kommt
+in dem Fall nachweislich NICHT an) und die Ursache liegt woanders — als Nächstes in
+den Vercel-Funktions-Logs für `/api/admin/texte` nachsehen (Zugriffsdaten/Dashboard
+hat nur Jörg).
