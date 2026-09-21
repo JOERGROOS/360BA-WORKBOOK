@@ -22,3 +22,12 @@ export function adminGeprueft(req: Request): boolean {
   return gleichOhneZeitverrat(s, sig(ablauf));
 }
 export function loginErlaubt(req: Request): boolean { return bremse(`admin:${aufruferIp(req)}`, 10, 3600); }
+// Für den täglichen Erinnerungs-Lauf: entweder Admin-Cookie (Jörgs „Jetzt prüfen"-Knopf)
+// oder das Cron-Geheimnis, das Vercel Cron automatisch als Bearer-Token mitschickt.
+export function cronGeprueft(req: Request): boolean {
+  const soll = process.env.CRON_SECRET;
+  if (!soll) return false;
+  const kopf = req.headers.get('authorization') ?? '';
+  if (!kopf.startsWith('Bearer ')) return false;
+  return gleichOhneZeitverrat(kopf.slice(7), soll);
+}

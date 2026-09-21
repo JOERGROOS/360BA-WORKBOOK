@@ -4,7 +4,23 @@ import type { Sitzung } from '@/lib/db';
 import type { DateiEintragAdmin } from '@/lib/dateien';
 import { EinladungFormular } from './EinladungFormular';
 
-type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at' | 'abholen_angefordert'> & { prozent: number; link: string };
+type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at' | 'abholen_angefordert' | 'termin_am'> & { prozent: number; link: string };
+
+// Kalendertage bis zum Termin, in Berlin gerechnet — dieselbe Formel wie serverseitig in
+// lib/erinnerungen.ts (dort mit Test abgesichert), hier bewusst dupliziert: die Serverdatei
+// zieht lib/db.ts (Supabase-Schlüssel) nach sich und darf nicht in den Browser gelangen.
+function tageBisTermin(terminAm: string): number {
+  const heute = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
+  const [jt, mt, tt] = terminAm.split('-').map(Number);
+  const [jh, mh, th] = heute.split('-').map(Number);
+  return Math.round((Date.UTC(jt, mt - 1, tt) - Date.UTC(jh, mh - 1, th)) / 86_400_000);
+}
+function terminText(terminAm: string): string {
+  const tage = tageBisTermin(terminAm);
+  if (tage < 0) return `${Math.abs(tage)} Tag${Math.abs(tage) === 1 ? '' : 'e'} her`;
+  if (tage === 0) return 'heute';
+  return `in ${tage} Tag${tage === 1 ? '' : 'en'}`;
+}
 
 function uhrzeit(iso: string): string {
   return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -38,6 +54,9 @@ export function Sitzungen() {
   const [fehler, setFehler] = useState('');
   const [neueEinladung, setNeueEinladung] = useState(false);
   const [kopiert, setKopiert] = useState<string | null>(null);
+  const [terminLaeuft, setTerminLaeuft] = useState<string | null>(null);
+  const [pruefLaeuft, setPruefLaeuft] = useState(false);
+  const [pruefErgebnis, setPruefErgebnis] = useState('');
 
   async function laden() {
     const r = await fetch('/api/admin/sitzungen');
@@ -115,14 +134,40 @@ export function Sitzungen() {
     setKopiert(s.id); setTimeout(() => setKopiert(null), 2000);
   }
 
+  async function terminSpeichern(id: string, terminAm: string) {
+    setTerminLaeuft(id); setFehler('');
+    const r = await fetch(`/api/admin/sitzungen/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ termin_am: terminAm || null }) });
+    setTerminLaeuft(null);
+    if (!r.ok) { setFehler(await fehlerAus(r, 'Termin konnte nicht gespeichert werden.')); return; }
+    setListe((l) => l && l.map((s) => (s.id === id ? { ...s, termin_am: terminAm || null } : s)));
+  }
+
+  // Der tägliche Lauf (Vercel Cron) prüft das selbst — dieser Knopf ist nur zum Testen und
+  // für den Fall, dass ein Termin kurzfristig eingetragen wird und die Erinnerung nicht bis
+  // zum nächsten Cron-Lauf warten soll.
+  async function jetztPruefen() {
+    setPruefLaeuft(true); setPruefErgebnis('');
+    const r = await fetch('/api/cron/erinnerungen');
+    const d = await r.json().catch(() => ({}));
+    setPruefLaeuft(false);
+    if (!r.ok) { setPruefErgebnis(d.error ?? 'Das hat nicht geklappt.'); return; }
+    const teile = [`${d.geprueft} Sitzung${d.geprueft === 1 ? '' : 'en'} mit Termin geprüft`, `${d.gesendet.length} Erinnerung${d.gesendet.length === 1 ? '' : 'en'} gesendet`];
+    if (d.fehler?.length) teile.push(`${d.fehler.length} Fehler (Server-Log)`);
+    setPruefErgebnis(teile.join(' · '));
+  }
+
   if (!liste) return null;
 
   return (
     <main className="p-8 max-w-[1100px]">
       <div className="flex items-center justify-between">
-        <div className="eyebrow">Admin · Ausgefüllte Workbooks</div>
-        <button className="btn" onClick={() => setNeueEinladung((v) => !v)}>{neueEinladung ? 'Schließen' : 'Neue Einladung'}</button>
+        <div className="eyebrow">Admin · Kunden</div>
+        <div className="flex items-center gap-3">
+          <button className="text-o font-medium text-[13px] disabled:opacity-40" disabled={pruefLaeuft} onClick={jetztPruefen}>{pruefLaeuft ? 'Prüft …' : 'Erinnerungen jetzt prüfen'}</button>
+          <button className="btn" onClick={() => setNeueEinladung((v) => !v)}>{neueEinladung ? 'Schließen' : 'Neue Einladung'}</button>
+        </div>
       </div>
+      {pruefErgebnis && <p className="fine mt-3">{pruefErgebnis}</p>}
       {neueEinladung && <div className="mt-4"><EinladungFormular angelegt={laden} /></div>}
       {fehler && <p className="text-[#ff7a52] mt-3">{fehler}</p>}
       <div className="flex flex-col gap-2 mt-6">
@@ -161,6 +206,17 @@ export function Sitzungen() {
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => linkErneut(s.id)}>Link erneut senden</button>
                   <button className="text-[#ff7a52] font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => zurueckziehen(s.id)}>Zurückziehen</button>
                 </span>
+              </div>
+              <div className="flex items-center gap-3 mt-2.5 text-[13px]">
+                <span className="text-muted">Termin vor Ort</span>
+                <input
+                  type="date"
+                  value={s.termin_am ?? ''}
+                  disabled={terminLaeuft === s.id}
+                  onChange={(e) => terminSpeichern(s.id, e.target.value)}
+                  className="bg-white/[.04] border border-white/10 rounded-lg px-2.5 py-1 text-[13px] text-[#C9CFD3] w-[150px]"
+                />
+                {s.termin_am && <span className="text-o">{terminText(s.termin_am)}</span>}
               </div>
               {offen === s.id && (
                 <div className="mt-4 border-t border-white/10 pt-4">
@@ -203,7 +259,7 @@ export function Sitzungen() {
             </div>
           );
         })}
-        {liste.length === 0 && <p className="fine">Noch keine Workbooks.</p>}
+        {liste.length === 0 && <p className="fine">Noch keine Kunden.</p>}
       </div>
     </main>
   );

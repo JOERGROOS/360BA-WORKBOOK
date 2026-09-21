@@ -13,6 +13,19 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   return NextResponse.json(data);
 }
 
+// Termin vor Ort setzen/ändern/löschen — vom Team im Admin gepflegt, oder später von einer
+// Automation aufgerufen (deshalb ein eigener, schlanker Endpunkt statt eines allgemeinen PATCH).
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!adminGeprueft(req)) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
+  const { id } = await params;
+  const b = await req.json().catch(() => ({}));
+  const terminAm = b.termin_am === null || b.termin_am === '' ? null : String(b.termin_am);
+  if (terminAm !== null && !/^\d{4}-\d{2}-\d{2}$/.test(terminAm)) return NextResponse.json({ error: 'Datum im Format JJJJ-MM-TT erwartet.' }, { status: 400 });
+  const { error } = await db.from('wb_sessions').update({ termin_am: terminAm }).eq('id', id);
+  if (error) return dbFehler('sitzungen', error, 'Termin konnte nicht gespeichert werden.');
+  return NextResponse.json({ ok: true, termin_am: terminAm });
+}
+
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!adminGeprueft(req)) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
   const { id } = await params;

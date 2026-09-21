@@ -20,10 +20,10 @@ const NAMEN: Record<string, string> = {
   aha_titel: 'Aha-Moment · Titel', aha_frage: 'Aha-Moment · Frage', aha_text: 'Aha-Moment · Hinweistext',
   ueber_titel: 'Über Jörg · Titel', ueber_text: 'Über Jörg · Text', ueber_web: 'Über Jörg · Web-Hinweis',
   kontakt: 'Kontaktzeile', claim: 'Claim / Slogan',
-  mail_link_betreff: 'Mail · Link · Betreff', mail_link_text: 'Mail · Link · Text',
-  mail_fertig_betreff: 'Mail · Fertig · Betreff', mail_fertig_text: 'Mail · Fertig · Text',
-  mail_intern_text: 'Mail · Intern (an Jörg) · Text',
 };
+// Alle Mail-Texte (Betreff + Inhalt der Mails, die das Tool direkt versendet) pflegt der
+// Admin-Bereich „E-Mails" (components/admin/Mails.tsx) — nicht hier, damit es nur einen Ort
+// dafür gibt.
 
 export function Texte() {
   const [texte, setTexte] = useState<Record<string, string> | null>(null);

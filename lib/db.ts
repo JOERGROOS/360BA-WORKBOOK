@@ -24,6 +24,8 @@ export type Sitzung = {
   fragen_snapshot: Snapshot; antworten: Antworten; aha: string; aktuelle_frage: number;
   pdf_path: string | null; created_at: string; updated_at: string; gestartet_at: string | null; abgeschlossen_at: string | null;
   diktate: number; abholen_angefordert: string | null;
+  termin_am: string | null;
+  erinnerung_14_gesendet_at: string | null; erinnerung_10_gesendet_at: string | null; erinnerung_7_gesendet_at: string | null;
 };
 
 function pflicht(name: string): string {

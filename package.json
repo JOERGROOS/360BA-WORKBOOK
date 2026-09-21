@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "seed": "node scripts/seed.mjs",
-    "check": "node scripts/check-seed.mjs && node scripts/check-punkte.mjs && node scripts/check-geometrie.mjs && node scripts/check-admin-auth.mjs && node scripts/check-statistik.mjs && node scripts/check-dateinamen.mjs && node scripts/check-fehlertext.mjs && node scripts/check-zip.mjs && node scripts/check-video.mjs"
+    "check": "node scripts/check-seed.mjs && node scripts/check-punkte.mjs && node scripts/check-geometrie.mjs && node scripts/check-admin-auth.mjs && node scripts/check-statistik.mjs && node scripts/check-dateinamen.mjs && node scripts/check-fehlertext.mjs && node scripts/check-zip.mjs && node scripts/check-video.mjs && node scripts/check-erinnerungen.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.126.0",

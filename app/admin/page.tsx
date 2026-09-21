@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import type { Kapitel, Frage } from '@/lib/db';
 import { Fragebogen } from '@/components/admin/Fragebogen';
 import { Texte } from '@/components/admin/Texte';
+import { Mails } from '@/components/admin/Mails';
 import { Sitzungen } from '@/components/admin/Sitzungen';
 import { Uebersicht } from '@/components/admin/Uebersicht';
 
-type Bereich = 'uebersicht' | 'fragebogen' | 'workbooks' | 'texte';
+type Bereich = 'uebersicht' | 'fragebogen' | 'workbooks' | 'texte' | 'mails';
 
 export default function AdminSeite() {
   const [angemeldet, setAngemeldet] = useState<boolean | null>(null);
@@ -66,9 +67,10 @@ export default function AdminSeite() {
 
   const BEREICHE: { key: Bereich; label: string }[] = [
     { key: 'uebersicht', label: 'Übersicht' },
-    { key: 'workbooks', label: 'Ausgefüllte Workbooks' },
+    { key: 'workbooks', label: 'Kunden' },
     { key: 'fragebogen', label: 'Fragebogen' },
     { key: 'texte', label: 'Texte (Einleitung · Über Jörg)' },
+    { key: 'mails', label: 'E-Mails' },
   ];
 
   return (
@@ -102,6 +104,7 @@ export default function AdminSeite() {
         {bereich === 'fragebogen' && <Fragebogen kapitel={kapitel} fragen={fragen} neuLaden={kapitelLaden} />}
         {bereich === 'workbooks' && <Sitzungen />}
         {bereich === 'texte' && <Texte />}
+        {bereich === 'mails' && <Mails />}
       </div>
     </div>
   );

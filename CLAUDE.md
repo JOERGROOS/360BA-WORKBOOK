@@ -5,6 +5,40 @@ Kunden-Landeseite mit Kacheln + Finanzdaten-Upload (Task 2), Abholprogramm
 auf Jörgs Mac (Task 3) und ZIP-Download + „Auf meinen Mac abholen" je Kunde
 (Plan „Abholen je Kunde", Task 1) fertig.
 
+## Termin vor Ort + Erinnerungs-Sequenz (21.09.2026, Jörg-Auftrag)
+`wb_sessions.termin_am` (Datum, nullable) ist der Vor-Ort-Termin — vom Team im
+Admin-Bereich „Kunden" gesetzt (Feld unter jeder Zeile), oder später von einer
+Automation über `PATCH /api/admin/sitzungen/[id]` (`{ "termin_am": "JJJJ-MM-TT" }`
+oder `null` zum Löschen). Datumslogik ist bewusst abhängigkeitsfrei in
+`lib/erinnerungen.ts` (wie `lib/video.ts`), der DB-/Mail-Teil steht getrennt in
+`lib/erinnerungen-lauf.ts` — sonst kann `scripts/check-erinnerungen.mjs` die
+Kernlogik nicht ohne Supabase-Schlüssel importieren.
+
+**Ablauf:** Ein täglicher Lauf (Vercel Cron, `vercel.json` → `0 6 * * *` UTC ≈
+morgens Berlin) ruft `GET /api/cron/erinnerungen` auf, authentifiziert über den
+`Authorization: Bearer $CRON_SECRET`-Kopf, den Vercel automatisch mitschickt.
+Derselbe Endpunkt akzeptiert auch das Admin-Cookie — dahinter steckt der Knopf
+„Erinnerungen jetzt prüfen" im Bereich Kunden, für Tests und für einen kurzfristig
+eingetragenen Termin, der nicht bis zum nächsten Cron-Lauf warten soll.
+
+Je Sitzung mit gesetztem Termin, Status ≠ `abgeschlossen`, `test: false`: genau
+**eine** fällige, noch nicht gesendete Stufe (14 · 10 · 7 Tage) wird verschickt,
+nie mehrere auf einmal. Geprüft wird von der dringendsten Stufe her (7 zuerst) —
+ein sehr spät eingetragener Termin (z. B. nur noch 8 Tage) schickt die 10er-Stufe,
+nicht die inhaltlich schon überholte 14er. Ein Termin in der Vergangenheit ohne
+gesendete Erinnerungen bekommt keine mehr nachgeschickt. Fehlertoleranz wie beim
+Abholer: eine Mail, die nicht rausgeht, stoppt nicht den Lauf für die übrigen
+Sitzungen (`fehler`-Liste in der Antwort, voller Fehler im Server-Log).
+
+Mail-Texte (Betreff + Inhalt, alle sechs vom Tool direkt versendeten Mails)
+pflegt der neue Admin-Bereich „E-Mails" (`components/admin/Mails.tsx`) — gleiche
+Tabelle `wb_texte`, gleiche API wie die generischen Texte, nur eine eigene,
+kuratierte Liste. Platzhalter in den drei Erinnerungs-Mails: `{vorname}`,
+`{firma}`, `{link}`, `{tage}`.
+
+**Migration:** `008_termin_erinnerungen.sql` (Spalten `termin_am`,
+`erinnerung_14/10/7_gesendet_at`).
+
 ## Abholprogramm für Finanzdaten (Task 3 + Plan „Abholen je Kunde")
 Holt neue Kunden-Uploads per launchd aus dem Supabase-Bucket `finanzdaten` nach
 `/Users/joergroos/_JRB-SERVER/03-FULLFILMENT/360 GRAD BUSINESSANALYSE/1-Uploads
@@ -170,8 +204,13 @@ einspielen und Seed-Ablauf: `supabase/README.md`.
   unter `public/fonts/` liegt.
 
 ## Offen für Jörg
+- `CRON_SECRET` in Vercel eintragen — exakt derselbe Wert, der lokal in
+  `~/.config/360ba-workbook/.env.local` steht (dort schon gesetzt, 21.09.2026).
+  Ohne diese Vercel-Variable läuft der tägliche Erinnerungs-Lauf nicht (401).
 - `RESEND_API_KEY` in Vercel eintragen (Wert aus dem Resend-Dashboard oder
-  aus dem JOERG-AI-Vercel-Projekt abschreiben).
+  aus dem JOERG-AI-Vercel-Projekt abschreiben). Lokal in
+  `~/.config/360ba-workbook/.env.local` bisher ebenfalls leer — Mails lassen
+  sich von hier aus noch nicht testen, nur live.
 - GitHub-Repo `JOERGROOS/360BA-WORKBOOK` anlegen und pushen.
 - Vercel-Projekt anlegen, Umgebungsvariablen eintragen, deployen.
 - Domain `360ba.joerg-roos.com` einrichten (CNAME beim DNS-Anbieter).
