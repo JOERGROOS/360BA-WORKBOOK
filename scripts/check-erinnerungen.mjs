@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-const { tageBisTermin, faelligeStufe } = await import('../lib/erinnerungen.ts');
+const { tageBisTermin, faelligeStufe, fehlendeUnterlagen } = await import('../lib/erinnerungen.ts');
 
 // Tage-Rechnung, mit festem "heute" statt der echten Uhrzeit.
 assert.equal(tageBisTermin('2026-10-03', '2026-09-19'), 14);
@@ -32,5 +32,12 @@ assert.equal(faelligeStufe(14, { ...nichtsGesendet, erinnerung_14_gesendet_at: '
 assert.equal(faelligeStufe(8, nichtsGesendet), 10);
 // Sind bereits alle drei Stufen gesendet, ist der Lauf für diese Sitzung fertig.
 assert.equal(faelligeStufe(3, { erinnerung_14_gesendet_at: 'x', erinnerung_10_gesendet_at: 'x', erinnerung_7_gesendet_at: 'x' }), null);
+
+// Beides fehlt → generische Erinnerung. Nur eine Sache fehlt → gezielte Erinnerung auf
+// genau diese Sache. Beides da → gar keine Erinnerung mehr, unabhängig von der Stufe.
+assert.equal(fehlendeUnterlagen(true, true), 'beide');
+assert.equal(fehlendeUnterlagen(true, false), 'workbook', 'Finanzdaten sind da, nur das Workbook fehlt noch');
+assert.equal(fehlendeUnterlagen(false, true), 'finanzdaten', 'Workbook ist fertig, nur die Finanzdaten fehlen noch');
+assert.equal(fehlendeUnterlagen(false, false), null, 'beides liegt vor — keine weitere Erinnerung nötig');
 
 console.log('ok');

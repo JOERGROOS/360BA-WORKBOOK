@@ -3,7 +3,7 @@ import { texteLaden, fuelle } from './texte';
 import { linkFuer } from './sitzung';
 import { html } from './mail-html';
 import type { Sitzung } from './db';
-import type { Stufe } from './erinnerungen';
+import type { Stufe, FehlendeUnterlagen } from './erinnerungen';
 
 const VON = 'JOERG ROOS <noreply@joerg-roos.com>';
 const ANTWORT_AN = 'office@joerg-roos.com';
@@ -35,14 +35,18 @@ export async function finanzdatenMailSenden(s: Sitzung, namen: string[]): Promis
   });
 }
 
-// Termin-Erinnerung 14 · 10 · 7 Tage vorher — Text kommt komplett aus dem Admin
-// (Bereich „E-Mails“, Schlüssel `mail_erinnerung_<stufe>_betreff/_text`).
-export async function erinnerungMailSenden(s: Sitzung, stufe: Stufe): Promise<void> {
+// Termin-Erinnerung 14 · 10 · 7 Tage vorher — Text kommt komplett aus dem Admin (Bereich
+// „E-Mails“). Fehlt nur EINE Sache (Workbook oder Finanzdaten), geht die zielgerichtete
+// „_teilweise“-Fassung raus, die per {fehlt} ausschließlich die fehlende Sache benennt —
+// nie eine generische Erinnerung, wenn eigentlich nur noch eine Kleinigkeit fehlt.
+export async function erinnerungMailSenden(s: Sitzung, stufe: Stufe, fehlend: Exclude<FehlendeUnterlagen, null>): Promise<void> {
   const t = await texteLaden();
-  const werte = { vorname: s.vorname, firma: s.firma, link: linkFuer(s), tage: String(stufe) };
+  const fehlt = fehlend === 'workbook' ? 'dein Workbook' : fehlend === 'finanzdaten' ? 'deine Finanzdaten' : '';
+  const suffix = fehlend === 'beide' ? '' : '_teilweise';
+  const werte = { vorname: s.vorname, firma: s.firma, link: linkFuer(s), tage: String(stufe), fehlt };
   await sendeMail({
     an: [s.email],
-    betreff: fuelle(t[`mail_erinnerung_${stufe}_betreff`] ?? '', werte),
-    text: fuelle(t[`mail_erinnerung_${stufe}_text`] ?? '', werte),
+    betreff: fuelle(t[`mail_erinnerung_${stufe}${suffix}_betreff`] ?? '', werte),
+    text: fuelle(t[`mail_erinnerung_${stufe}${suffix}_text`] ?? '', werte),
   });
 }

@@ -21,20 +21,40 @@ Derselbe Endpunkt akzeptiert auch das Admin-Cookie — dahinter steckt der Knopf
 „Erinnerungen jetzt prüfen" im Bereich Kunden, für Tests und für einen kurzfristig
 eingetragenen Termin, der nicht bis zum nächsten Cron-Lauf warten soll.
 
-Je Sitzung mit gesetztem Termin, Status ≠ `abgeschlossen`, `test: false`: genau
-**eine** fällige, noch nicht gesendete Stufe (14 · 10 · 7 Tage) wird verschickt,
-nie mehrere auf einmal. Geprüft wird von der dringendsten Stufe her (7 zuerst) —
-ein sehr spät eingetragener Termin (z. B. nur noch 8 Tage) schickt die 10er-Stufe,
-nicht die inhaltlich schon überholte 14er. Ein Termin in der Vergangenheit ohne
-gesendete Erinnerungen bekommt keine mehr nachgeschickt. Fehlertoleranz wie beim
-Abholer: eine Mail, die nicht rausgeht, stoppt nicht den Lauf für die übrigen
-Sitzungen (`fehler`-Liste in der Antwort, voller Fehler im Server-Log).
+Je Sitzung mit gesetztem Termin, `test: false`: genau **eine** fällige, noch
+nicht gesendete Stufe (14 · 10 · 7 Tage) wird geprüft, nie mehrere auf einmal.
+Geprüft wird von der dringendsten Stufe her (7 zuerst) — ein sehr spät
+eingetragener Termin (z. B. nur noch 8 Tage) schickt die 10er-Stufe, nicht die
+inhaltlich schon überholte 14er. Ein Termin in der Vergangenheit ohne gesendete
+Erinnerungen bekommt keine mehr nachgeschickt.
 
-Mail-Texte (Betreff + Inhalt, alle sechs vom Tool direkt versendeten Mails)
-pflegt der neue Admin-Bereich „E-Mails" (`components/admin/Mails.tsx`) — gleiche
-Tabelle `wb_texte`, gleiche API wie die generischen Texte, nur eine eigene,
-kuratierte Liste. Platzhalter in den drei Erinnerungs-Mails: `{vorname}`,
-`{firma}`, `{link}`, `{tage}`.
+**Gezielt statt generisch (22.09.2026, Jörg-Auftrag):** Bevor eine fällige Stufe
+tatsächlich verschickt wird, prüft `lib/erinnerungen-lauf.ts`, was der Sitzung
+wirklich noch fehlt — `fehlendeUnterlagen()` in `lib/erinnerungen.ts` (reine
+Funktion, geprüft in `check-erinnerungen.mjs`): Workbook fehlt, wenn
+`status !== 'abgeschlossen'`; Finanzdaten fehlen, wenn `wb_dateien` keine Zeile
+zur Sitzung hat (`count`-Abfrage, keine Bewertung des Inhalts — nur „ist
+überhaupt etwas hochgeladen"). **Liegt beides schon vor, bleibt die Erinnerung
+ganz aus**, unabhängig davon, welche Stufe fällig wäre — Status allein
+(früher: `.neq('status','abgeschlossen')` in der Datenbank-Abfrage) entscheidet
+das nicht mehr, weil ein abgeschlossenes Workbook ohne Finanzdaten (oder
+umgekehrt) weiterhin eine Erinnerung braucht. Fehlt nur eine der beiden Sachen,
+geht die `_teilweise`-Fassung der Mail raus (`mail_erinnerung_<stufe>_teilweise_
+betreff/_text`), die per Platzhalter `{fehlt}` („dein Workbook" bzw. „deine
+Finanzdaten") ausschließlich die fehlende Sache benennt — nie eine allgemeine
+Erinnerung, wenn eigentlich nur noch eine Kleinigkeit fehlt. `erinnerungMail
+Senden()` in `lib/mail.ts` wählt Text-Schlüssel und `{fehlt}`-Wert danach aus.
+
+Fehlertoleranz wie beim Abholer: eine Mail, die nicht rausgeht (oder deren
+Finanzdaten-Zählung scheitert), stoppt nicht den Lauf für die übrigen Sitzungen
+(`fehler`-Liste in der Antwort, voller Fehler im Server-Log).
+
+Mail-Texte (Betreff + Inhalt, alle neun vom Tool direkt versendeten Mails —
+drei Erinnerungs-Stufen × generisch/teilweise + drei weitere) pflegt der
+Admin-Bereich „E-Mails" (`components/admin/Mails.tsx`) — gleiche Tabelle
+`wb_texte`, gleiche API wie die generischen Texte, nur eine eigene, kuratierte
+Liste. Platzhalter in den generischen Erinnerungs-Mails: `{vorname}`, `{firma}`,
+`{link}`, `{tage}`; in den `_teilweise`-Fassungen zusätzlich `{fehlt}`.
 
 **Migration:** `008_termin_erinnerungen.sql` (Spalten `termin_am`,
 `erinnerung_14/10/7_gesendet_at`).

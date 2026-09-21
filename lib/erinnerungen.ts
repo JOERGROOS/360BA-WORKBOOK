@@ -41,3 +41,14 @@ export function faelligeStufe(tage: number, stand: ErinnerungsStand): Stufe | nu
   }
   return null;
 }
+
+// Was einer Sitzung noch fehlt — steuert, ob überhaupt eine Erinnerung geht und ob sie
+// generisch ist (beides fehlt) oder gezielt auf die eine fehlende Sache zeigt. `null` heißt:
+// nichts fehlt mehr, keine weitere Erinnerung nötig, unabhängig davon, welche Stufe fällig wäre.
+export type FehlendeUnterlagen = 'beide' | 'workbook' | 'finanzdaten' | null;
+export function fehlendeUnterlagen(workbookFehlt: boolean, finanzdatenFehlen: boolean): FehlendeUnterlagen {
+  if (workbookFehlt && finanzdatenFehlen) return 'beide';
+  if (workbookFehlt) return 'workbook';
+  if (finanzdatenFehlen) return 'finanzdaten';
+  return null;
+}
