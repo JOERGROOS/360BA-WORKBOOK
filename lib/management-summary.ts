@@ -86,31 +86,65 @@ Liefere:
 - worauf_achten: was das Team im Gespräch unbedingt ansprechen oder im Hinterkopf behalten sollte.
 - vermutete_themen: was der Unternehmer vermutlich selbst kennt, sich aber noch nicht traut offen anzusprechen — erkennbar an Ton, Auslassungen, Widersprüchen, Ausweichen zwischen den Zeilen. Das ist deine Interpretation, keine belegte Tatsache — entsprechend vorsichtig, aber konkret formulieren, nicht vage.
 
-Kurz und knapp, aber so ausführlich wie inhaltlich sinnvoll — lieber drei starke, konkrete Punkte je Abschnitt als zehn austauschbare. Sprich Jörg direkt mit "du" an, wo es passt. Nenne den Unternehmer beim Vornamen.`;
+Kurz und knapp, aber so ausführlich wie inhaltlich sinnvoll — lieber drei starke, konkrete Punkte je Abschnitt als zehn austauschbare. Sprich Jörg direkt mit "du" an, wo es passt. Nenne den Unternehmer beim Vornamen.
 
-function pruefeSummary(x: unknown): ManagementSummary {
-  const s = x as Partial<ManagementSummary>;
-  const listen: (keyof ManagementSummary)[] = ['staerken', 'schwaechen', 'potenziale', 'worauf_achten', 'vermutete_themen'];
-  if (typeof s.kurzeinschaetzung !== 'string' || !listen.every((k) => Array.isArray(s[k]))) {
-    throw new Error('Management Summary hat nicht die erwartete Form');
+Format-Regel für die Listenfelder: mehrere eigenständige Stichpunkte statt einem einzigen, zusammengefassten — wo die Antworten es hergeben, drei bis fünf je Abschnitt, jeder Stichpunkt EIN zusammenhängender Satz oder kurzer Absatz, ohne Zeilenumbruch innerhalb des Textes, ohne Aufzählungszeichen und ohne Markup-Zeichen.`;
+
+// Bei einem umfangreichen, dichten Antwortsatz (echter Kunde mit 91 beantworteten Fragen, mit
+// vier aufeinanderfolgenden echten API-Aufrufen reproduziert — kein Einzelfall, sondern bei
+// dieser Eingabegröße das REGELMÄSSIGE Verhalten) liefert das Modell die Listenfelder nicht als
+// echtes JSON-Array, sondern als EINE Zeichenkette — keine Token-Grenze (stop_reason bleibt
+// "tool_use"), einfach eine andere interne Formatierung, die durchrutscht. Beobachtete Formen:
+// "<item>...</item>"-Markup, reine Zeilen ohne jedes Markup, und einmal eine führende
+// Platzhalter-Zeile "<UNKNOWN>" vor den echten Zeilen. Alle drei werden hier in eine echte
+// Liste zurückverwandelt, bevor überhaupt geprüft wird — ein erneuter Versuch allein würde bei
+// dieser Eingabegröße nichts bringen, das Verhalten ist regelmäßig, nicht zufällig.
+function alsListe(wert: unknown, feld: string): string[] {
+  if (Array.isArray(wert)) return wert.map((w) => String(w).trim()).filter((w) => w.length > 0);
+  if (typeof wert === 'string') {
+    // Nicht auf "<item>" festgelegt — beobachtet wurden auch feld-spezifische Tag-Namen wie
+    // "<staerke>" (Einzahl von "staerken"). Ein generisches Tag-Paar mit Rückverweis passt auf
+    // jeden Namen, solange öffnendes und schließendes Tag übereinstimmen.
+    const mitMarkup = Array.from(wert.matchAll(/<(\w+)>([\s\S]*?)<\/\1>/g)).map((m) => m[2].trim()).filter((t) => t.length > 0);
+    if (mitMarkup.length > 0) return mitMarkup;
+    const zeilenweise = wert.split('\n').map((z) => z.trim()).filter((z) => z.length > 0 && !/^<[A-Za-z_]+>$/.test(z));
+    if (zeilenweise.length > 0) return zeilenweise;
   }
-  return s as ManagementSummary;
+  throw new Error(`Management Summary: ${feld} hat kein brauchbares Format`);
 }
 
-export async function analysiere(s: Pick<Sitzung, 'vorname' | 'firma' | 'fragen_snapshot' | 'antworten' | 'aha'>): Promise<ManagementSummary> {
+export function pruefeSummary(x: unknown): ManagementSummary {
+  const roh = x as Record<string, unknown>;
+  if (typeof roh.kurzeinschaetzung !== 'string' || roh.kurzeinschaetzung.trim().length === 0) {
+    throw new Error('Management Summary: kurzeinschaetzung fehlt oder ist leer');
+  }
+  const listen = ['staerken', 'schwaechen', 'potenziale', 'worauf_achten', 'vermutete_themen'] as const;
+  const aus = { kurzeinschaetzung: roh.kurzeinschaetzung.trim() } as ManagementSummary;
+  for (const k of listen) {
+    const liste = alsListe(roh[k], k);
+    for (const eintrag of liste) {
+      if (eintrag.length === 0) throw new Error(`Management Summary: ${k} enthält einen leeren Stichpunkt`);
+    }
+    aus[k] = liste;
+  }
+  return aus;
+}
+
+const SCHEMA = {
+  type: 'object' as const,
+  properties: {
+    kurzeinschaetzung: { type: 'string' },
+    staerken: { type: 'array', items: { type: 'string' } },
+    schwaechen: { type: 'array', items: { type: 'string' } },
+    potenziale: { type: 'array', items: { type: 'string' } },
+    worauf_achten: { type: 'array', items: { type: 'string' } },
+    vermutete_themen: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['kurzeinschaetzung', 'staerken', 'schwaechen', 'potenziale', 'worauf_achten', 'vermutete_themen'],
+};
+
+async function einAnalyseVersuch(text: string): Promise<unknown> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const schema = {
-    type: 'object' as const,
-    properties: {
-      kurzeinschaetzung: { type: 'string' },
-      staerken: { type: 'array', items: { type: 'string' } },
-      schwaechen: { type: 'array', items: { type: 'string' } },
-      potenziale: { type: 'array', items: { type: 'string' } },
-      worauf_achten: { type: 'array', items: { type: 'string' } },
-      vermutete_themen: { type: 'array', items: { type: 'string' } },
-    },
-    required: ['kurzeinschaetzung', 'staerken', 'schwaechen', 'potenziale', 'worauf_achten', 'vermutete_themen'],
-  };
   const r = await client.messages.create({
     model: 'claude-sonnet-5',
     // 3000 hat sich in der Praxis als zu knapp erwiesen: bei sechs Feldern mit mehreren
@@ -120,13 +154,23 @@ export async function analysiere(s: Pick<Sitzung, 'vorname' | 'firma' | 'fragen_
     // Kein `temperature` hier — das Modell lehnt den Parameter mit 400 ab ("deprecated for
     // this model"), anders als das ältere Haiku in lib/glaettung.ts.
     system: SYSTEM,
-    messages: [{ role: 'user', content: sitzungAlsText(s) }],
-    tools: [{ name: 'management_summary', description: 'Die strukturierte Management Summary', input_schema: schema }],
+    messages: [{ role: 'user', content: text }],
+    tools: [{ name: 'management_summary', description: 'Die strukturierte Management Summary', input_schema: SCHEMA }],
     tool_choice: { type: 'tool', name: 'management_summary' },
   });
   const werkzeug = r.content.find((c) => c.type === 'tool_use');
   if (!werkzeug || werkzeug.type !== 'tool_use') throw new Error('Keine strukturierte Antwort von Claude erhalten');
-  return pruefeSummary(werkzeug.input);
+  return werkzeug.input;
+}
+
+export async function analysiere(s: Pick<Sitzung, 'vorname' | 'firma' | 'fragen_snapshot' | 'antworten' | 'aha'>): Promise<ManagementSummary> {
+  const text = sitzungAlsText(s);
+  try {
+    return pruefeSummary(await einAnalyseVersuch(text));
+  } catch (e) {
+    console.warn('[management-summary] erster Versuch missglückt, ein zweiter läuft', e);
+    return pruefeSummary(await einAnalyseVersuch(text));
+  }
 }
 
 export function managementSummaryDateiname(s: Pick<Sitzung, 'nachname'>): string {

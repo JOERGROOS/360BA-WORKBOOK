@@ -1,5 +1,38 @@
 import assert from 'node:assert/strict';
-const { sitzungAlsText, docxErzeugen, managementSummaryDateiname } = await import('../lib/management-summary.ts');
+const { sitzungAlsText, docxErzeugen, managementSummaryDateiname, pruefeSummary } = await import('../lib/management-summary.ts');
+
+// Regression: bei einem umfangreichen echten Antwortsatz lieferte Claude ein Listenfeld einmal
+// nicht als Array, sondern als eine Zeichenkette mit "<item>...</item>"-Markup. pruefeSummary
+// fängt das auf, statt die ganze Analyse zu verwerfen.
+const roh = {
+  kurzeinschaetzung: ' Testfall. ',
+  staerken: '\n<item>Erste Stärke.</item>\n<item>Zweite Stärke.</item>\n',
+  schwaechen: ['Eine Schwäche.', '  '], // Leerstring am Ende wird beim normalen Array-Pfad einfach entfernt
+  potenziale: [],
+  worauf_achten: ['Ein Punkt.'],
+  vermutete_themen: [],
+};
+const geprueft = pruefeSummary(roh);
+assert.equal(geprueft.kurzeinschaetzung, 'Testfall.', 'wird getrimmt');
+assert.deepEqual(geprueft.staerken, ['Erste Stärke.', 'Zweite Stärke.'], '<item>-Markup wird in eine echte Liste verwandelt');
+// Feld-spezifischer Tag-Name statt "item" (beobachtet: "<staerke>" für staerken) — muss genauso
+// funktionieren, das Tag-Paar ist generisch, nicht auf "item" festgelegt.
+assert.deepEqual(pruefeSummary({ ...roh, schwaechen: '\n<schwaeche>Erste Schwäche.</schwaeche>\n<schwaeche>Zweite Schwäche.</schwaeche>\n' }).schwaechen, ['Erste Schwäche.', 'Zweite Schwäche.']);
+assert.deepEqual(geprueft.schwaechen, ['Eine Schwäche.'], 'leere Einträge im normalen Array-Pfad werden entfernt');
+
+// Zwei weitere bei einem echten, umfangreichen Antwortsatz beobachtete Formen: reine Zeilen
+// ohne jedes Markup, und eine führende "<UNKNOWN>"-Platzhalterzeile vor den echten Zeilen.
+assert.deepEqual(pruefeSummary({ ...roh, worauf_achten: 'Erste Zeile.\nZweite Zeile.\n' }).worauf_achten, ['Erste Zeile.', 'Zweite Zeile.']);
+assert.deepEqual(pruefeSummary({ ...roh, vermutete_themen: '\n<UNKNOWN>\nErste Zeile.\nZweite Zeile.' }).vermutete_themen, ['Erste Zeile.', 'Zweite Zeile.']);
+
+// Ein einzelner Fließtext-Satz ohne jedes Markup und ohne Zeilenumbruch wird als EIN Stichpunkt
+// übernommen (besser ein einzelner Punkt als ein verworfener Abschnitt).
+assert.deepEqual(pruefeSummary({ ...roh, potenziale: 'Ein einzelner Satz ohne Aufzählung.' }).potenziale, ['Ein einzelner Satz ohne Aufzählung.']);
+// Weder Markup noch Zeilen noch ein echtes Array noch überhaupt Text (leer, falscher Typ) →
+// Fehler, nicht stillschweigend eine leere/erfundene Liste.
+assert.throws(() => pruefeSummary({ ...roh, potenziale: '' }));
+assert.throws(() => pruefeSummary({ ...roh, potenziale: 42 }));
+assert.throws(() => pruefeSummary({ ...roh, kurzeinschaetzung: '' }), 'leere Kurzeinschätzung ist kein gültiges Ergebnis');
 
 // Text-Aufbereitung: Kapitel-Überschriften, Frage-Antwort-Zeilen, Skala als "x/10", Aha-Moment.
 const snapshot = {
