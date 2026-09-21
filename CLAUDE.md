@@ -5,6 +5,49 @@ Kunden-Landeseite mit Kacheln + Finanzdaten-Upload (Task 2), Abholprogramm
 auf Jörgs Mac (Task 3) und ZIP-Download + „Auf meinen Mac abholen" je Kunde
 (Plan „Abholen je Kunde", Task 1) fertig.
 
+## Management Summary nach Kunden-Abschluss (22.09.2026, Jörg-Auftrag)
+Sobald ein Kunde sein Workbook wirklich zum ersten Mal abschließt (nicht bei
+„PDF neu erzeugen" im Admin, nicht bei einer Test-Sitzung), läuft im
+Hintergrund eine KI-Analyse seiner Antworten und schickt eine Management
+Summary als Word-Datei **ausschließlich** an `controlling@joerg-roos.com` —
+der Kunde bekommt diese Mail nie, auch nicht als Kopie.
+
+**Ablauf:** `app/api/w/[token]/abschluss/route.ts` ruft nach erfolgreichem
+`abschliessen()` — nur wenn dessen neues Rückgabefeld `neuAbgeschlossen: true`
+ist — `after(() => managementSummaryErstellenUndSenden(s)...)` aus
+`next/server` auf. Das läuft NACH der Antwort an den Kunden, verzögert seinen
+Abschluss also nicht (`maxDuration` dafür auf 90 statt 60 angehoben). Das
+Feld `neuAbgeschlossen` unterscheidet einen echten Erst-Abschluss von: schon
+vorher abgeschlossen, Verlierer eines gleichzeitigen Abschlusses, oder
+`neuErzeugen` (Admin-Knopf „PDF neu erzeugen" — verschickt bewusst keine
+Mails, siehe dortiger Kommentar).
+
+**Code-Aufteilung** (gleiches Muster wie bei den Erinnerungen, gleicher Grund
+— `scripts/check-management-summary.mjs` lädt die Datei direkt mit `node` und
+löst extensionslose Projekt-Importe nicht auf): `lib/management-summary.ts`
+ist eigenständig (eigene Kopie der Faktor-Punkte-Rechnung aus `lib/punkte.ts`
+statt Import) und enthält `sitzungAlsText` (alle Antworten als Fließtext für
+die Analyse), `analysiere` (der KI-Aufruf) und `docxErzeugen` (die Word-Datei,
+ohne Netzwerk-Aufruf testbar). `lib/management-summary-lauf.ts` verbindet das
+mit `managementSummaryMailSenden` aus `lib/mail.ts` und prüft `s.test`.
+
+**KI-Aufruf:** `claude-sonnet-5`, strukturierte Antwort über Tool-Use
+(`tool_choice` fest auf das eine Werkzeug) statt Freitext-JSON — robuster,
+kein Parsen von Markdown-Codezäunen nötig. Zwei Fallen beim Bau entdeckt und
+behoben, beide nur beim echten API-Aufruf sichtbar geworden, nicht im
+Typ-Check: (1) `temperature` wird von diesem Modell mit 400 abgelehnt
+("deprecated for this model") — anders als beim älteren Haiku in
+`lib/glaettung.ts`, deshalb dort weggelassen. (2) `max_tokens: 3000` reichte
+bei sechs Feldern mit mehreren Stichpunkten je Feld nicht — die Antwort brach
+mitten im JSON ab, sichtbar an `"<UNKNOWN>"`-Platzhaltern statt echter
+Stichpunkte; auf `6000` angehoben.
+
+**Ergebnis-Form:** `kurzeinschaetzung` (Fließtext) + fünf Listen (`staerken`,
+`schwaechen`, `potenziale`, `worauf_achten`, `vermutete_themen`) —
+`vermutete_themen` ist die „zwischen den Zeilen"-Interpretation, im Wort-
+Dokument ausdrücklich als Vermutung gekennzeichnet, nicht als Tatsache
+(Selbst-Bewertungs-Disziplin: Interpretation von Fakt trennen).
+
 ## Controlling@ bekommt jede Kunden-Mail in Kopie (22.09.2026, Jörg-Auftrag)
 `lib/mail.ts` → `kopieInternBeiEcht(s)`: jede Mail an einen echten Kunden (Link-
 Mail, alle Erinnerungen) geht per `cc` auch an `controlling@joerg-roos.com` —

@@ -41,6 +41,18 @@ export async function finanzdatenMailSenden(s: Sitzung, namen: string[]): Promis
   });
 }
 
+// Interne Management Summary nach einem echten Kunden-Abschluss (Jörg-Auftrag 22.09.2026) —
+// ausschließlich an controlling@, NIE an den Kunden, auch nicht als Kopie. Kein `an: [s.email]`,
+// kein `cc` hierher — bewusst kein gemeinsamer Code-Pfad mit den Kunden-Mails oben.
+export async function managementSummaryMailSenden(s: Sitzung, docx: Buffer, dateiname: string): Promise<void> {
+  await sendeMail({
+    an: [INTERN],
+    betreff: `Management Summary · ${s.vorname} ${s.nachname} · ${s.firma}`,
+    text: `Automatische Analyse der Workbook-Antworten von ${s.vorname} ${s.nachname} (${s.firma}) — als Vorbereitung auf euer Gespräch. Details im angehängten Dokument.\n\nDiese Mail ist ausschließlich für euch, nicht für den Kunden bestimmt.`,
+    anhang: { dateiname, inhalt: docx },
+  });
+}
+
 // Termin-Erinnerung 14 · 10 · 7 Tage vorher — Text kommt komplett aus dem Admin (Bereich
 // „E-Mails“). Fehlt nur EINE Sache (Workbook oder Finanzdaten), geht die zielgerichtete
 // „_teilweise“-Fassung raus, die per {fehlt} ausschließlich die fehlende Sache benennt —

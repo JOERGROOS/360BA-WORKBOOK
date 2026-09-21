@@ -13,7 +13,11 @@ export async function signierteAdresse(pfad: string): Promise<string> {
 // Idempotent: liegt die PDF schon, wird sie nicht neu erzeugt und nicht erneut verschickt.
 // RESEND_API_KEY kann fehlen — dann ist das Workbook trotzdem fertig (PDF liegt, Status steht),
 // nur der Mailversand schlägt fehl. Das darf den Abschluss nicht rückgängig machen.
-export async function abschliessen(s: Sitzung, neuErzeugen = false): Promise<{ pfad: string; mailFehler?: boolean }> {
+// `neuAbgeschlossen: true` heißt: DIESER Aufruf hat die Sitzung gerade wirklich zum ersten Mal
+// abgeschlossen (Beanspruchung gewonnen, PDF gerendert, keine Neu-Erzeugung) — nur dann soll
+// die Management Summary laufen, nicht bei "PDF neu erzeugen" im Admin und nicht bei einem
+// Verlierer eines gleichzeitigen Abschlusses.
+export async function abschliessen(s: Sitzung, neuErzeugen = false): Promise<{ pfad: string; mailFehler?: boolean; neuAbgeschlossen?: boolean }> {
   if (s.pdf_path && s.status === 'abgeschlossen' && !neuErzeugen) return { pfad: s.pdf_path };
   const jetzt = new Date().toISOString();
   if (!neuErzeugen) {
@@ -67,7 +71,7 @@ export async function abschliessen(s: Sitzung, neuErzeugen = false): Promise<{ p
     if (!s.test) await sendeMail({ an: [INTERN], betreff: `Workbook 360° BA · ${s.vorname} ${s.nachname} · ${s.firma}`, text: fuelle(texte.mail_intern_text, werte), anhang: { dateiname, inhalt: pdf } });
   } catch (e) {
     console.error('[abschluss] Mail', e);
-    return { pfad, mailFehler: true };
+    return { pfad, mailFehler: true, neuAbgeschlossen: true };
   }
-  return { pfad };
+  return { pfad, neuAbgeschlossen: true };
 }
