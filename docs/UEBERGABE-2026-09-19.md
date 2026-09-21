@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `a1cf903`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `e9275fe`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -192,3 +192,60 @@ Suchtext hatte und beim nächsten Mal stillschweigend nichts tat, statt einen
 Fehler zu werfen. Jetzt auf den echten Stand korrigiert. Lehre: Bei so einer
 Ersetzung künftig mit einer Prüfung arbeiten, die abbricht, wenn der Suchtext
 nicht mehr passt — nicht mit einem stillen `.replace()`.
+
+## 18. Nachtrag 22.09.2026 #4 · Management Summary nach Kunden-Abschluss
+
+Neu, im Detail in `CLAUDE.md` → „Management Summary nach Kunden-Abschluss":
+Nach jedem echten Erst-Abschluss eines Kunden-Workbooks läuft im Hintergrund
+eine KI-Analyse der Antworten (`claude-sonnet-5`, Business-Coach-Rolle,
+„zwischen den Zeilen lesen") und schickt eine Management Summary als
+`.docx` **ausschließlich** an `controlling@joerg-roos.com`. Der Kunde bekommt
+diese Mail nie — eigener Code-Pfad, kein cc auf dem Kunden-Mail-Weg.
+
+**Neue Dateien:** `lib/management-summary.ts` (Text-Aufbereitung, KI-Aufruf,
+Word-Erzeugung — eigenständig wie `lib/erinnerungen.ts`, gleicher Grund),
+`lib/management-summary-lauf.ts` (verbindet das mit dem Mail-Versand),
+`scripts/check-management-summary.mjs`. Neue Abhängigkeit: `docx` (npm).
+Geändert: `lib/abschluss.ts` (neues Feld `neuAbgeschlossen`), die
+Abschluss-Route (`after()` aus `next/server`, `maxDuration` 60→90),
+`lib/mail.ts` (`managementSummaryMailSenden`).
+
+**Zwei echte API-Fallen gefunden und behoben** (nur durch einen echten
+Aufruf gegen die Anthropic-API sichtbar, nicht im Typ-Check): `claude-sonnet-5`
+lehnt `temperature` mit HTTP 400 ab ("deprecated for this model") — anders
+als das ältere Haiku-Modell in `lib/glaettung.ts`. Und `max_tokens: 3000` war
+für die sechs Antwortfelder zu knapp — die strukturierte Antwort brach mitten
+im JSON ab (Platzhalter statt echter Stichpunkte); auf `6000` angehoben.
+
+**Echter End-to-End-Test** mit erfundenen Antworten (kein DB-Zugriff, keine
+Mail): Die Analyse liest tatsächlich zwischen den Zeilen — erkannte in einem
+Testfall z. B. die stille Abhängigkeit vom Steuerberater statt eigener
+Zahlen-Kontrolle und benannte eine Formulierung des (fiktiven) Kunden als
+mögliche Schutzbehauptung. Die erzeugte Word-Datei ist ein echter, gültiger
+`.docx`-Container (ZIP mit PK-Signatur).
+
+⚠ **Nicht geprüft:** der tatsächliche Mail-Versand — `RESEND_API_KEY` ist
+lokal weiterhin leer. Ebenso nicht mit einem vollständigen Kunden-Durchlauf
+durch die eigentliche Abschluss-Route getestet (hätte alle ~90 Fragen des
+echten Fragebogens beantworten müssen) — stattdessen `analysiere()` und
+`docxErzeugen()` direkt mit einem realistischen Test-Datensatz aufgerufen.
+Die Verkabelung selbst (`neuAbgeschlossen`-Flag, `after()`-Aufruf) ist per
+Code-Review und Typ-Check abgesichert, nicht per echtem Durchlauf. **Der
+erste echte Kunden-Abschluss ist damit der erste echte Beweis** — bitte den
+Posteingang von controlling@ danach kurz prüfen.
+
+11/11 Prüfskripte, tsc, Produktionsbau grün. `e9275fe` auf bau+main, live
+per 405-Statuscode auf der neuen Route bestätigt (kein Server-Absturz) —
+nicht per Bundle-Inhalt, weil der Code rein serverseitig ist.
+
+## 19. Betriebs-Lehre 22.09.2026 · Backticks mit spitzen Klammern in der Shell
+
+Beim Schreiben dieses Nachtrags ist ein Bash-Aufruf mit Parse-Fehler
+abgebrochen, BEVOR er etwas verändert hat (nichts Halbes hängen geblieben).
+Ursache: eine Session-Log-Zeile enthielt in Backticks eingeschlossenen Text
+mit spitzen Klammern (Platzhalter-Notation) — für die Shell sind `<`/`>`
+Umleitungs-Zeichen, das bricht die Befehlszeile mitten im Backtick-Block.
+Lehre: Session-Log-Zeilen mit Code-Begriffen in Backticks künftig über ein
+einfach gequotetes Heredoc (`<<'EOF'`) schreiben, nie als doppelt gequotete
+Bash-Variable — das schließt jede Shell-Interpretation zuverlässig aus,
+unabhängig vom Inhalt.
