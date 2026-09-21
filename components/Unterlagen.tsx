@@ -73,6 +73,7 @@ export function Unterlagen({ token, start, texte, schliessen }: {
 
         {fehler && <p className="mt-4 text-[#ff7a52] text-[14.5px]">{fehler}</p>}
 
+        {texte.unterlagen_link && <>
         <p className="fine mt-6">{texte.unterlagen_muster}</p>
         <a href={texte.unterlagen_link} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-2 mt-2.5 text-[15px] text-o underline underline-offset-2 hover:text-white transition-colors">
@@ -81,6 +82,7 @@ export function Unterlagen({ token, start, texte, schliessen }: {
             <path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
           </svg>
         </a>
+        </>}
       </div>
     </div>
   );

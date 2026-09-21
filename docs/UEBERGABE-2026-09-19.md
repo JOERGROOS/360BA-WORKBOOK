@@ -560,6 +560,13 @@ Upload, der Link öffnet nur das Unterlagen-Fenster, kein `button button` im fer
 
 **Vier neue Texte im Admin unter „Texte"**: `unterlagen_intro`, `unterlagen_muster`,
 `unterlagen_link_text`, `unterlagen_link` (SharePoint-Ordner mit den Musterdateien).
+Korrektur Jörg 22.09.: Der Link zeigte auf den **übergeordneten** Ordner
+`3-360BA-Kickoff-Unterlagen` (dort liegen auch Workbook und Wegbeschreibung), jetzt direkt
+auf `…/1-Finanzdaten-Muster` mit den sechs Musterdateien; Linktext „Finanzdaten-Muster".
+Beide Adressen im sauberen Browser ohne Microsoft-Konto geprüft — **beide öffnen sich**,
+das von Jörg gesehene weiße Fenster ließ sich nicht nachstellen (⚠ Ursache damit offen;
+falls es wiederkommt, liegt es nicht an der Freigabe). Fehlt die Adresse ganz, wird der
+Link samt Vorspann gar nicht erst angezeigt statt als toter Verweis.
 Die **Punkte selbst stehen bewusst nicht** dort — sie tragen die Kennungen.
 
 **Im Admin** zeigt jede Kunden-Zeile „Unterlagen 2/5"; beim Draufzeigen stehen die offenen
