@@ -130,3 +130,25 @@ Drehung der Hierarchie statt durch Box-Verbreiterung oder Wort-Kürzung allein:
 `app/page.tsx` + `data/texte-seed.json`. Lokale und Live-Datenbank sind dasselbe
 Supabase-Projekt — ein lokal gesetzter Text-Wert gilt sofort auch live, kein
 separater Schritt nötig. `1fe7b75` auf bau+main, live per echtem Browser bestätigt.
+
+## 15. Nachtrag 22.09.2026 · Erinnerungen gezielt statt generisch
+
+Jörg-Auftrag: Prüfen, ob Workbook und Finanzdaten schon vorliegen, bevor eine
+Erinnerung rausgeht — liegt beides vor, keine Erinnerung mehr; fehlt nur eine
+Sache, soll die Mail ausschließlich die fehlende Sache benennen.
+
+Umgesetzt in `lib/erinnerungen.ts` (`fehlendeUnterlagen`, reine Funktion,
+Workbook fehlt bei `status !== 'abgeschlossen'`, Finanzdaten fehlen bei leerem
+`wb_dateien`), `lib/erinnerungen-lauf.ts` (zählt `wb_dateien` je fälliger
+Sitzung, überspringt bei beidem erledigt — der frühere Datenbank-Filter
+`.neq('status','abgeschlossen')` ist weg, sonst wäre ein fertiges Workbook ohne
+Finanzdaten fälschlich stumm geblieben), `lib/mail.ts` (wählt zwischen
+generischer und `_teilweise`-Textfassung + `{fehlt}`-Wert). Drei neue,
+admin-editierbare Textpaare im Bereich „E-Mails" (14/10/7 Tage × teilweise),
+grammatikalisch bewusst so gebaut, dass Singular („dein Workbook") und Plural
+(„deine Finanzdaten") nie ein Verb-Kongruenz-Problem erzeugen.
+
+Lokal end-to-end gegen die echte, geteilte Datenbank getestet (sichere interne
+Test-Sitzung, sofort wieder gelöscht, keine echte Kundensitzung verändert).
+`95f3dce` auf bau+main, live per echtem Browser bestätigt (Bundle-Inhalt
+geprüft, nicht Kommandozeile — wegen des Checkpoint-Vorfalls vom 21.09.).
