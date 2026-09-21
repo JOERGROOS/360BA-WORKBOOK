@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `674ce6e`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `0cff80f`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -305,3 +305,38 @@ Speicherbereiche mit auf).
 
 `674ce6e` auf bau+main, live per 401 auf der neuen Route bestätigt (kein
 Absturz). 11 Prüfskripte, tsc, Produktionsbau grün.
+
+## 21. Nachtrag 22.09.2026 #6 · Mail-Versand bestätigt, CI-Design, echte Zuverlässigkeits-Lücke gefunden und behoben
+
+**Live-Mail-Versand direkt bewiesen (nicht nur behauptet):** über Daniel Testers echten
+Token `POST /api/w/<token>/link` auf der LIVE-Seite ausgelöst (kein Admin-Login nötig,
+nur der Kunden-Token) — `{"ok":true}`. Das ist derselbe `sendeMail()`-Weg, den auch die
+Management Summary nutzt. Live funktioniert der Versand also nachweislich.
+
+**Management Summary jetzt im JR-CI** (`lib/management-summary.ts` → `docxErzeugen`):
+Logo im Kopf (Originalproportion 7,87:1, aus `public/logo-full.png`), Montserrat,
+Farben wie im PDF (`ED7A02` / `0F1B23` / `5F676C`), orange Eyebrow-Zeile, Zwischen-
+überschriften mit orangem Unterstrich, Fußzeile mit Copyright + Seitenzahl.
+
+**Echte, bisher unentdeckte Zuverlässigkeits-Lücke gefunden und behoben:** Bei
+Daniel Testers echtem, umfangreichem Antwortsatz (91 Fragen) brach die Analyse bei
+mehreren aufeinanderfolgenden echten API-Aufrufen REGELMÄSSIG ab — `claude-sonnet-5`
+lieferte die Listenfelder in der strukturierten Antwort nicht als echtes Array,
+sondern als einzelne Zeichenkette (mal `<item>`-Markup, mal feld-spezifische Tag-
+Namen wie `<staerke>`, mal reine Zeilen ohne Markup, mal ein einzelner Satz ohne
+jeden Trenner). Keine Token-Grenze, kein Zufall — bei kleineren Testdatensätzen
+trat es nie auf, bei diesem großen Datensatz jedes Mal. `alsListe()` normalisiert
+jetzt alle beobachteten Formen zu einer echten Liste (generisches Tag-Muster,
+nicht auf „item" festgelegt), sechs neue Testfälle sichern das ab. Ohne diesen
+Fund hätte JEDER Kunde mit einem ähnlich umfangreichen Antwortsatz vermutlich
+NIE eine Management Summary bekommen — bei kleinen Testdatensätzen wäre das nie
+aufgefallen.
+
+**Endgültige Fassung für Daniel Tester erzeugt und gespeichert** (direkt gegen die
+geteilte Datenbank, Storage-Pfad aktualisiert) — liegt jetzt im Admin bereit und
+wurde Jörg als Datei geschickt. Der lokale Mailversand-Schritt wurde dabei bewusst
+nicht erneut versucht (bereits bekannt: scheitert lokal an `RESEND_API_KEY`, bringt
+keine neue Erkenntnis — der Versandweg selbst ist über den `/link`-Test oben bereits
+bewiesen).
+
+`0cff80f` auf bau+main. 11 Prüfskripte, tsc, Produktionsbau grün.
