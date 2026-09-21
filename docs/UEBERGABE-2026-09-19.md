@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `0a748cb`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `9fc318e`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -82,3 +82,18 @@ versendeten Mails (Betreff+Text) jetzt an einem Ort: neuer Admin-Bereich
 lokal in `~/.config/360ba-workbook/.env.local`), sonst läuft der tägliche
 Erinnerungs-Lauf nicht — der Testknopf im Admin funktioniert unabhängig davon.
 Migration 008 ist bereits eingespielt.
+
+## 12. Nachtrag 21.09.2026 abends · Termin-Feld-Fix
+
+Bug gemeldet: Jahreszahl im Termin-Feld ließ sich nicht durchtippen, brach nach der
+ersten Ziffer oder nach „20" ab. Ursache: Jedes Tastendruck-Ereignis (auch mit noch
+unvollständigem Datum) löste sofort `terminSpeichern` aus, das die Eingabe synchron
+deaktivierte (`disabled`) — mitten im Tippen verlor das Feld den Fokus. Fix:
+Entwurfs-Zustand wie bei Texte.tsx/Mails.tsx (lokal tippen, erst beim Verlassen des
+Felds `onBlur` speichern), `disabled` komplett entfernt. Dazu `colorScheme: 'dark'`
+auf dem Feld — macht das native Kalender-Icon hell statt dunkel-auf-dunkel-unsichtbar.
+Automatisiertes Durchtippen ließ sich im Browser-Werkzeug nicht nachstellen (bekannte
+Grenze bei nativen Datumsfeldern), stattdessen den exakten Auslöser nachgebaut
+(Zwischen-Ereignis mit leerem Wert) und geprüft: Feld bleibt editierbar und fokussiert,
+kein Speichervorgang läuft an; ein vollständiges Datum löst beim Verlassen genau einen
+PATCH aus. `9fc318e` auf bau+main.
