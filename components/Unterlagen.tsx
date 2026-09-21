@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { CHECKLISTE, stand } from '@/lib/checkliste';
+import { MUSTER, MUSTER_GRUPPEN } from '@/lib/muster';
 
 // Fenster „Welche Unterlagen brauchen wir?" — erreichbar über die ersten Worte im Text der
 // Finanzdaten-Kachel. Jeder Punkt lässt sich abhaken; der Haken liegt in der Datenbank an
@@ -73,16 +74,26 @@ export function Unterlagen({ token, start, texte, schliessen }: {
 
         {fehler && <p className="mt-4 text-[#ff7a52] text-[14.5px]">{fehler}</p>}
 
-        {texte.unterlagen_link && <>
-        <p className="fine mt-6">{texte.unterlagen_muster}</p>
-        <a href={texte.unterlagen_link} target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 mt-2.5 text-[15px] text-o underline underline-offset-2 hover:text-white transition-colors">
-          {texte.unterlagen_link_text}
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
-          </svg>
-        </a>
-        </>}
+        <p className="fine mt-7">{texte.unterlagen_muster}</p>
+        <div className="flex flex-col gap-4 mt-3">
+          {MUSTER_GRUPPEN.map((g) => (
+            <div key={g}>
+              <div className="text-[13px] tracking-[.14em] uppercase text-muted mb-2">{g}</div>
+              <div className="flex flex-col gap-1.5">
+                {MUSTER.filter((m) => m.gruppe === g).map((m) => (
+                  <a key={m.datei} href={`/muster/${m.datei}`} download
+                    className="flex items-center gap-3 rounded-xl border border-white/10 px-3.5 py-2.5 hover:border-o/45 hover:bg-white/[.03] transition-colors">
+                    <span className="text-[11px] font-semibold text-o border border-o/40 rounded px-1.5 py-0.5 shrink-0">{m.art}</span>
+                    <span className="text-[15px] flex-1">{m.titel}</span>
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="text-muted shrink-0" aria-hidden="true">
+                      <path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M4 18v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

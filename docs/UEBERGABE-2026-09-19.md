@@ -558,16 +558,10 @@ auseinander. Die Kachel ist deshalb jetzt eine Fläche mit Knopf-Rolle (`role="b
 mit `stopPropagation`. Beides geprüft: Klick und Enter auf die Kachel öffnen weiterhin den
 Upload, der Link öffnet nur das Unterlagen-Fenster, kein `button button` im fertigen DOM.
 
-**Vier neue Texte im Admin unter „Texte"**: `unterlagen_intro`, `unterlagen_muster`,
-`unterlagen_link_text`, `unterlagen_link` (SharePoint-Ordner mit den Musterdateien).
-Korrektur Jörg 22.09.: Der Link zeigte auf den **übergeordneten** Ordner
-`3-360BA-Kickoff-Unterlagen` (dort liegen auch Workbook und Wegbeschreibung), jetzt direkt
-auf `…/1-Finanzdaten-Muster` mit den sechs Musterdateien; Linktext „Finanzdaten-Muster".
-Beide Adressen im sauberen Browser ohne Microsoft-Konto geprüft — **beide öffnen sich**,
-das von Jörg gesehene weiße Fenster ließ sich nicht nachstellen (⚠ Ursache damit offen;
-falls es wiederkommt, liegt es nicht an der Freigabe). Fehlt die Adresse ganz, wird der
-Link samt Vorspann gar nicht erst angezeigt statt als toter Verweis.
-Die **Punkte selbst stehen bewusst nicht** dort — sie tragen die Kennungen.
+**Drei neue Texte im Admin unter „Texte"**: `unterlagen_intro`, `unterlagen_muster` und der
+Kacheltext. Die Punkte selbst stehen bewusst nicht dort — sie tragen die Kennungen.
+
+**Musterdateien liegen in der App, nicht mehr in OneDrive** (Nachtrag #11 unten).
 
 **Im Admin** zeigt jede Kunden-Zeile „Unterlagen 2/5"; beim Draufzeigen stehen die offenen
 Punkte im Klartext.
@@ -580,3 +574,45 @@ Bündel nachgewiesen. Testsitzung gelöscht. 13 Prüfskripte, tsc, Produktionsba
 
 **Nicht gesehen:** die Admin-Zeile im laufenden Bild — dafür hätte das Admin-Passwort durch
 den Browser gehen müssen. Nachgewiesen ist sie über Typprüfung, API-Antwort und Bündel.
+
+## 26. Nachtrag 22.09.2026 #11 · Musterdateien in die App — und ein Datenschutz-Fund
+
+**Der OneDrive-Link war nicht kaputt, Jörgs Anmeldung war das Problem.** Er sah beim Öffnen
+ein weißes Fenster, mein Browser (nicht angemeldet) sah alle sechs Dateien. In Jörgs Chrome
+auf genau dem Tab nachgemessen: `Gastmitwirkender = ja`, `Dateizeilen = 0`, **keine
+Fehlermeldung**. Sobald jemand bei Microsoft angemeldet ist, wirft SharePoint das
+Freigabe-Merkmal aus der Adresse und zeigt den Ordner mit den Rechten des angemeldeten
+Kontos — hier ein Gastkonto ohne Rechte. Da viele Handwerker selbst bei Microsoft 365
+angemeldet sind, hätte das jeden Kunden treffen können.
+
+**Jörgs Entscheidung:** Die Dateien liegen jetzt unter `public/muster/` und kommen von
+360ba.joerg-roos.com selbst. Keine Microsoft-Anmeldung, kein Freigabelink. Der OneDrive-Link
+und seine beiden Texte sind aus dem Fenster entfernt. Liste: `lib/muster.ts`, gruppiert nach
+„Summen- und Saldenliste" (3 CSV) und „BWA" (3 PDF).
+
+**⚠ Der wichtige Fund — bitte lesen, bevor jemand eine Musterdatei austauscht:** Die drei
+BWA-Muster zeigen sichtbar „Musterholz GbR", trugen aber **im Dateiinneren weiterhin den
+echten Mandantennamen „Rudy Elektrotechnik e.K." plus die DATEV-Nummern 707617 / 962 / 2021
+und 21541 / 962**. Der Name war nur optisch überdeckt, nicht entfernt — jede Textauswahl und
+jedes Auswerteprogramm holt ihn hervor. Gemessen: bis zu 1.937 Textbefehle je Datei, Name in
+allen dreien. **Diese Dateien liegen weiterhin so in Jörgs OneDrive-Freigabeordner und sind
+dort ohne Anmeldung abrufbar** — das ist unabhängig von dieser App und sollte aufgeräumt
+werden.
+
+**Was in der App liegt, ist geglättet:** Jede Seite wurde mit `pdftoppm` (poppler, war schon
+installiert) zu JPEG gerendert und mit einem kleinen eigenen Zusammenbauer wieder zu einem
+PDF gemacht. Ergebnis geprüft: **null Textbefehle, kein Treffer auf Name oder Nummern**,
+Seitenzahl stimmt (1 / 2 / 4 — der erste Anlauf über `qlmanage` hätte still nur die erste
+Seite genommen, deshalb der Umweg). Sichtbar bleiben die echten Zahlen des Betriebs unter
+dem Namen „Musterholz GbR"; das ist Jörgs bewusste Entscheidung vom 22.09.2026.
+Dateigröße dadurch 2,4 MB statt 105 KB.
+
+**Wer eine Musterdatei austauscht, muss das Glätten wiederholen** — sonst wandert der
+versteckte Name wieder mit. Kurzfassung des Wegs: `pdftoppm -r 150 -jpeg -jpegopt quality=82
+quelle.pdf seite` und die Seiten wieder zu einem PDF zusammensetzen, danach mit einer
+Textsuche über die entpackten Ströme gegenprüfen.
+
+**Geprüft:** Fenster zeigt sechs Einträge in zwei Gruppen mit Typ-Kennzeichen · alle sechs
+Adressen liefern Status 200, vollständige Größe und richtigen Dateityp · eine geglättete
+Seite im Bild gegengelesen (identisch zum Original, voll lesbar). 13 Prüfskripte, tsc,
+Produktionsbau grün. Testsitzung gelöscht.
