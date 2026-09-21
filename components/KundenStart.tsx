@@ -64,7 +64,7 @@ export function KundenStart({ token, vorname, workbook, texte }: { token: string
     <main>
       <Kopf kinder={<span className="text-[13px] tracking-[.14em] uppercase text-muted">360° Business-Analyse</span>} />
       <div className="max-w-[900px] mx-auto px-6 md:px-8 pb-24 pt-8 erscheint">
-        <div className="eyebrow">Dein Workbook</div>
+        <div className="eyebrow">Dein persönlicher Arbeitsbereich</div>
         <h1 className="font-semibold text-[34px] md:text-[46px] leading-[1.14] mt-3 mb-5">
           <Zweifarbig text={gruss} wort={wort} />
         </h1>
