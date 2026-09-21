@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `0cff80f`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `8da299e`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -47,11 +47,11 @@ Plan als Datei in `docs/plans/`, je Aufgabe ein frischer Subagent (sonnet für U
 
 ## 8. Offen
 
-1. **Jörgs eigener Durchlauf** als Kunde (Admin → Übersicht → Neue Einladung → Link → Video-Platz, Kacheln, Upload, Workbook, Abschluss). Danach ZIP und „Auf meinen Mac abholen“ prüfen. Drei Mails erwartet (Einladung, Finanzdaten-Hinweis an controlling@, fertiges Workbook).
-2. **Vimeo-Link** eintragen, sobald das Begrüßungsvideo da ist.
+1. **Jörgs eigener Durchlauf** als Kunde (Admin → Übersicht → Neue Einladung → Link → Video-Platz, Kacheln, Upload, Workbook, Abschluss). Danach ZIP und „Auf meinen Mac abholen” prüfen. Drei Mails erwartet (Einladung, Finanzdaten-Hinweis an controlling@, fertiges Workbook).
+2. ~~Vimeo-Link eintragen~~ erledigt (Video eingearbeitet, erster Test erfolgreich, Jörg-Rückmeldung 22.09.).
 3. **Datenschutz-Absatz** aus `docs/datenschutz-absatz.md` auf joerg-roos.com ergänzen (Sub-Prozessoren: Supabase EU, Vercel Frankfurt, OpenAI USA mit Standardvertragsklauseln, Anthropic, Resend, Vimeo wenn genutzt).
 4. **Sprachaufnahme in Chrome:** bei Jörgs erstem Test scheiterten 3 von 5 Aufnahmen clientseitig, bevor Audio hochging (Server sah nur 2 Aufrufe, beide ok). Messpunkte sind eingebaut (Server-Log `[transkribieren] eingang/ergebnis`, Browser-Log `[mikro] …` erscheint im Dev-Server-Terminal als `[browser]`, Pegelanzeige, Leer-Erkennung). Nächster Schritt: Jörg testet erneut in Chrome, Log lesen. Modellwechsel auf `gpt-4o-transcribe` mit Handwerker-Wortschatz-Prompt ist gemessen besser (Testskript-Idee in `scratchpad` der alten Sitzung, nicht im Repo) — nach Klärung der Aufnahme umstellen.
-5. **Entscheidungen bei Jörg:** ~~Video-Kachel schmaler~~ erledigt 19.09. (jetzt rechts im Text schwimmend mit Vergrößern-Overlay, siehe Vorgaben). Foto auf der Über-Jörg-Seite (aktuell Shooting 2024, weißes Hemd) behalten?
+5. ~~Foto Über-Jörg-Seite~~ Entscheidung Jörg 22.09.: bleibt so.
 6. **Später / geparkt:** Admin-Workbook-Liste lädt je Sitzung Dateien + signierte URLs (N+1) · ZIP-Route hält alles im Speicher (30×50 MB Grenze) · Weiß auf Orange 2,8:1 (Markenvorgabe, bewusst) · `diktate`-Zähler nicht atomar (Statistik) · PDF 1,3 MB wegen PNG-Hintergrund (JPEG wäre ~150 KB).
 
 ## 9. Fallen, die Zeit gekostet haben
@@ -78,9 +78,8 @@ automatisch je eine kurze, wertschätzende Erinnerungsmail raus (nie mehrere am
 selben Tag), zuletzt mit der Bitte um Workbook + Finanzdaten. Täglicher Lauf
 über Vercel Cron, Testknopf „Erinnerungen jetzt prüfen" im Admin. Alle sechs
 versendeten Mails (Betreff+Text) jetzt an einem Ort: neuer Admin-Bereich
-„E-Mails". **Offen bei Jörg:** `CRON_SECRET` in Vercel eintragen (Wert steht
-lokal in `~/.config/360ba-workbook/.env.local`), sonst läuft der tägliche
-Erinnerungs-Lauf nicht — der Testknopf im Admin funktioniert unabhängig davon.
+„E-Mails". `CRON_SECRET` in Vercel eingetragen (Jörg, 22.09.) — täglicher
+Erinnerungs-Lauf jetzt aktiv, nicht mehr nur der Testknopf im Admin.
 Migration 008 ist bereits eingespielt.
 
 ## 12. Nachtrag 21.09.2026 abends · Termin-Feld-Fix
@@ -340,3 +339,35 @@ keine neue Erkenntnis — der Versandweg selbst ist über den `/link`-Test oben 
 bewiesen).
 
 `0cff80f` auf bau+main. 11 Prüfskripte, tsc, Produktionsbau grün.
+
+## 22. Nachtrag 22.09.2026 #7 · Inhalt war zu dünn — echte Ursache behoben, nicht nur kaschiert
+
+Jörg-Rückmeldung: die reparierte Fassung war inhaltlich spürbar dünner als die
+allererste. Berechtigt — die vorherige Reparatur (`alsListe`-Normalisierung, siehe
+Nachtrag #6) hat zwar verhindert, dass die Erzeugung abbricht, aber nicht das
+eigentliche Problem gelöst: sie hat einen kollabierten, zu dünnen Stichpunkt
+akzeptiert, statt einen reichhaltigen zu erzwingen.
+
+**Root Cause:** `claude-sonnet-5` hält die feste JSON-Array-Struktur einer
+Werkzeug-Antwort (`tool_choice`) bei einem großen, echten Datensatz (91 Fragen)
+nicht zuverlässig durch — manchmal kollabiert ein Listenfeld auf einen einzigen,
+stark verkürzten Stichpunkt statt mehrerer, unabhängig von Prompt-Feinschliff.
+
+**Der eigentliche Fix:** komplette Umstellung von JSON-Werkzeug auf Markdown.
+`lib/management-summary.ts` verlangt jetzt sechs Markdown-Abschnitte mit fester
+Überschrift (`## Titel`) und `- `-Stichpunkten, `parseMarkdown()` liest das
+deterministisch per Regex aus. Sprachmodelle halten eine Fließtext-Struktur mit
+Markdown-Überschriften für lange, inhaltsreiche Antworten erwiesenermaßen sehr
+viel zuverlässiger durch als ein tief verschachteltes JSON-Schema — das war die
+falsche Werkzeugwahl für diese Aufgabe, nicht nur ein Formatierungsproblem.
+
+**Fünf von fünf Testläufen** mit Daniel Testers echten 91 Antworten:
+durchgehend 5 Stichpunkte je Abschnitt (Ziel war drei bis fünf), inhaltlich
+sichtbar reichhaltiger als beide vorherigen Fassungen — u. a. eine neue,
+tiefere Beobachtung zur fehlenden Neupositionierung nach der Betriebs-
+übernahme, die in den dünneren Fassungen nicht auftauchte.
+
+**Endgültige, dritte Fassung für Daniel Tester erzeugt und gespeichert** —
+liegt im Admin bereit, wurde Jörg als Datei geschickt.
+
+`8da299e` auf bau+main. 11 Prüfskripte, tsc, Produktionsbau grün.
