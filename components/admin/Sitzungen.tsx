@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react';
 import type { Sitzung } from '@/lib/db';
 import type { DateiEintragAdmin } from '@/lib/dateien';
+import { CHECKLISTE, stand as checklistenStand } from '@/lib/checkliste';
 import { EinladungFormular } from './EinladungFormular';
 
-type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at' | 'abholen_angefordert' | 'termin_am' | 'management_summary_path'> & { prozent: number; link: string };
+type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at' | 'abholen_angefordert' | 'termin_am' | 'management_summary_path' | 'checkliste'> & { prozent: number; link: string };
 
 // Kalendertage bis zum Termin, in Berlin gerechnet — dieselbe Formel wie serverseitig in
 // lib/erinnerungen.ts (dort mit Test abgesichert), hier bewusst dupliziert: die Serverdatei
@@ -212,6 +213,10 @@ export function Sitzungen() {
                 <span className="flex gap-3 justify-end flex-wrap text-[13px]">
                   <button className="text-o font-medium" onClick={() => ausklappen(s.id)}>Antworten</button>
                   <button className="text-o font-medium" onClick={() => setDateienOffen((o) => (o === s.id ? null : s.id))}>Dateien ({dateien[s.id]?.length ?? 0})</button>
+                  {/* Was der Kunde selbst abgehakt hat — Titel zeigt die offenen Punkte im Klartext. */}
+                  <span className="text-muted" title={CHECKLISTE.filter((p) => s.checkliste?.[p.id] !== true).map((p) => `offen: ${p.titel}`).join('\n') || 'alles abgehakt'}>
+                    Unterlagen {checklistenStand(s.checkliste).erledigt}/{checklistenStand(s.checkliste).gesamt}
+                  </span>
                   {(dateien[s.id]?.length ?? 0) > 0 && (
                     <a className="text-o font-medium" href={`/api/admin/sitzungen/${s.id}/dateien/zip`} download>Alle herunterladen (ZIP)</a>
                   )}

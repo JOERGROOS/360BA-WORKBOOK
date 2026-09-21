@@ -524,3 +524,52 @@ und danach eine Messung wie oben fahren. Falls das später Jörg selbst pflegen 
 er in den Admin-Bereich „Texte" — heute bewusst nicht, weil er kein Kundentext ist.
 
 12 Prüfskripte, tsc, Produktionsbau grün. Testsitzung gelöscht.
+
+## 25. Nachtrag 22.09.2026 #10 · Unterlagen-Checkliste an der Finanzdaten-Kachel
+
+Jörg-Auftrag: In der Finanzdaten-Kachel sollen die **ersten Worte des Textes ein Link**
+sein, der ein Fenster mit den benötigten Unterlagen öffnet — und die Punkte darin sollen
+**abhakbar** sein, „so dass wir dann pro Kunde oder der Kunde auch jeweils gucken kann, was
+er uns schon geschickt hat und was eben noch nicht".
+
+**Wo die Haken liegen: in der Datenbank an der Sitzung**, nicht im Browser
+(`wb_sessions.checkliste`, Migration 010, jsonb). Damit sieht der Kunde seinen Stand auf
+jedem Gerät, und Jörg sieht ihn im Admin — beides war in Jörgs Satz gefordert. Gespeichert
+wird **je Punkt einzeln**, nicht die ganze Liste: Hakt jemand auf dem Handy und am Rechner
+gleichzeitig etwas ab, überschreibt keiner den anderen.
+
+**Die fünf Punkte stehen in `lib/checkliste.ts`** mit fester Kennung (`jahresabschluss`,
+`fixkosten`, `kontostand`, `bwa`, `susa`). **Die Kennungen sind der Schlüssel in der
+Datenbank — wer sie ändert, löscht bestehenden Kunden die Haken.** Der Text darf sich
+ändern, die Kennung nicht; `scripts/check-checkliste.mjs` hält das fest. Die Route nimmt
+nur bekannte Kennungen an (auch `__proto__` wird abgewiesen).
+
+**Der Link entsteht aus dem Kacheltext selbst:** `teileKacheltext()` trennt am
+Gedankenstrich — der Teil davor („Jahresabschlüsse, Summen- und Saldenlisten, BWA und
+Kontostände") wird zum Link, der Rest bleibt normaler Text. **Damit bleibt der Text im
+Admin unter „Texte" änderbar**, ohne dass jemand Code anfassen muss; Jörg steuert die
+Link-Worte über die Stelle des Gedankenstrichs. Fehlt er, wird der ganze Text zum Link,
+statt zu raten.
+
+**Eine Stolperstelle, die Arbeit gemacht hat:** Die Kachel war ein `<button>`. Ein Knopf im
+Knopf ist ungültiges HTML — der Browser zieht den inneren heraus und die Kachel fällt
+auseinander. Die Kachel ist deshalb jetzt eine Fläche mit Knopf-Rolle (`role="button"`,
+`tabIndex`, Enter/Leertaste von Hand nachgebaut); der Link im Text ist ein echter Knopf
+mit `stopPropagation`. Beides geprüft: Klick und Enter auf die Kachel öffnen weiterhin den
+Upload, der Link öffnet nur das Unterlagen-Fenster, kein `button button` im fertigen DOM.
+
+**Vier neue Texte im Admin unter „Texte"**: `unterlagen_intro`, `unterlagen_muster`,
+`unterlagen_link_text`, `unterlagen_link` (SharePoint-Ordner mit den Musterdateien).
+Die **Punkte selbst stehen bewusst nicht** dort — sie tragen die Kennungen.
+
+**Im Admin** zeigt jede Kunden-Zeile „Unterlagen 2/5"; beim Draufzeigen stehen die offenen
+Punkte im Klartext.
+
+**Geprüft über die echte Oberfläche:** Link sitzt auf den ersten Worten · Fenster öffnet ·
+zwei Punkte abgehakt → in der Datenbank nachgesehen (`{"bwa":true,"jahresabschluss":true}`)
+· Seite neu geladen → Haken stehen noch, Balken „2 von 5 erledigt" · Musterdaten-Link
+vorhanden · Admin-API liefert die Checkliste · beide neuen Anzeigen im ausgelieferten
+Bündel nachgewiesen. Testsitzung gelöscht. 13 Prüfskripte, tsc, Produktionsbau grün.
+
+**Nicht gesehen:** die Admin-Zeile im laufenden Bild — dafür hätte das Admin-Passwort durch
+den Browser gehen müssen. Nachgewiesen ist sie über Typprüfung, API-Antwort und Bündel.

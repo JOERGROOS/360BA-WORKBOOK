@@ -5,6 +5,8 @@ import { FinanzdatenUpload } from './FinanzdatenUpload';
 import { Kopf } from './Kopf';
 import { Zweifarbig } from './Zweifarbig';
 import { Videobotschaft } from './Videobotschaft';
+import { Unterlagen } from './Unterlagen';
+import { teileKacheltext } from '@/lib/checkliste';
 
 type Kachel = { text: string; href: string; prozent: number; zeigtFortschritt: boolean };
 
@@ -54,8 +56,10 @@ function Kacheltitel({ text }: { text: string }) {
   );
 }
 
-export function KundenStart({ token, vorname, workbook, texte }: { token: string; vorname: string; workbook: Kachel; texte: Record<string, string> }) {
+export function KundenStart({ token, vorname, workbook, texte, checkliste }: { token: string; vorname: string; workbook: Kachel; texte: Record<string, string>; checkliste: Record<string, boolean> }) {
   const [upload, setUpload] = useState(false);
+  const [unterlagen, setUnterlagen] = useState(false);
+  const kacheltext = teileKacheltext(texte.kachel_finanzdaten ?? '');
   const gruss = (texte.landing_titel ?? '').replace(/\{vorname\}/g, vorname);
   // Alles nach dem ersten Komma steht orange — so bleibt die Zweifarbigkeit erhalten,
   // auch wenn Jörg den Begrüßungstext im Admin ändert.
@@ -92,18 +96,32 @@ export function KundenStart({ token, vorname, workbook, texte }: { token: string
             <p className="fine mt-2.5">{texte.kachel_workbook}</p>
           </Link>
 
-          <button type="button" onClick={() => setUpload(true)} className="glas glas--hebt h-full flex flex-col text-left group">
+          {/* Kein <button> als Hülle mehr: Im Text steckt jetzt ein zweiter Knopf (das
+              Unterlagen-Fenster), und ein Knopf im Knopf ist ungültiges HTML — der Browser
+              reißt die Kachel dann auseinander. Darum eine Fläche mit Knopf-Rolle, die
+              Tastatur-Bedienung von Hand nachgebaut. */}
+          <div role="button" tabIndex={0} onClick={() => setUpload(true)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setUpload(true); } }}
+            className="glas glas--hebt h-full flex flex-col text-left group cursor-pointer">
             <div className="flex items-start gap-4">
               <Symbolkreis kinder={<IconUpload />} />
             </div>
             <Kacheltitel text="Finanzdaten senden" />
-            <p className="fine mt-2.5">{texte.kachel_finanzdaten}</p>
-          </button>
+            <p className="fine mt-2.5">
+              <button type="button"
+                onClick={(e) => { e.stopPropagation(); setUnterlagen(true); }}
+                className="text-o underline decoration-dotted underline-offset-[3px] hover:text-white transition-colors text-left">
+                {kacheltext.link}
+              </button>
+              {kacheltext.rest && ` ${kacheltext.rest}`}
+            </p>
+          </div>
         </div>
 
         <p className="fine mt-8">{texte.kontakt}</p>
       </div>
       {upload && <FinanzdatenUpload token={token} hinweis={texte.upload_hinweis} schliessen={() => setUpload(false)} />}
+      {unterlagen && <Unterlagen token={token} start={checkliste} texte={texte} schliessen={() => setUnterlagen(false)} />}
     </main>
   );
 }

@@ -24,5 +24,5 @@ export default async function LandeSeite({ params }: { params: Promise<{ token: 
         : s.pdf_path
           ? { text: 'Workbook herunterladen', href: `/w/${token}/fertig`, prozent, zeigtFortschritt: false }
           : { text: 'Zum Ergebnis', href: `/w/${token}/ergebnis`, prozent, zeigtFortschritt: true };
-  return <KundenStart token={token} vorname={s.vorname} workbook={workbook} texte={texte} />;
+  return <KundenStart token={token} vorname={s.vorname} workbook={workbook} texte={texte} checkliste={s.checkliste ?? {}} />;
 }
