@@ -4,7 +4,7 @@ import type { Sitzung } from '@/lib/db';
 import type { DateiEintragAdmin } from '@/lib/dateien';
 import { EinladungFormular } from './EinladungFormular';
 
-type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at' | 'abholen_angefordert' | 'termin_am'> & { prozent: number; link: string };
+type SitzungListe = Pick<Sitzung, 'id' | 'vorname' | 'nachname' | 'firma' | 'email' | 'status' | 'test' | 'created_at' | 'abgeschlossen_at' | 'abholen_angefordert' | 'termin_am' | 'management_summary_path'> & { prozent: number; link: string };
 
 // Kalendertage bis zum Termin, in Berlin gerechnet — dieselbe Formel wie serverseitig in
 // lib/erinnerungen.ts (dort mit Test abgesichert), hier bewusst dupliziert: die Serverdatei
@@ -103,6 +103,14 @@ export function Sitzungen() {
     const r = await fetch(`/api/admin/sitzungen/${id}/pdf`, { method: 'POST' });
     setLaeuft(null);
     if (!r.ok) { setFehler(await fehlerAus(r, 'Das hat nicht geklappt.')); return; }
+    const d = await r.json();
+    window.open(d.url, '_blank');
+  }
+  async function managementSummaryOeffnen(id: string) {
+    setLaeuft(id); setFehler('');
+    const r = await fetch(`/api/admin/sitzungen/${id}/management-summary`);
+    setLaeuft(null);
+    if (!r.ok) { setFehler(await fehlerAus(r, 'Management Summary noch nicht vorhanden.')); return; }
     const d = await r.json();
     window.open(d.url, '_blank');
   }
@@ -217,6 +225,7 @@ export function Sitzungen() {
                   {s.status !== 'abgeschlossen' && <button className="text-o font-medium" onClick={() => linkKopieren(s)}>{kopiert === s.id ? 'Kopiert ✓' : 'Link kopieren'}</button>}
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => pdfOeffnen(s.id)}>PDF öffnen</button>
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => pdfNeu(s.id)}>PDF neu erzeugen</button>
+                  {s.management_summary_path && <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => managementSummaryOeffnen(s.id)}>Management Summary öffnen</button>}
                   <button className="text-o font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => linkErneut(s.id)}>Link erneut senden</button>
                   <button className="text-[#ff7a52] font-medium disabled:opacity-40" disabled={laeuft === s.id} onClick={() => zurueckziehen(s.id)}>Zurückziehen</button>
                 </span>

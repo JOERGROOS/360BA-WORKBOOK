@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db, dbFehler } from '@/lib/db';
 import { adminGeprueft } from '@/lib/admin-auth';
 
-const SPALTEN_OHNE_TOKEN = 'id,vorname,nachname,firma,telefon,email,status,test,fragen_snapshot,antworten,aha,aktuelle_frage,pdf_path,created_at,updated_at,abgeschlossen_at';
+const SPALTEN_OHNE_TOKEN = 'id,vorname,nachname,firma,telefon,email,status,test,fragen_snapshot,antworten,aha,aktuelle_frage,pdf_path,management_summary_path,created_at,updated_at,abgeschlossen_at';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!adminGeprueft(req)) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 });
@@ -43,6 +43,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (finanzdaten && finanzdaten.length > 0) {
     const { error: eStorageFin } = await db.storage.from('finanzdaten').remove(finanzdaten.map((d) => `${id}/${d.name}`));
     if (eStorageFin) { console.error('[admin sitzungen] Finanzdaten-Ordner löschen', eStorageFin); return NextResponse.json({ error: 'Finanzdaten konnten nicht gelöscht werden' }, { status: 500 }); }
+  }
+  // Management-Summary-Bucket ebenfalls aufräumen — gleiches Muster wie oben.
+  const { data: summaries, error: eListeSum } = await db.storage.from('management-summaries').list(id);
+  if (eListeSum) { console.error('[admin sitzungen] Management-Summary-Ordner listen', eListeSum); return NextResponse.json({ error: 'Management Summary konnte nicht gelöscht werden' }, { status: 500 }); }
+  if (summaries && summaries.length > 0) {
+    const { error: eStorageSum } = await db.storage.from('management-summaries').remove(summaries.map((d) => `${id}/${d.name}`));
+    if (eStorageSum) { console.error('[admin sitzungen] Management-Summary-Ordner löschen', eStorageSum); return NextResponse.json({ error: 'Management Summary konnte nicht gelöscht werden' }, { status: 500 }); }
   }
   const { error } = await db.from('wb_sessions').delete().eq('id', id);
   if (error) return dbFehler('sitzungen', error, 'Sitzung konnte nicht gelöscht werden.');
