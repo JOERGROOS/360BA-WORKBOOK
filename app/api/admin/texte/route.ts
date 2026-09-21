@@ -13,7 +13,16 @@ export async function PUT(req: Request) {
   const b = await req.json().catch(() => ({}));
   const key = String(b.key ?? '');
   if (!key) return NextResponse.json({ error: 'Schlüssel fehlt' }, { status: 400 });
-  const { error } = await db.from('wb_texte').upsert({ key, wert: String(b.wert ?? ''), updated_at: new Date().toISOString() });
-  if (error) return dbFehler('texte', error, 'Text konnte nicht gespeichert werden.');
+  const wert = String(b.wert ?? '');
+  const { error } = await db.from('wb_texte').upsert({ key, wert, updated_at: new Date().toISOString() });
+  if (error) {
+    // Bei einer gepoolten Datenbank-Verbindung kann der Schreibvorgang selbst schon
+    // durchgegangen sein, während nur die Bestätigung auf dem Rückweg verloren geht — genau
+    // das Muster, das Jörg gemeldet hat: „Fehler beim Speichern“, Text steht aber schon drin.
+    // Einmal nachsehen, bevor wirklich ein Fehler gemeldet wird.
+    const { data: kontrolle } = await db.from('wb_texte').select('wert').eq('key', key).maybeSingle();
+    if (kontrolle?.wert === wert) return NextResponse.json({ ok: true });
+    return dbFehler('texte', error, 'Text konnte nicht gespeichert werden.');
+  }
   return NextResponse.json({ ok: true });
 }
