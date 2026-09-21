@@ -433,3 +433,53 @@ gelöscht. 11 Prüfskripte, tsc, Produktionsbau grün.
 **Nicht geprüft:** echte gesprochene Sprache durchs echte Mikrofon bis zum fertigen Text —
 im Browser-Bereich ist das Mikrofon gesperrt, und Jörgs Chrome war beim Abschluss zu.
 **Jörg testet das bitte einmal selbst.**
+
+## 23. Nachtrag 22.09.2026 #8 · Die Glättung antwortete, statt zu glätten
+
+Jörg meldete: Auf „Was sind deine Hobbys?" sprach er **„Fußball, Grillen und Reisen"** —
+im Antwortfeld stand danach *„Ich kann diese Anweisung nicht ausführen, da kein Text zur
+Bearbeitung vorhanden ist. Du hast nur drei Stichpunkte eingegeben …"*. Auf „Wo wohnst du?"
+(„Haltern am See") kam eine Bemerkung über Nordrhein-Westfalen. Das Sprachmodell hat also
+**die Antwort des Kunden als Auftrag an sich selbst gelesen** und seine Rückfrage landete
+als Antwort im Workbook.
+
+**Zwei Ursachen, beide behoben:**
+1. **Die Glättung kannte die Frage nicht.** Sie sah nur „Haltern am See" und hielt das für
+   einen unvollständigen Auftrag. Jetzt bekommt sie die Frage als Zusammenhang mit —
+   **nachgeschlagen auf dem Server** über die Fragen-Kennung aus dem Snapshot, nicht als
+   Text aus dem Browser. Sonst könnte über das Formular beliebiger Text in die Anweisung
+   an das Sprachmodell geschoben werden. Das Aha-Feld auf der Ergebnisseite nutzt dafür
+   die Kennung `aha`, der Server holt den Text aus `wb_texte.aha_frage`.
+2. **Kurze Antworten gingen überhaupt erst zum Modell.** Die alte Grenze lag bei 12 Zeichen,
+   jetzt bei 40 — an „Fußball, Grillen und Reisen" ist nichts zu glätten.
+
+**Dazu drei Sicherungen, damit so etwas nie wieder in eine Kundenantwort gerät:**
+- **Vorbelegte Antwort** (`assistant`-Nachricht `<geglaettet>`): Das Modell kann gar nicht
+  mit einem Vorwort oder einer Rückfrage anfangen, es schreibt zwangsläufig im Text weiter.
+- **Verschärfte Anweisung:** „Du bist ein Schreibwerkzeug, kein Gesprächspartner … Stichpunkte
+  bleiben Stichpunkte." Die Frage dient ausdrücklich nur dem Verständnis.
+- **`wirktWieKommentar()`** prüft das Ergebnis: verräterische Wendungen („kein Text zur
+  Bearbeitung", „bitte stelle mir", „als KI") oder ein Ergebnis, das mehr als das 2,5-fache
+  der Vorlage umfasst (dann wurde gedichtet). Trifft eines zu, wird die **Rohabschrift**
+  verwendet statt der Modellantwort. Abgesichert durch `scripts/check-glaettung.mjs` mit
+  Jörgs echter Fehlantwort als Testfall (jetzt 12 Prüfskripte).
+
+**Echt geprüft, nicht nur behauptet** — mit echten Aufrufen beim Sprachmodell und, über den
+echten Server-Weg, mit echter gesprochener Sprache (macOS-Stimme `say` → `.m4a` → Route):
+
+| gesprochen | Ergebnis |
+|---|---|
+| „Fußball, Grillen und Reisen" | „Fußball, Grillen und Reisen." (unverändert, kein Kommentar) |
+| „Fußball, Grillen, Reisen, Motorrad und Skifahren" (über der Grenze, geht zum Modell) | unverändert |
+| „Sanitär, Heizung, Klima, Bad, Wärmepumpe, Solar" | unverändert |
+| „ja also Fußball ähm Grillen und Reisen mit der Familie das mache ich gerne" | „Ja, also Fußball, Grillen und Reisen mit der Familie – das mache ich gerne." |
+| „also ähm ich wohne in Haltern am See … seit zwölf Jahren" | „Ich wohne in Haltern am See. Da wohne ich jetzt schon seit 12 Jahren zusammen mit meiner Familie." |
+| „fünf Gesellen einen Azubi und ein Minijobber … sieben Leute" | „Wir sind 5 Gesellen, 1 Azubi und 1 Minijobber, also insgesamt 7 Leute plus ich." |
+
+**Nebenbefund für den offenen Punkt „Modellwechsel":** Beim Test verstand
+`gpt-4o-mini-transcribe` aus der Roboterstimme „Haltern am See" ein „Taltern am See" —
+Eigennamen sind die Schwachstelle. Das ist genau das, was `gpt-4o-transcribe` mit einem
+Wortschatz-Prompt (Orte, Gewerke, Fachbegriffe) verbessern würde. Kein Glättungs-Fehler:
+Die Antwort blieb eine Antwort.
+
+12 Prüfskripte, tsc, Produktionsbau grün. Testsitzungen gelöscht.

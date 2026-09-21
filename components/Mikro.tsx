@@ -18,7 +18,7 @@ const MAX_SEKUNDEN = 300;
 // Gemessen in Jörgs Chrome: Mikrofon-Freigabe dauert 200–280 ms. In diesem Fenster sah der
 // Knopf früher unverändert aus, ein zweiter Klick startete eine zweite Aufnahme und löschte
 // dabei die Teile der ersten. Deshalb der Zustand „startet" plus die Wiedereintritts-Sperre.
-export function Mikro({ token, onText, onStatus }: { token: string; onText: (t: string) => void; onStatus?: (s: MikroStatus) => void }) {
+export function Mikro({ token, frageId, onText, onStatus }: { token: string; frageId: string; onText: (t: string) => void; onStatus?: (s: MikroStatus) => void }) {
   const [z, setZ] = useState<Zustand>('bereit');
   const [sek, setSek] = useState(0);
   const [fehler, setFehler] = useState('');
@@ -71,6 +71,8 @@ export function Mikro({ token, onText, onStatus }: { token: string; onText: (t: 
     setZ('wandelt-um');
     const fd = new FormData();
     fd.append('audio', blob, blob.type.includes('mp4') ? 'aufnahme.mp4' : 'aufnahme.webm');
+    // Nur die Kennung, nicht der Fragetext: Der Server schlägt die Frage selbst nach.
+    fd.append('frageId', frageId);
     try {
       const res = await fetch('/api/transkribieren', { method: 'POST', headers: { 'x-wb-token': token }, body: fd });
       const d = await res.json().catch(() => ({}));
@@ -87,7 +89,7 @@ export function Mikro({ token, onText, onStatus }: { token: string; onText: (t: 
     } catch (e) {
       melde((e as Error).message || 'Aufnahme konnte nicht umgewandelt werden.', 'upload');
     }
-  }, [token, onText, melde]);
+  }, [token, frageId, onText, melde]);
 
   // Einziger Weg vom Rekorder in die Umwandlung — egal ob regulär gestoppt, vom Wachhund
   // erzwungen oder weil die Tonspur weggebrochen ist. Läuft garantiert nur einmal je Aufnahme.

@@ -190,7 +190,7 @@ export function Ergebnis({ token, snapshot, antworten, aha: ahaStart, vorname, t
               placeholder="Tippen oder einsprechen …"
             />
             <div className="absolute right-4 bottom-4">
-              <Mikro token={token} onText={(t) => { const neu = aha ? aha.trimEnd() + '\n\n' + t : t; setAha(neu); void speichereAha(neu); }} onStatus={setMikroStatus} />
+              <Mikro token={token} frageId="aha" onText={(t) => { const neu = aha ? aha.trimEnd() + '\n\n' + t : t; setAha(neu); void speichereAha(neu); }} onStatus={setMikroStatus} />
             </div>
           </div>
           <div className="mt-3.5 text-[14px] text-[#C9CFD3] min-h-[22px]">{mikroStatusZeile(mikroStatus)}</div>

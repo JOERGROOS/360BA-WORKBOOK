@@ -237,7 +237,7 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
                   wert={(antworten[frage.id] as string) ?? ''}
                   onChange={setzeWert}
                   onWeiter={() => weiter()}
-                  mikro={<Mikro key={frage.id} token={token} onText={(t) => setAntworten((a) => { const alt = (a[frage.id] as string) ?? ''; return { ...a, [frage.id]: alt ? alt.trimEnd() + '\n\n' + t : t }; })} onStatus={setMikroStatus} />}
+                  mikro={<Mikro key={frage.id} token={token} frageId={frage.id} onText={(t) => setAntworten((a) => { const alt = (a[frage.id] as string) ?? ''; return { ...a, [frage.id]: alt ? alt.trimEnd() + '\n\n' + t : t }; })} onStatus={setMikroStatus} />}
                 />
                 <div className="mt-3.5 text-[14px] text-[#C9CFD3] min-h-[22px]">{mikroStatusZeile(mikroStatus)}</div>
               </>
