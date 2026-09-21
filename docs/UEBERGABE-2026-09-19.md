@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `e9275fe`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `674ce6e`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -249,3 +249,59 @@ Lehre: Session-Log-Zeilen mit Code-Begriffen in Backticks künftig über ein
 einfach gequotetes Heredoc (`<<'EOF'`) schreiben, nie als doppelt gequotete
 Bash-Variable — das schließt jede Shell-Interpretation zuverlässig aus,
 unabhängig vom Inhalt.
+
+## 20. Nachtrag 22.09.2026 #5 · Klarstellung, Download, Wording, echter Testkunde
+
+**Klarstellung Mail-Versand (Jörg-Rückmeldung):** Meine frühere Formulierung
+„Mail-Versand nicht geprüft" hat missverständlich geklungen, als sei der
+E-Mail-Versand generell unsicher — das war falsch formuliert. `RESEND_API_KEY`
+fehlt ausschließlich in der lokalen Testumgebung hier. Live ist er gesetzt und
+funktioniert nachweislich (Jörg hat selbst eine echte, live versendete
+Erinnerungsmail an Finja Roos gesehen). Betroffen von der fehlenden lokalen
+Prüfung ist nur: Ich konnte den allerletzten Schritt (den tatsächlichen
+Resend-Aufruf) meiner eigenen lokalen Tests nicht beobachten — nicht, dass
+der Versand selbst irgendwo unsicher wäre.
+
+**Management Summary jetzt im Admin herunterladbar.** Neuer Speicherbereich
+`management-summaries` (Migration 009, Spalte `wb_sessions.
+management_summary_path`), Knopf „Management Summary öffnen" direkt neben
+„PDF öffnen" in der Kunden-Kachel. Die Datei wird jetzt IMMER abgelegt, bevor
+die Mail verschickt wird — bleibt also auch abrufbar, falls der Mail-Versand
+scheitert.
+
+**Wording-Korrektur:** Die drei `_teilweise`-Erinnerungstexte nannten die
+fehlende Sache „eine Kleinigkeit" — unpassend, wenn es um die Finanzdaten
+geht, das Herzstück der Analyse. Jetzt neutral: „es fehlt uns von dir noch:
+{fehlt}", ohne verharmlosendes Wort. Gilt für alle drei Stufen (14/10/7),
+nicht nur die, die Jörg live gesehen hat — die gleiche Formulierung stand
+in allen dreien.
+
+**Echter Testkunde, kompletter Durchlauf:** Sitzung „Daniel Tester ·
+Schreinerei Tester GmbH" angelegt (`joerg@familie-roos.net`, `test: false` —
+bewusst kein Test-Flag, sonst hätte die Management Summary gar nicht
+ausgelöst, siehe deren eigene Test-Sperre), alle 91 Fragen inhaltlich
+plausibel beantwortet (Schreinerei, 700.000 € Umsatz, 5 Gesellen, 1
+Minijobber, 1 Azubi — mit bewusst gelegten Schwachstellen bei Zahlen,
+Marketing und einem vermiedenen Mitarbeitergespräch, damit die Analyse
+etwas zu finden hat), Aha-Moment gesetzt, komplett abgeschlossen. Ergebnis:
+Kunden-PDF (1,3 MB) und Management Summary (echtes .docx, 11 KB) beide
+erfolgreich erzeugt und in Supabase abgelegt — **beide Dateien liegen als
+Anhang in dieser Sitzung**, zusätzlich jederzeit über den Admin abrufbar
+(dieselbe geteilte Datenbank wie live). Die Analyse-Qualität ist wirklich
+gut: erkannte u. a. aus der Kombination „Sonntage klappen nicht jede Woche"
++ niedriger Energie-Wert eine mögliche private Belastung, obwohl das im
+Workbook nirgends direkt gesagt wurde.
+
+**Einzige Lücke weiterhin:** Kunden-Mail, interne Mail und Management-
+Summary-Mail sind bei diesem Testlauf lokal wie erwartet an
+`RESEND_API_KEY fehlt` gescheitert (`mailFehler: true` in der Antwort) —
+das betrifft nur diesen lokalen Testlauf, nicht die Live-Umgebung (siehe
+Klarstellung oben).
+
+**Wichtig — Aufräumen:** Die Sitzung „Daniel Tester" ist eine ECHTE
+(nicht-Test-)Sitzung und zählt aktuell in Statistik und Erfolgsrad mit. Bitte
+nach dem Prüfen im Admin unter „Kunden" löschen (räumt automatisch beide
+Speicherbereiche mit auf).
+
+`674ce6e` auf bau+main, live per 401 auf der neuen Route bestätigt (kein
+Absturz). 11 Prüfskripte, tsc, Produktionsbau grün.
