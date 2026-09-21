@@ -14,7 +14,7 @@ Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages
 
 ## 2. Stack und Architektur in einem Absatz
 
-Next.js 16 (App Router, React 19, Tailwind), Supabase (Projekt `zzmomqmegzjibnqrmzyo` = das Produktiv-Projekt von JOERG AI, Tabellen mit Präfix `wb_`, RLS aktiv, Zugriff nur serverseitig mit Service-Role-Key), Buckets `workbooks` (PDFs) und `finanzdaten` (Kunden-Uploads, privat), Resend (`noreply@joerg-roos.com`), OpenAI `gpt-4o-mini-transcribe` (Sprache), Anthropic `claude-haiku-4-5-20251001` (Text-Glättung), `@react-pdf/renderer` (PDF). Migrationen `supabase/migrations/001–007` sind eingespielt (Anleitung `supabase/README.md`, Management-API mit `SUPABASE_ACCESS_TOKEN`). Umgebungsvariablen: `SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, RESEND_API_KEY, ADMIN_PASSWORD, APP_URL` — lokal in `~/.config/360ba-workbook/.env.local` (Symlink in der Arbeitskopie), in Vercel gesetzt. ⚠ Lokal steht `APP_URL=http://localhost:3000`, in Vercel `https://360ba.joerg-roos.com` — am 19.09. waren beide Werte plus `SUPABASE_URL` in Vercel falsch kopiert; bei „Link zeigt auf localhost“ oder „Fehler mit HTML-Wust“ zuerst die Vercel-Variablen gegen die lokale Datei prüfen.
+Next.js 16 (App Router, React 19, Tailwind), Supabase (Projekt `zzmomqmegzjibnqrmzyo` = das Produktiv-Projekt von JOERG AI, Tabellen mit Präfix `wb_`, RLS aktiv, Zugriff nur serverseitig mit Service-Role-Key), Buckets `workbooks` (PDFs) und `finanzdaten` (Kunden-Uploads, privat), Resend (`noreply@joerg-roos.com`), OpenAI `gpt-transcribe` mit Wortschatz-Vorgabe (Sprache, siehe Abschnitt 24), Anthropic `claude-haiku-4-5-20251001` (Text-Glättung), `@react-pdf/renderer` (PDF). Migrationen `supabase/migrations/001–007` sind eingespielt (Anleitung `supabase/README.md`, Management-API mit `SUPABASE_ACCESS_TOKEN`). Umgebungsvariablen: `SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, RESEND_API_KEY, ADMIN_PASSWORD, APP_URL` — lokal in `~/.config/360ba-workbook/.env.local` (Symlink in der Arbeitskopie), in Vercel gesetzt. ⚠ Lokal steht `APP_URL=http://localhost:3000`, in Vercel `https://360ba.joerg-roos.com` — am 19.09. waren beide Werte plus `SUPABASE_URL` in Vercel falsch kopiert; bei „Link zeigt auf localhost“ oder „Fehler mit HTML-Wust“ zuerst die Vercel-Variablen gegen die lokale Datei prüfen.
 
 ## 3. Status-Kette und Datenmodell
 
@@ -483,3 +483,44 @@ Wortschatz-Prompt (Orte, Gewerke, Fachbegriffe) verbessern würde. Kein Glättun
 Die Antwort blieb eine Antwort.
 
 12 Prüfskripte, tsc, Produktionsbau grün. Testsitzungen gelöscht.
+
+## 24. Nachtrag 22.09.2026 #9 · Spracherkennung: Modell gewechselt, Wortschatz eingeführt
+
+Jörg-Auftrag: „das aktuellste oder beste". Erst die Modell-Liste bei OpenAI abgefragt statt
+aus dem Gedächtnis zu raten — es gibt inzwischen `gpt-transcribe`, `gpt-4o-transcribe`,
+`gpt-4o-transcribe-diarize` und neuere Datumsstände von `gpt-4o-mini-transcribe`.
+
+**Gemessen statt geglaubt.** Fünf deutsche Testsätze mit genau den Stolperfallen des
+Workbooks (Orte, Gewerke, Zahlen, Fachbegriffe, Markenname), einmal sauber gesprochen und
+einmal mit kräftigem Störgeräusch plus schnellerem Sprechen — so klingt ein Handwerker in
+der Werkstatt oder im Auto. Trefferquote bei **gestörtem** Ton:
+
+| Variante | Trefferquote |
+|---|---|
+| `gpt-4o-mini-transcribe` ohne Wortschatz (Stand bis heute) | **74,6 %** |
+| `gpt-4o-mini-transcribe` mit Wortschatz | 94,3 % |
+| `gpt-4o-transcribe` mit Wortschatz | 96,3 % |
+| **`gpt-transcribe` mit Wortschatz** | **97,6 %** ← jetzt in Betrieb |
+| `gpt-transcribe` ohne Wortschatz | 86,1 % |
+
+**Die wichtigste Erkenntnis: Der Wortschatz bringt mehr als das Modell.** Das beste Modell
+fällt ohne ihn auf 86 %, das schwächste steigt mit ihm auf 94 %. Deshalb beides.
+
+So klang der alte Stand bei Störgeräusch — das hätte jeder Kunde in seinem Workbook
+stehen gehabt: *„Mein **Feuerberater** macht die **DW aus**, aber die **Sonnen- und
+Seitenlichter** schaue ich mir selbst an"* · *„Wir haben fünf **Busse**, einen **Bus** und
+einen **Minibusser**"* · *„Ich arbeite mit **Jörg Rufs** zusammen"*.
+
+Dasselbe verrauschte Material über den echten Server-Weg nach der Umstellung, wörtlich:
+*„Mein Steuerberater macht die BWA, aber die Summen- und Saldenliste schaue ich mir selbst
+an"* · *„Wir haben 5 Gesellen, einen Azubi und einen Minijobber und machen rund 700.000
+Euro"* · *„Ich wohne in Haltern am See und mein Betrieb ist in Recklinghausen"* · *„Ich
+arbeite mit Jörg Roos zusammen"*. Antwortzeit inklusive Glättung: **1,5 bis 2,5 Sekunden**.
+
+**Der Wortschatz steht in `lib/stt.ts` als `WORTSCHATZ`** und ist bewusst kurz: Orte aus
+Jörgs Umfeld, Gewerke, Zahlen-/Controlling-Begriffe, Marken. Eine überlange Liste verleitet
+das Modell dazu, Wörter zu hören, die niemand gesagt hat. Wer ihn erweitert: sparsam bleiben
+und danach eine Messung wie oben fahren. Falls das später Jörg selbst pflegen soll, gehört
+er in den Admin-Bereich „Texte" — heute bewusst nicht, weil er kein Kundentext ist.
+
+12 Prüfskripte, tsc, Produktionsbau grün. Testsitzung gelöscht.
