@@ -30,16 +30,18 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
   const keinTonSeitRef = useRef<number | null>(null);
   const zeitgeberRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Beleg für "Mikro nimmt auf, aber es kommt kein Ton an": 3 Sekunden am Stück Pegel ~0.
+  // Beleg für "Mikro nimmt auf, aber es kommt kein Ton an": 6 Sekunden am Stück Pegel ~0.
+  // Schwelle bewusst sehr tief: In Jörgs Chrome lag das Grundrauschen des Shure MV6 bei 0,0063
+  // gemessen — die frühere Schwelle 0,01 hätte bei jeder Denkpause falschen Alarm ausgelöst.
   useEffect(() => {
     if (mikroStatus.z !== 'nimmt-auf') {
       keinTonSeitRef.current = null;
       if (keinTonHinweis) setKeinTonHinweis(false);
       return;
     }
-    if (mikroStatus.pegel < 0.01) {
+    if (mikroStatus.pegel < 0.002) {
       if (keinTonSeitRef.current === null) keinTonSeitRef.current = Date.now();
-      if (Date.now() - keinTonSeitRef.current > 3000 && !keinTonHinweis) setKeinTonHinweis(true);
+      if (Date.now() - keinTonSeitRef.current > 6000 && !keinTonHinweis) setKeinTonHinweis(true);
     } else {
       keinTonSeitRef.current = null;
       if (keinTonHinweis) setKeinTonHinweis(false);
@@ -155,6 +157,7 @@ export function Interview({ token, snapshot, antworten: antwortenStart, start, z
   }
 
   function mikroStatusZeile(s: MikroStatus) {
+    if (s.z === 'startet') return <span>Mikrofon wird geöffnet …</span>;
     if (s.z === 'nimmt-auf') {
       const mm = `${Math.floor(s.sek / 60)}:${String(s.sek % 60).padStart(2, '0')}`;
       const gefuellt = Math.min(8, Math.round(s.pegel * 30));

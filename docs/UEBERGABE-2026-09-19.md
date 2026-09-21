@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `8da299e`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD siehe `git log` — die Zeile hier lief in der Vergangenheit unbemerkt veraltet mit (siehe Abschnitt 17). Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -49,8 +49,8 @@ Plan als Datei in `docs/plans/`, je Aufgabe ein frischer Subagent (sonnet für U
 
 1. **Jörgs eigener Durchlauf** als Kunde (Admin → Übersicht → Neue Einladung → Link → Video-Platz, Kacheln, Upload, Workbook, Abschluss). Danach ZIP und „Auf meinen Mac abholen” prüfen. Drei Mails erwartet (Einladung, Finanzdaten-Hinweis an controlling@, fertiges Workbook).
 2. ~~Vimeo-Link eintragen~~ erledigt (Video eingearbeitet, erster Test erfolgreich, Jörg-Rückmeldung 22.09.).
-3. **Datenschutz-Absatz** aus `docs/datenschutz-absatz.md` auf joerg-roos.com ergänzen (Sub-Prozessoren: Supabase EU, Vercel Frankfurt, OpenAI USA mit Standardvertragsklauseln, Anthropic, Resend, Vimeo wenn genutzt).
-4. **Sprachaufnahme in Chrome:** bei Jörgs erstem Test scheiterten 3 von 5 Aufnahmen clientseitig, bevor Audio hochging (Server sah nur 2 Aufrufe, beide ok). Messpunkte sind eingebaut (Server-Log `[transkribieren] eingang/ergebnis`, Browser-Log `[mikro] …` erscheint im Dev-Server-Terminal als `[browser]`, Pegelanzeige, Leer-Erkennung). Nächster Schritt: Jörg testet erneut in Chrome, Log lesen. Modellwechsel auf `gpt-4o-transcribe` mit Handwerker-Wortschatz-Prompt ist gemessen besser (Testskript-Idee in `scratchpad` der alten Sitzung, nicht im Repo) — nach Klärung der Aufnahme umstellen.
+3. ~~Datenschutz-Absatz auf joerg-roos.com~~ erledigt anders als ursprünglich geplant (Jörg, 22.09.): statt Sub-Prozessoren-Absatz direkt in der Haupt-Datenschutzerklärung eigene kurze `/datenschutz`-Seite auf 360ba.joerg-roos.com gebaut (Commit `c259c2f`), plus Fußzeile mit Impressum-/Datenschutz-Links auf allen Kundenseiten. Jörg hat den Verweis-Satz in der Haupt-Datenschutzerklärung selbst ergänzt (gleiches Muster wie beim Verweis auf die Potenzialanalyse).
+4. ~~Sprachaufnahme in Chrome~~ Ursache gefunden und behoben 22.09.2026, siehe Abschnitt 22. Offen bleibt nur noch der **Modellwechsel auf `gpt-4o-transcribe`** mit Handwerker-Wortschatz-Prompt (gemessen besser als `gpt-4o-mini-transcribe`) — unabhängig vom Aufnahme-Problem, jederzeit machbar.
 5. ~~Foto Über-Jörg-Seite~~ Entscheidung Jörg 22.09.: bleibt so.
 6. **Später / geparkt:** Admin-Workbook-Liste lädt je Sitzung Dateien + signierte URLs (N+1) · ZIP-Route hält alles im Speicher (30×50 MB Grenze) · Weiß auf Orange 2,8:1 (Markenvorgabe, bewusst) · `diktate`-Zähler nicht atomar (Statistik) · PDF 1,3 MB wegen PNG-Hintergrund (JPEG wäre ~150 KB).
 
@@ -371,3 +371,65 @@ tiefere Beobachtung zur fehlenden Neupositionierung nach der Betriebs-
 liegt im Admin bereit, wurde Jörg als Datei geschickt.
 
 `8da299e` auf bau+main. 11 Prüfskripte, tsc, Produktionsbau grün.
+
+## 22. Nachtrag 22.09.2026 #7 · Sprachaufnahme in Chrome — Ursache gefunden
+
+Jörgs Fehlerbild, wörtlich: *„Es ist einfach nur nichts passiert"* — keine Warnung,
+keine Meldung. Damit war die Pegel-Warnung („Kein Ton") als Ursache ausgeschlossen.
+
+**Erst gemessen, dann gebaut.** In Jörgs echtem Chrome (über die Chrome-Steuerung,
+echtes Shure MV6) fünf Aufnahmen à 3 Sekunden gefahren: **5 von 5 sauber**, je ~48 KB,
+Mikrofon-Freigabe in 206–279 ms, `AudioContext` lief. Ergebnis: Der Aufnahme-Weg selbst
+ist in Ordnung — der Fehler steckt in der Ablauflogik drumherum.
+
+**Die eigentliche Ursache — zwei Dinge, die zusammenspielen:**
+1. **Kein Signal während des Öffnens.** Zwischen Klick und laufender Aufnahme vergehen
+   gemessen ~250 ms, in denen der Knopf früher unverändert aussah. Wer da aus Ungeduld
+   ein zweites Mal klickt, stoppt die gerade gestartete Aufnahme sofort wieder.
+2. **Der Rekorder lieferte seine Daten nur im Sekundentakt** (`r.start(1000)`). Eine
+   Aufnahme, die nach Millisekunden gestoppt wird, enthält deshalb **null Byte** — und
+   die alte Prüfung `blob.size < 2000` verwarf sie. Im Browser-Test nachgestellt: zwei
+   Klicks im Abstand von 60 ms ergaben `teile: 0, bytes: 0`.
+
+**Behoben:** Zustand `startet` mit Lade-Ring und Wiedereintritts-Sperre (drei Klicks im
+60-ms-Takt erzeugen jetzt nachweislich **genau eine** Aufnahme statt Start-Stopp-Start) ·
+Taktung auf 250 ms (eine 350-ms-Aufnahme liefert jetzt 4991 Byte statt null) · Leer-Prüfung
+hängt nicht mehr an einer Byte-Grenze, sondern daran, ob überhaupt Tondaten da sind.
+
+**Dazu vier stille Sackgassen geschlossen** — Wege, auf denen der Code vorher wortlos
+nichts tat:
+- `confirm()` als Einwilligungs-Dialog: Chrome unterdrückt Dialoge einer Seite dauerhaft,
+  sobald der Nutzer einmal „weitere Dialoge verhindern" ankreuzt. Danach lieferte `confirm()`
+  **ohne jede Anzeige** `false` und der Knopf tat schlicht nichts, für immer. Der Hinweis
+  steht jetzt als Karte in der Seite.
+- `stopp()` lief ins Leere, wenn der Rekorder nicht mehr `recording` war — Anzeige blieb
+  ewig auf „Aufnahme läuft". Jetzt endet jeder Weg über **eine** Abschluss-Funktion, plus
+  Wachhund (3 s), falls `onstop` ausbleibt.
+- Der `catch` beim Start verschluckte jeden Fehler und behauptete pauschal „Kein Zugriff
+  auf das Mikrofon" — ohne Protokoll. Jetzt je Fall ein eigener Satz (blockiert / kein
+  Gerät / von Teams oder Zoom belegt) und `console.warn` mit Grund.
+- Bricht die Tonspur mitten in der Aufnahme weg (Gerät abgezogen, von einem anderen
+  Programm übernommen), wird jetzt sauber abgeschlossen statt hängen zu bleiben.
+
+**Pegel-Warnung entschärft:** Schwelle von 0,01 auf 0,002 und von 3 auf 6 Sekunden. Das
+Grundrauschen von Jörgs Shure MV6 wurde mit 0,0063 gemessen — die alte Schwelle hätte bei
+jeder Denkpause falschen Alarm ausgelöst.
+
+**Warum NICHT der Weg von JOERG AI übernommen wurde:** JOERG AI nutzt die browsereigene
+Spracherkennung (`webkitSpeechRecognition`). Das passt dort für kurze Chat-Nachrichten,
+taugt aber nicht für das Workbook: kein Firefox, keine Zeichensetzung, keine Glättung, und
+bei langen Antworten (hier bis 5 Minuten) bricht Chrome die Erkennung laufend ab — JOERG AIs
+Code fängt das mit Neustart-Behelfen ab. Die Messung hat außerdem gezeigt, dass der
+Whisper-Weg gar nicht das Problem war. Dazu käme ein Wechsel des Empfängers der Sprachdaten
+(Google statt OpenAI) — die gerade veröffentlichte Datenschutzseite müsste neu geschrieben
+werden.
+
+**Geprüft** im echten Browser mit eingespeistem Tonstrom, über die echte Oberfläche:
+Einwilligungs-Karte · gesperrtes Mikrofon meldet sich klar statt stumm · vollständiger Weg
+Aufnahme → 48 Teile/230 KB → Upload → Server → OpenAI-Antwort → sichtbare Rückmeldung ·
+Erholung nach Fehler · Dreifachklick erzeugt eine Aufnahme. Interne Testsitzung danach
+gelöscht. 11 Prüfskripte, tsc, Produktionsbau grün.
+
+**Nicht geprüft:** echte gesprochene Sprache durchs echte Mikrofon bis zum fertigen Text —
+im Browser-Bereich ist das Mikrofon gesperrt, und Jörgs Chrome war beim Abschluss zu.
+**Jörg testet das bitte einmal selbst.**
