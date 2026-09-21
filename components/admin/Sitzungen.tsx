@@ -55,6 +55,7 @@ export function Sitzungen() {
   const [neueEinladung, setNeueEinladung] = useState(false);
   const [kopiert, setKopiert] = useState<string | null>(null);
   const [terminLaeuft, setTerminLaeuft] = useState<string | null>(null);
+  const [terminEntwuerfe, setTerminEntwuerfe] = useState<Record<string, string>>({});
   const [pruefLaeuft, setPruefLaeuft] = useState(false);
   const [pruefErgebnis, setPruefErgebnis] = useState('');
 
@@ -140,6 +141,19 @@ export function Sitzungen() {
     setTerminLaeuft(null);
     if (!r.ok) { setFehler(await fehlerAus(r, 'Termin konnte nicht gespeichert werden.')); return; }
     setListe((l) => l && l.map((s) => (s.id === id ? { ...s, termin_am: terminAm || null } : s)));
+    setTerminEntwuerfe((e) => { const { [id]: _, ...rest } = e; return rest; });
+  }
+  // Erst beim Verlassen des Felds speichern, nicht bei jedem Tastendruck: ein natives
+  // Datumsfeld feuert beim Eintippen der Jahreszahl schon nach den ersten Ziffern ein
+  // change-Ereignis — würde man das sofort speichern und den Wert von außen zurückschreiben
+  // (controlled value), bricht das Eintippen mittendrin ab. Solange getippt wird, bleibt der
+  // Wert deshalb lokal im Entwurf.
+  function terminAendern(id: string, wert: string) {
+    setTerminEntwuerfe((e) => ({ ...e, [id]: wert }));
+  }
+  function terminVerlassen(id: string, terminAm: string, original: string) {
+    if (terminAm === original) { setTerminEntwuerfe((e) => { const { [id]: _, ...rest } = e; return rest; }); return; }
+    terminSpeichern(id, terminAm);
   }
 
   // Der tägliche Lauf (Vercel Cron) prüft das selbst — dieser Knopf ist nur zum Testen und
@@ -211,12 +225,14 @@ export function Sitzungen() {
                 <span className="text-muted">Termin vor Ort</span>
                 <input
                   type="date"
-                  value={s.termin_am ?? ''}
-                  disabled={terminLaeuft === s.id}
-                  onChange={(e) => terminSpeichern(s.id, e.target.value)}
+                  value={terminEntwuerfe[s.id] ?? s.termin_am ?? ''}
+                  onChange={(e) => terminAendern(s.id, e.target.value)}
+                  onBlur={(e) => terminVerlassen(s.id, e.target.value, s.termin_am ?? '')}
+                  style={{ colorScheme: 'dark' }}
                   className="bg-white/[.04] border border-white/10 rounded-lg px-2.5 py-1 text-[13px] text-[#C9CFD3] w-[150px]"
                 />
-                {s.termin_am && <span className="text-o">{terminText(s.termin_am)}</span>}
+                {terminLaeuft === s.id && <span className="text-muted">speichert …</span>}
+                {s.termin_am && terminLaeuft !== s.id && <span className="text-o">{terminText(s.termin_am)}</span>}
               </div>
               {offen === s.id && (
                 <div className="mt-4 border-t border-white/10 pt-4">
