@@ -5,6 +5,17 @@ Kunden-Landeseite mit Kacheln + Finanzdaten-Upload (Task 2), Abholprogramm
 auf Jörgs Mac (Task 3) und ZIP-Download + „Auf meinen Mac abholen" je Kunde
 (Plan „Abholen je Kunde", Task 1) fertig.
 
+## Controlling@ bekommt jede Kunden-Mail in Kopie (22.09.2026, Jörg-Auftrag)
+`lib/mail.ts` → `kopieInternBeiEcht(s)`: jede Mail an einen echten Kunden (Link-
+Mail, alle Erinnerungen) geht per `cc` auch an `controlling@joerg-roos.com` —
+außer bei einer Test-Sitzung (`s.test === true`), sonst würde jeder Testlauf
+eine Kopie ins echte Postfach schicken. Die „Workbook fertig"-Mail ist davon
+NICHT betroffen und bleibt unverändert: sie erreicht controlling@ bereits über
+eine eigene, inhaltlich passendere interne Mail (`lib/abschluss.ts`, mit
+Kontaktdaten statt bloßer Kopie) — keine doppelte Zustellung einbauen. Die
+Finanzdaten-Upload-Mail (`finanzdatenMailSenden`) geht ohnehin schon direkt und
+ausschließlich an controlling@, ist keine Kunden-Mail.
+
 ## Termin vor Ort + Erinnerungs-Sequenz (21.09.2026, Jörg-Auftrag)
 `wb_sessions.termin_am` (Datum, nullable) ist der Vor-Ort-Termin — vom Team im
 Admin-Bereich „Kunden" gesetzt (Feld unter jeder Zeile), oder später von einer
