@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `1fe7b75`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `a1cf903`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -168,3 +168,27 @@ weiterhin leer, siehe „Offen für Jörg" oben) — nur tsc, Build und die
 Prüfskripte, plus ein sauberer 401 der Cron-Route live (kein Server-Absturz
 beim neuen Code-Pfad). Der erste echte Versand mit sichtbarem cc-Feld ist erst
 möglich, sobald der Resend-Schlüssel gesetzt ist. `b6a58c9` auf bau+main.
+
+## 17. Nachtrag 22.09.2026 #3 · Kleine Überschrift Kunden-Landeseite
+
+„Dein Workbook“ → „Dein persönlicher Arbeitsbereich“ auf `/w/[token]`
+(`components/KundenStart.tsx`, Zeile mit der `eyebrow`-Klasse). Lokal mit
+Test-Sitzung visuell bestätigt, sofort gelöscht. `a1cf903` auf bau+main.
+
+⚠ **Live nicht per Bundle-Suche nachgewiesen** — anders als sonst in dieser
+Übergabe: Der Text sitzt in `KundenStart.tsx`, die nur geladen wird, wenn ein
+gültiger Kunden-Token in der URL steht. Ein ungültiger Token rendert
+serverseitig `UngueltigerLink` statt `KundenStart` — die Komponente (und ihr
+JS-Bündel) wird dann gar nicht erst angefragt. Ohne Live-Admin-Zugang stand
+kein gültiger Token zur Verfügung. Das Deploy-Muster war in dieser Sitzung
+bislang jedes Mal zuverlässig, aber das ist kein Ersatz für einen echten Blick
+auf einen echten Kunden-Link. **Bitte einmal selbst mit einem gültigen Link
+gegenprüfen.**
+
+⚠ **Nachgezogener Fehler beim Pflegen dieser Übergabe:** Die HEAD-Zeile ganz
+oben blieb über mehrere Nachträge (design/f3d640b bis cc-controlling/b6a58c9)
+unbemerkt auf `1fe7b75` stehen, weil ein Text-Ersetzungsschritt den falschen
+Suchtext hatte und beim nächsten Mal stillschweigend nichts tat, statt einen
+Fehler zu werfen. Jetzt auf den echten Stand korrigiert. Lehre: Bei so einer
+Ersetzung künftig mit einer Prüfung arbeiten, die abbricht, wenn der Suchtext
+nicht mehr passt — nicht mit einem stillen `.replace()`.
