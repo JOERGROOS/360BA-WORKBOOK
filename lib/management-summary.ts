@@ -74,102 +74,105 @@ export function sitzungAlsText(s: Pick<Sitzung, 'vorname' | 'firma' | 'fragen_sn
   return zeilen.join('\n');
 }
 
+// Die sechs Abschnitts-Überschriften, exakt so wie sie im Prompt verlangt und beim Einlesen
+// wiedererkannt werden — an einer Stelle gepflegt, damit Prompt und Parser nie auseinanderlaufen.
+const UEBERSCHRIFTEN = {
+  kurzeinschaetzung: 'Kurzeinschätzung',
+  staerken: 'Stärken',
+  schwaechen: 'Schwächen & Risiken',
+  potenziale: 'Potenziale',
+  worauf_achten: 'Worauf ihr im Gespräch achten solltet',
+  vermutete_themen: 'Vermutete, noch unausgesprochene Themen',
+} as const;
+
 const SYSTEM = `Du bist ein erfahrener Business-Coach mit der besonderen Fähigkeit, zwischen den Zeilen zu lesen. Du bereitest für Jörg Roos und sein Team eine interne Management Summary zu den Antworten eines Handwerksunternehmers aus dessen 360°-Business-Analyse-Workbook vor — als Vorbereitung auf das persönliche Gespräch mit ihm.
 
 Lies die Antworten aufmerksam und empathisch, auf den Menschen dahinter eingestellt. Formuliere klar, wertschätzend, auf den Punkt — kein Berater-Blabla, keine Floskeln, kein "man könnte", keine Plattitüden. Jede Aussage muss aus den konkreten Antworten erkennbar hergeleitet sein, nicht generisch für jeden Handwerksbetrieb passen.
 
-Liefere:
-- kurzeinschaetzung: Gesamteindruck in zwei bis drei Sätzen.
-- staerken: was aus den Antworten klar für den Unternehmer und seinen Betrieb spricht.
-- schwaechen: was riskant, ungeklärt oder schwach wirkt.
-- potenziale: was ungenutzt bleibt, aber greifbar ist.
-- worauf_achten: was das Team im Gespräch unbedingt ansprechen oder im Hinterkopf behalten sollte.
-- vermutete_themen: was der Unternehmer vermutlich selbst kennt, sich aber noch nicht traut offen anzusprechen — erkennbar an Ton, Auslassungen, Widersprüchen, Ausweichen zwischen den Zeilen. Das ist deine Interpretation, keine belegte Tatsache — entsprechend vorsichtig, aber konkret formulieren, nicht vage.
+Antworte in genau diesem Markdown-Format, sechs Abschnitte mit "## " als Überschrift, exakt diese sechs Titel in dieser Reihenfolge, sonst nichts davor, dazwischen oder danach:
 
-Kurz und knapp, aber so ausführlich wie inhaltlich sinnvoll — lieber drei starke, konkrete Punkte je Abschnitt als zehn austauschbare. Sprich Jörg direkt mit "du" an, wo es passt. Nenne den Unternehmer beim Vornamen.
+## ${UEBERSCHRIFTEN.kurzeinschaetzung}
+Gesamteindruck in zwei bis drei Sätzen, als Fließtext ohne Aufzählung.
 
-Format-Regel für die Listenfelder: mehrere eigenständige Stichpunkte statt einem einzigen, zusammengefassten — wo die Antworten es hergeben, drei bis fünf je Abschnitt, jeder Stichpunkt EIN zusammenhängender Satz oder kurzer Absatz, ohne Zeilenumbruch innerhalb des Textes, ohne Aufzählungszeichen und ohne Markup-Zeichen.`;
+## ${UEBERSCHRIFTEN.staerken}
+- Was aus den Antworten klar für den Unternehmer und seinen Betrieb spricht.
 
-// Bei einem umfangreichen, dichten Antwortsatz (echter Kunde mit 91 beantworteten Fragen, mit
-// vier aufeinanderfolgenden echten API-Aufrufen reproduziert — kein Einzelfall, sondern bei
-// dieser Eingabegröße das REGELMÄSSIGE Verhalten) liefert das Modell die Listenfelder nicht als
-// echtes JSON-Array, sondern als EINE Zeichenkette — keine Token-Grenze (stop_reason bleibt
-// "tool_use"), einfach eine andere interne Formatierung, die durchrutscht. Beobachtete Formen:
-// "<item>...</item>"-Markup, reine Zeilen ohne jedes Markup, und einmal eine führende
-// Platzhalter-Zeile "<UNKNOWN>" vor den echten Zeilen. Alle drei werden hier in eine echte
-// Liste zurückverwandelt, bevor überhaupt geprüft wird — ein erneuter Versuch allein würde bei
-// dieser Eingabegröße nichts bringen, das Verhalten ist regelmäßig, nicht zufällig.
-function alsListe(wert: unknown, feld: string): string[] {
-  if (Array.isArray(wert)) return wert.map((w) => String(w).trim()).filter((w) => w.length > 0);
-  if (typeof wert === 'string') {
-    // Nicht auf "<item>" festgelegt — beobachtet wurden auch feld-spezifische Tag-Namen wie
-    // "<staerke>" (Einzahl von "staerken"). Ein generisches Tag-Paar mit Rückverweis passt auf
-    // jeden Namen, solange öffnendes und schließendes Tag übereinstimmen.
-    const mitMarkup = Array.from(wert.matchAll(/<(\w+)>([\s\S]*?)<\/\1>/g)).map((m) => m[2].trim()).filter((t) => t.length > 0);
-    if (mitMarkup.length > 0) return mitMarkup;
-    const zeilenweise = wert.split('\n').map((z) => z.trim()).filter((z) => z.length > 0 && !/^<[A-Za-z_]+>$/.test(z));
-    if (zeilenweise.length > 0) return zeilenweise;
+## ${UEBERSCHRIFTEN.schwaechen}
+- Was riskant, ungeklärt oder schwach wirkt.
+
+## ${UEBERSCHRIFTEN.potenziale}
+- Was ungenutzt bleibt, aber greifbar ist.
+
+## ${UEBERSCHRIFTEN.worauf_achten}
+- Was das Team im Gespräch unbedingt ansprechen oder im Hinterkopf behalten sollte.
+
+## ${UEBERSCHRIFTEN.vermutete_themen}
+- Was der Unternehmer vermutlich selbst kennt, sich aber noch nicht traut offen anzusprechen — erkennbar an Ton, Auslassungen, Widersprüchen, Ausweichen zwischen den Zeilen. Das ist deine Interpretation, keine belegte Tatsache — entsprechend vorsichtig, aber konkret formulieren, nicht vage.
+
+In den fünf Abschnitten mit Stichpunkten: jede Zeile beginnt mit "- ", ein Stichpunkt ist EIN zusammenhängender Satz ohne eigenen Zeilenumbruch. Schreib mehrere eigenständige Stichpunkte statt einen einzigen, zusammengefassten — wo die Antworten es hergeben, drei bis fünf je Abschnitt, lieber fünf starke als zwei dürftige. Sprich Jörg direkt mit "du" an, wo es passt. Nenne den Unternehmer beim Vornamen.`;
+
+// Warum Markdown statt eines Werkzeug-Aufrufs mit festem JSON-Schema: bei einem umfangreichen,
+// dichten Antwortsatz (echter Kunde mit 91 beantworteten Fragen) lieferte die JSON-Variante die
+// Listenfelder in mehreren aufeinanderfolgenden echten API-Aufrufen NICHT zuverlässig als Array —
+// mal als Zeichenkette mit XML-artigem Markup, mal nur mit einem einzigen, stark verkürzten
+// Stichpunkt statt mehrerer. Keine Token-Grenze (stop_reason blieb "tool_use"), sondern die
+// starre JSON-Struktur selbst geriet unter der Länge der Antwort ins Wanken. Fließtext mit
+// Markdown-Überschriften und einfachen "- "-Stichpunkten ist eine Form, die das Modell für lange,
+// inhaltsreiche Antworten sehr viel zuverlässiger einhält — entsprechend wird hier eingelesen,
+// nicht auf ein Schema gewartet.
+export function parseMarkdown(text: string): ManagementSummary {
+  const abschnitte = new Map<string, string>();
+  for (const teil of text.split(/\n(?=##\s+)/)) {
+    const treffer = teil.match(/^##\s+(.+?)\s*\n([\s\S]*)$/);
+    if (treffer) abschnitte.set(treffer[1].trim(), treffer[2].trim());
   }
-  throw new Error(`Management Summary: ${feld} hat kein brauchbares Format`);
-}
+  const alsListe = (titel: string): string[] =>
+    (abschnitte.get(titel) ?? '').split('\n').map((z) => z.replace(/^[-•]\s*/, '').trim()).filter((z) => z.length > 0);
 
-export function pruefeSummary(x: unknown): ManagementSummary {
-  const roh = x as Record<string, unknown>;
-  if (typeof roh.kurzeinschaetzung !== 'string' || roh.kurzeinschaetzung.trim().length === 0) {
-    throw new Error('Management Summary: kurzeinschaetzung fehlt oder ist leer');
-  }
-  const listen = ['staerken', 'schwaechen', 'potenziale', 'worauf_achten', 'vermutete_themen'] as const;
-  const aus = { kurzeinschaetzung: roh.kurzeinschaetzung.trim() } as ManagementSummary;
-  for (const k of listen) {
-    const liste = alsListe(roh[k], k);
-    for (const eintrag of liste) {
-      if (eintrag.length === 0) throw new Error(`Management Summary: ${k} enthält einen leeren Stichpunkt`);
-    }
-    aus[k] = liste;
+  const kurzeinschaetzung = (abschnitte.get(UEBERSCHRIFTEN.kurzeinschaetzung) ?? '').trim();
+  if (kurzeinschaetzung.length === 0) throw new Error('Management Summary: Kurzeinschätzung fehlt oder ist leer');
+  const aus: ManagementSummary = {
+    kurzeinschaetzung,
+    staerken: alsListe(UEBERSCHRIFTEN.staerken),
+    schwaechen: alsListe(UEBERSCHRIFTEN.schwaechen),
+    potenziale: alsListe(UEBERSCHRIFTEN.potenziale),
+    worauf_achten: alsListe(UEBERSCHRIFTEN.worauf_achten),
+    vermutete_themen: alsListe(UEBERSCHRIFTEN.vermutete_themen),
+  };
+  // Kurzeinschätzung braucht keine Stichpunkte, die vier ersten inhaltlichen Abschnitte schon —
+  // ein komplett leerer davon ist ein Zeichen, dass das Einlesen misslang, nicht dass der
+  // Abschnitt wirklich nichts hergab (vermutete_themen darf als einziger leer bleiben, wenn
+  // wirklich nichts zwischen den Zeilen steht).
+  const pflicht: (keyof ManagementSummary)[] = ['staerken', 'schwaechen', 'potenziale', 'worauf_achten'];
+  for (const feld of pflicht) {
+    if (aus[feld].length === 0) throw new Error(`Management Summary: ${feld} enthält keine Stichpunkte`);
   }
   return aus;
 }
 
-const SCHEMA = {
-  type: 'object' as const,
-  properties: {
-    kurzeinschaetzung: { type: 'string' },
-    staerken: { type: 'array', items: { type: 'string' } },
-    schwaechen: { type: 'array', items: { type: 'string' } },
-    potenziale: { type: 'array', items: { type: 'string' } },
-    worauf_achten: { type: 'array', items: { type: 'string' } },
-    vermutete_themen: { type: 'array', items: { type: 'string' } },
-  },
-  required: ['kurzeinschaetzung', 'staerken', 'schwaechen', 'potenziale', 'worauf_achten', 'vermutete_themen'],
-};
-
-async function einAnalyseVersuch(text: string): Promise<unknown> {
+async function einAnalyseVersuch(text: string): Promise<string> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const r = await client.messages.create({
     model: 'claude-sonnet-5',
-    // 3000 hat sich in der Praxis als zu knapp erwiesen: bei sechs Feldern mit mehreren
-    // Stichpunkten je Feld bricht die strukturierte Antwort sonst mitten im JSON ab (leere
-    // "<UNKNOWN>"-Platzhalter statt echter Stichpunkte). 6000 gibt spürbar Luft.
+    // Ausführliche Markdown-Antwort mit fünf Stichpunkt-Abschnitten braucht Luft.
     max_tokens: 6000,
     // Kein `temperature` hier — das Modell lehnt den Parameter mit 400 ab ("deprecated for
     // this model"), anders als das ältere Haiku in lib/glaettung.ts.
     system: SYSTEM,
     messages: [{ role: 'user', content: text }],
-    tools: [{ name: 'management_summary', description: 'Die strukturierte Management Summary', input_schema: SCHEMA }],
-    tool_choice: { type: 'tool', name: 'management_summary' },
   });
-  const werkzeug = r.content.find((c) => c.type === 'tool_use');
-  if (!werkzeug || werkzeug.type !== 'tool_use') throw new Error('Keine strukturierte Antwort von Claude erhalten');
-  return werkzeug.input;
+  const block = r.content.find((c) => c.type === 'text');
+  if (!block || block.type !== 'text') throw new Error('Keine Textantwort von Claude erhalten');
+  return block.text;
 }
 
 export async function analysiere(s: Pick<Sitzung, 'vorname' | 'firma' | 'fragen_snapshot' | 'antworten' | 'aha'>): Promise<ManagementSummary> {
   const text = sitzungAlsText(s);
   try {
-    return pruefeSummary(await einAnalyseVersuch(text));
+    return parseMarkdown(await einAnalyseVersuch(text));
   } catch (e) {
     console.warn('[management-summary] erster Versuch missglückt, ein zweiter läuft', e);
-    return pruefeSummary(await einAnalyseVersuch(text));
+    return parseMarkdown(await einAnalyseVersuch(text));
   }
 }
 
