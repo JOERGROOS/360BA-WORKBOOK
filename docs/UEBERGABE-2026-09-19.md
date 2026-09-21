@@ -152,3 +152,19 @@ Lokal end-to-end gegen die echte, geteilte Datenbank getestet (sichere interne
 Test-Sitzung, sofort wieder gelöscht, keine echte Kundensitzung verändert).
 `95f3dce` auf bau+main, live per echtem Browser bestätigt (Bundle-Inhalt
 geprüft, nicht Kommandozeile — wegen des Checkpoint-Vorfalls vom 21.09.).
+
+## 16. Nachtrag 22.09.2026 #2 · Kunden-Mails in Kopie an controlling@
+
+Jörg-Auftrag: jede versendete Mail auch an `controlling@joerg-roos.com`. Umgesetzt
+für die Link-Mail und alle sechs Erinnerungs-Fassungen über ein echtes `cc`-Feld
+(`kopieInternBeiEcht()` in `lib/mail.ts`), nicht als separater Zweit-Versand —
+außer bei einer Test-Sitzung. Die „Workbook fertig"-Mail bekommt bewusst KEIN
+zusätzliches cc: sie erreicht controlling@ bereits über eine eigene, inhaltlich
+passendere interne Mail (Kontaktdaten statt bloßer Kopie) — ein cc dort hätte zu
+einer doppelten Zustellung geführt.
+
+⚠ Nicht live mit echtem Mail-Versand geprüft (`RESEND_API_KEY` ist auch lokal
+weiterhin leer, siehe „Offen für Jörg" oben) — nur tsc, Build und die
+Prüfskripte, plus ein sauberer 401 der Cron-Route live (kein Server-Absturz
+beim neuen Code-Pfad). Der erste echte Versand mit sichtbarem cc-Feld ist erst
+möglich, sobald der Resend-Schlüssel gesetzt ist. `b6a58c9` auf bau+main.
