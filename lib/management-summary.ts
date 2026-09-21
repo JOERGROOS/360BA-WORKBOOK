@@ -1,5 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import Anthropic from '@anthropic-ai/sdk';
-import { Document, Packer, Paragraph, HeadingLevel, TextRun } from 'docx';
+import {
+  Document, Packer, Paragraph, TextRun, ImageRun, Header, Footer, PageNumber,
+  BorderStyle, TabStopType, TabStopPosition,
+} from 'docx';
 import type { Sitzung, Snapshot, SnapshotFrage, Antwort, Antworten, TabellenWert } from './db';
 
 // Interne Management Summary nach jedem echten Kunden-Abschluss (Jörg-Auftrag 22.09.2026):
@@ -129,33 +134,101 @@ export function managementSummaryDateiname(s: Pick<Sitzung, 'nachname'>): string
   return `Management-Summary-${name}-${new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })}.docx`;
 }
 
+// CI-Farben, dieselben Werte wie im Kunden-PDF (lib/pdf/Workbook.tsx). docx will Hex ohne '#'.
+const O = 'ED7A02', BLAU = '0F1B23', GRAU = '5F676C', LINIE = 'E2E6E9';
+const SCHRIFT = 'Montserrat';
+
+// Logo in Original-Proportion (7,87 : 1, siehe ci-design.md) — nie Breite und Höhe unabhängig
+// setzen. Wie lib/pdf/render.ts liest das direkt aus public/, läuft serverseitig (Node-Laufzeit).
+function logoBild(): ImageRun | null {
+  try {
+    const bytes = fs.readFileSync(path.join(process.cwd(), 'public', 'logo-full.png'));
+    const breite = 130;
+    return new ImageRun({ type: 'png', data: bytes, transformation: { width: breite, height: Math.round(breite / 7.87) } });
+  } catch {
+    return null; // Fehlt die Datei aus irgendeinem Grund, bleibt der Kopf eben ohne Logo statt die ganze Datei scheitern zu lassen.
+  }
+}
+
+function kopfzeile(): Header {
+  const logo = logoBild();
+  return new Header({
+    children: [
+      new Paragraph({
+        tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
+        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: LINIE, space: 8 } },
+        children: [
+          ...(logo ? [logo] : [new TextRun({ text: 'JOERG ROOS', bold: true, color: BLAU, font: SCHRIFT })]),
+          new TextRun({ text: '\tMANAGEMENT SUMMARY · INTERN', color: GRAU, size: 15, font: SCHRIFT, characterSpacing: 20 }),
+        ],
+      }),
+    ],
+  });
+}
+
+function fusszeile(): Footer {
+  return new Footer({
+    children: [
+      new Paragraph({
+        tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
+        children: [
+          new TextRun({ text: `Copyright © ${new Date().getFullYear()} · Jörg Roos`, color: GRAU, size: 15, font: SCHRIFT }),
+          new TextRun({ text: '\tSeite ', color: GRAU, size: 15, font: SCHRIFT }),
+          new TextRun({ children: [PageNumber.CURRENT], color: GRAU, size: 15, font: SCHRIFT }),
+        ],
+      }),
+    ],
+  });
+}
+
+// Kleine, orange, großgeschriebene Label-Zeile — dieselbe Rolle wie `st.eyebrow` im PDF.
+function eyebrow(text: string): Paragraph {
+  return new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: text.toUpperCase(), color: O, bold: true, size: 17, font: SCHRIFT, characterSpacing: 20 })] });
+}
+function h2(text: string): Paragraph {
+  return new Paragraph({
+    spacing: { before: 300, after: 120 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 3, color: O, space: 4 } },
+    children: [new TextRun({ text, bold: true, color: BLAU, size: 24, font: SCHRIFT })],
+  });
+}
+function absatz(text: string, optionen: { italic?: boolean; farbe?: string } = {}): Paragraph {
+  return new Paragraph({ spacing: { after: 140 }, children: [new TextRun({ text, italics: optionen.italic, color: optionen.farbe ?? BLAU, size: 21, font: SCHRIFT })] });
+}
+function punktListe(punkte: string[]): Paragraph[] {
+  return punkte.length
+    ? punkte.map((p) => new Paragraph({ bullet: { level: 0 }, spacing: { after: 90 }, children: [new TextRun({ text: p, color: BLAU, size: 21, font: SCHRIFT })] }))
+    : [absatz('—', { farbe: GRAU })];
+}
 function abschnitt(titel: string, punkte: string[]): Paragraph[] {
-  return [
-    new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 280, after: 120 }, children: [new TextRun({ text: titel, bold: true })] }),
-    ...(punkte.length ? punkte.map((p) => new Paragraph({ bullet: { level: 0 }, spacing: { after: 60 }, children: [new TextRun({ text: p })] }))
-      : [new Paragraph({ children: [new TextRun({ text: '—', italics: true })] })]),
-  ];
+  return [h2(titel), ...punktListe(punkte)];
 }
 
 export async function docxErzeugen(z: ManagementSummary, meta: { vorname: string; nachname: string; firma: string; terminAm: string | null }): Promise<Buffer> {
   const termin = meta.terminAm ? new Date(meta.terminAm).toLocaleDateString('de-DE') : null;
   const doc = new Document({
+    styles: { default: { document: { run: { font: SCHRIFT, size: 21, color: BLAU } } } },
     sections: [{
-      properties: {},
+      properties: { page: { margin: { top: 900, bottom: 900, left: 1000, right: 1000 } } },
+      headers: { default: kopfzeile() },
+      footers: { default: fusszeile() },
       children: [
-        new Paragraph({ heading: HeadingLevel.TITLE, spacing: { after: 80 }, children: [new TextRun({ text: 'Management Summary · 360° Business-Analyse' })] }),
-        new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: `${meta.vorname} ${meta.nachname} · ${meta.firma}`, bold: true, size: 24 })] }),
-        ...(termin ? [new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: `Termin vor Ort: ${termin}`, italics: true })] })] : [new Paragraph({ spacing: { after: 200 }, children: [] })]),
-        new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { after: 120 }, children: [new TextRun({ text: 'Kurzeinschätzung', bold: true })] }),
-        new Paragraph({ spacing: { after: 120 }, children: [new TextRun({ text: z.kurzeinschaetzung })] }),
+        eyebrow('360° Business-Analyse'),
+        new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: 'Management Summary', bold: true, color: BLAU, size: 42, font: SCHRIFT })] }),
+        new Paragraph({
+          spacing: { after: termin ? 60 : 260 },
+          children: [new TextRun({ text: `${meta.vorname} ${meta.nachname} · ${meta.firma}`, bold: true, color: O, size: 24, font: SCHRIFT })],
+        }),
+        ...(termin ? [new Paragraph({ spacing: { after: 260 }, children: [new TextRun({ text: `Termin vor Ort: ${termin}`, italics: true, color: GRAU, size: 19, font: SCHRIFT })] })] : []),
+        h2('Kurzeinschätzung'),
+        absatz(z.kurzeinschaetzung),
         ...abschnitt('Stärken', z.staerken),
         ...abschnitt('Schwächen & Risiken', z.schwaechen),
         ...abschnitt('Potenziale', z.potenziale),
         ...abschnitt('Worauf ihr im Gespräch achten solltet', z.worauf_achten),
-        new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 280, after: 60 }, children: [new TextRun({ text: 'Vermutete, noch unausgesprochene Themen', bold: true })] }),
-        new Paragraph({ spacing: { after: 120 }, children: [new TextRun({ text: '⚠ Interpretation zwischen den Zeilen, keine belegte Tatsache — als Gesprächs-Antenne gedacht, nicht als Vorwurf.', italics: true })] }),
-        ...(z.vermutete_themen.length ? z.vermutete_themen.map((p) => new Paragraph({ bullet: { level: 0 }, spacing: { after: 60 }, children: [new TextRun({ text: p })] }))
-          : [new Paragraph({ children: [new TextRun({ text: '—', italics: true })] })]),
+        h2('Vermutete, noch unausgesprochene Themen'),
+        absatz('⚠ Interpretation zwischen den Zeilen, keine belegte Tatsache — als Gesprächs-Antenne gedacht, nicht als Vorwurf.', { italic: true, farbe: GRAU }),
+        ...punktListe(z.vermutete_themen),
       ],
     }],
   });
