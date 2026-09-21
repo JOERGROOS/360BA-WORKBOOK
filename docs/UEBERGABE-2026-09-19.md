@@ -7,7 +7,7 @@ Für den nächsten Chat. Alles, was nötig ist, um ohne Rückfragen weiterzuarbe
 Das Word-Workbook der 360° Business-Analyse (Vorbereitung des gemeinsamen Tages mit einem Kunden) ist eine Online-App: Kunde bekommt einen Einladungslink, beantwortet 93 Fragen (Freitext mit Spracheingabe, Skala 1–10, Tabelle), sieht sein Erfolgsrad, hält Aha-Momente fest, bekommt das fertige Workbook als PDF per Mail (Kopie an controlling@joerg-roos.com) und kann Finanzdaten hochladen. Jörg pflegt Fragen, Texte, Einladungen und Uploads im Admin.
 
 - **Live:** https://360ba.joerg-roos.com (Vercel, Region fra1 greift). Admin: `/admin`.
-- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `4d6bea8`. Vercel deployt `main` automatisch.
+- **Code:** GitHub `JOERGROOS/360BA-WORKBOOK`, Zweig `main` = Zweig `bau` (Arbeitszweig). HEAD `1fe7b75`. Vercel deployt `main` automatisch.
 - **Projektordner (Synology-Sync, hier wird geschrieben und committet):** `/Users/joergroos/Library/CloudStorage/SynologyDrive-AI-BUSINSESS-OS/04-360BA-Workbook`
 - **Arbeitskopie (hier laufen node, tsc, build, Dev-Server):** `/Users/joergroos/dev/360ba-workbook` — angleichen mit `./scripts/sync-lokal.sh` aus dem Projektordner. Nie auf dem Synology-Ordner bauen (Turbopack bricht ab).
 - Spec, Pläne, Mockups, Design-Screenshots: `docs/` (`specs/`, `plans/`, `mockup/`, `design/`, `deployment.md`, `abholer.md`, `datenschutz-absatz.md`). Projekt-`CLAUDE.md` = technische Kurzreferenz inkl. react-pdf-Fallen.
@@ -115,3 +115,18 @@ dieselbe Route nutzen. `e0e0af0` auf bau+main.
 in dem Fall nachweislich NICHT an) und die Ursache liegt woanders — als Nächstes in
 den Vercel-Funktions-Logs für `/api/admin/texte` nachsehen (Zugriffsdaten/Dashboard
 hat nur Jörg).
+
+## 14. Nachtrag 21.09.2026 abends #3 · Zugangsseite neu geordnet
+
+Jörgs Einwand gegen die vorherige Überschrift „Phase 1: Interview und Finanzdaten":
+brach auf schmaleren Bildschirmen um, UND falsche Gewichtung — das Produkt ist die
+360° Business-Analyse, „Phase 1" nur der aktuelle Schritt darin. Gelöst durch
+Drehung der Hierarchie statt durch Box-Verbreiterung oder Wort-Kürzung allein:
+- **Große Überschrift:** „360° Business-Analyse" (das Produkt, immer einzeilig).
+- **Kleine Zeile darüber:** „Phase 1 · Interview & Finanzdaten" (mit „&" statt „und").
+- **Zugangs-Hinweis-Text** in drei Absätze geteilt (vor „Den persönlichen Link" und
+  vor „Bei Fragen"), mehr Luft zwischen den Sätzen.
+
+`app/page.tsx` + `data/texte-seed.json`. Lokale und Live-Datenbank sind dasselbe
+Supabase-Projekt — ein lokal gesetzter Text-Wert gilt sofort auch live, kein
+separater Schritt nötig. `1fe7b75` auf bau+main, live per echtem Browser bestätigt.
